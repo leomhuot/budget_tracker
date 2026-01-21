@@ -3,3 +3,4 @@ Flask-Login
 Flask-Mail
 gunicorn
 pyotp
+psycopg2-binary
