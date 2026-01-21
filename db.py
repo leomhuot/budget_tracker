@@ -105,7 +105,7 @@ def init_db():
             # Initialize default settings after tables are created
             settings_manager.initialize_default_settings() # Added call
     finally:
-        db.release_db_connection(conn)
+        release_db_connection(conn)
 
 if __name__ == '__main__':
     # This allows you to run `python db.py` to initialize the database manually.
