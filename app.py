@@ -5,6 +5,7 @@ from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
 import os # Added os import
 from functools import wraps # Added wraps import
+import pyotp # Added pyotp import
 import budget as budget_logic
 import settings_manager
 import savings_goals as savings_goals_logic
