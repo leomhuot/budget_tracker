@@ -15,6 +15,7 @@ import base64
 from functools import wraps
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER')
 app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
 app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True').lower() == 'true'
