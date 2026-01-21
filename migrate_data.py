@@ -189,7 +189,7 @@ def migrate_data(local_data_dir):
                     date=EXCLUDED.date, type=EXCLUDED.type, category=EXCLUDED.category, item=EXCLUDED.item, 
                     amount=EXCLUDED.amount, description=EXCLUDED.description, savings_goal_id=EXCLUDED.savings_goal_id;
                     """,
-                    (int(t['transaction_id']), t['date'], t['type'], t['category'], t['item'], t['amount'], t['description'], savings_goal_id_int)
+                    (t['transaction_id'], t['date'], t['type'], t['category'], t['item'], t['amount'], t['description'], savings_goal_id_int)
                 )
             conn.commit()
             print("Transactions migrated.")
