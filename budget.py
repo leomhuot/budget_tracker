@@ -1,42 +1,45 @@
 from datetime import datetime, timedelta
-import db
+import db # Import the db module for database interaction
 
-def dict_from_row(row, cursor):
-    """Converts a database row into a dictionary."""
-    return dict(zip([col[0] for col in cursor.description], row))
+
+
 
 def add_transaction(type, category, item, amount, date, description, savings_goal_id=None):
     """Adds a single transaction to the database."""
     conn = db.get_db_connection()
     try:
         with conn.cursor() as cur:
-            # The savings_goal_id can be None, so handle that case
-            if savings_goal_id == '' or savings_goal_id is None:
-                goal_id_to_insert = None
-            else:
-                goal_id_to_insert = int(savings_goal_id)
-
             cur.execute(
-                "INSERT INTO transactions (date, type, category, item, amount, description, savings_goal_id) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s);",
-                (date, type, category, item, amount, description, goal_id_to_insert)
+                """
+                INSERT INTO transactions (type, category, item, amount, date, description, savings_goal_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s);
+                """,
+                (type, category, item, amount, date, description, savings_goal_id if savings_goal_id else None)
             )
             conn.commit()
     finally:
         db.release_db_connection(conn)
-
 def get_transactions(sort_by_date=True):
     """Reads all transactions from the database."""
-    conn = db.get_db_connection()
     transactions = []
+    conn = db.get_db_connection()
     try:
         with conn.cursor() as cur:
-            query = "SELECT * FROM transactions"
-            if sort_by_date:
-                query += " ORDER BY date DESC, transaction_id DESC"
-            cur.execute(query)
+            cur.execute("SELECT transaction_id, date, type, category, item, amount, description, savings_goal_id FROM transactions ORDER BY date DESC;")
+            # Convert rows to a list of dictionaries for consistency with original CSV output
+            # Also convert Decimal to float for JSON serialization later
             for row in cur.fetchall():
-                transactions.append(dict_from_row(row, cur))
+                transaction_dict = {
+                    'transaction_id': str(row[0]), # Ensure ID is string for consistency
+                    'date': str(row[1]),
+                    'type': row[2],
+                    'category': row[3],
+                    'item': row[4],
+                    'amount': float(row[5]), # Convert Decimal to float
+                    'description': row[6],
+                    'savings_goal_id': str(row[7]) if row[7] else '' # Ensure ID is string
+                }
+                transactions.append(transaction_dict)
     finally:
         db.release_db_connection(conn)
     return transactions
@@ -46,14 +49,26 @@ def get_transaction(transaction_id):
     conn = db.get_db_connection()
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT * FROM transactions WHERE transaction_id = %s;", (transaction_id,))
+            cur.execute(
+                "SELECT transaction_id, date, type, category, item, amount, description, savings_goal_id FROM transactions WHERE transaction_id = %s;",
+                (transaction_id,)
+            )
             row = cur.fetchone()
             if row:
-                return dict_from_row(row, cur)
+                transaction_dict = {
+                    'transaction_id': str(row[0]),
+                    'date': str(row[1]),
+                    'type': row[2],
+                    'category': row[3],
+                    'item': row[4],
+                    'amount': float(row[5]),
+                    'description': row[6],
+                    'savings_goal_id': str(row[7]) if row[7] else ''
+                }
+                return transaction_dict
     finally:
         db.release_db_connection(conn)
     return None
-
 def delete_transaction(transaction_id):
     """Deletes a transaction by its ID from the database."""
     conn = db.get_db_connection()
@@ -63,125 +78,144 @@ def delete_transaction(transaction_id):
             conn.commit()
     finally:
         db.release_db_connection(conn)
-
 def update_transaction(transaction_id, data):
     """Updates a transaction by its ID in the database."""
     conn = db.get_db_connection()
     try:
         with conn.cursor() as cur:
-            # Handle case where savings_goal_id might be an empty string
-            if 'savings_goal_id' in data and data['savings_goal_id'] == '':
-                data['savings_goal_id'] = None
+            # Construct the SET part of the SQL query dynamically
+            set_clauses = []
+            values = []
+            for key, value in data.items():
+                if key != 'transaction_id': # transaction_id is in WHERE clause
+                    set_clauses.append(f"{key} = %s")
+                    values.append(value)
             
+            values.append(transaction_id) # Add transaction_id for WHERE clause
+
             cur.execute(
-                "UPDATE transactions SET date=%s, type=%s, category=%s, item=%s, amount=%s, description=%s, savings_goal_id=%s "
-                "WHERE transaction_id = %s;",
-                (
-                    data['date'], data['type'], data['category'], data['item'],
-                    data['amount'], data['description'], data.get('savings_goal_id'),
-                    transaction_id
-                )
+                f"""
+                UPDATE transactions
+                SET {', '.join(set_clauses)}
+                WHERE transaction_id = %s;
+                """,
+                tuple(values)
             )
             conn.commit()
     finally:
         db.release_db_connection(conn)
-
 def generate_report_data(period=None, start_date_str=None, end_date_str=None):
-    """Generates budget report data for a given period or custom date range using database queries."""
+    """Generates budget report data for a given period or custom date range."""
+    transactions = get_transactions(sort_by_date=False)
     today = datetime.now()
-    
+
     if start_date_str and end_date_str:
-        start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-        end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
-    else:
-        if period == 'daily':
-            start_date = today.replace(hour=0, minute=0, second=0, microsecond=0)
-            end_date = start_date + timedelta(days=1)
-        elif period == 'weekly':
-            start_date = (today - timedelta(days=today.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
-            end_date = start_date + timedelta(weeks=1)
-        elif period == 'yearly':
-            start_date = today.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
-            end_date = start_date.replace(year=today.year + 1)
-        else: # Default to monthly
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+            end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+            # period is already correctly set by app.py, so no need to overwrite to "custom" here
+        except ValueError:
             period = 'monthly'
-            start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-            next_month = (start_date.replace(day=28) + timedelta(days=4)).replace(day=1)
-            end_date = next_month
+    
+    if period == 'daily':
+        start_date = today.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = start_date + timedelta(days=1)
+    elif period == 'weekly':
+        start_date = today - timedelta(days=today.weekday())
+        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = start_date + timedelta(weeks=1)
+    elif period == 'monthly':
+        start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if today.month == 12:
+            end_date = start_date.replace(year=today.year + 1, month=1)
+        else:
+            end_date = start_date.replace(month=today.month + 1)
+    elif period == 'yearly':
+        start_date = today.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        end_date = start_date.replace(year=today.year + 1)
+    elif period == 'last_year_to_date': # Added this line for last_year_to_date
+        last_year = today.year - 1
+        start_date = datetime(last_year, 1, 1, 0, 0, 0, 0)
+        end_date = today.replace(hour=23, minute=59, second=59, microsecond=999999)
+    elif not (start_date_str and end_date_str):
+        period = 'monthly'
+        start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if today.month == 12:
+            end_date = start_date.replace(year=today.year + 1, month=1)
+        else:
+            end_date = start_date.replace(month=today.month + 1)
+    
+    if 'start_date' not in locals() or 'end_date' not in locals():
+        # Default to monthly if no period and no custom dates or if custom dates were invalid
+        period = 'monthly'
+        start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if today.month == 12:
+            end_date = start_date.replace(year=today.year + 1, month=1)
+        else:
+            end_date = start_date.replace(month=today.month + 1)
 
-    conn = db.get_db_connection()
-    try:
-        with conn.cursor() as cur:
-            # Fetch filtered transactions
-            cur.execute(
-                "SELECT * FROM transactions WHERE date >= %s AND date < %s ORDER BY date DESC, transaction_id DESC;",
-                (start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
-            )
-            filtered_transactions = [dict_from_row(row, cur) for row in cur.fetchall()]
 
-            # Fetch aggregated data
-            cur.execute(
-                "SELECT type, category, SUM(amount) as total FROM transactions "
-                "WHERE date >= %s AND date < %s GROUP BY type, category;",
-                (start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
-            )
-            summary_data = cur.fetchall()
+    filtered_transactions = [
+        t for t in transactions 
+        if 'date' in t and t['date'] and start_date <= datetime.strptime(t['date'], '%Y-%m-%d') < end_date
+    ]
+    
+    filtered_transactions.sort(key=lambda x: datetime.strptime(x['date'], '%Y-%m-%d'), reverse=True)
+
+    total_income = sum(t['amount'] for t in filtered_transactions if t['type'] == 'income')
+    total_expense = sum(t['amount'] for t in filtered_transactions if t['type'] == 'expense')
+    total_goal_savings = sum(t['amount'] for t in filtered_transactions if t['type'] == 'expense' and t['category'] == 'Goal Savings')
+    total_general_savings = sum(t['amount'] for t in filtered_transactions if t['type'] == 'expense' and t['category'] == 'General Savings')
+    total_savings = total_goal_savings + total_general_savings
+    balance = total_income - total_expense
+
+    income_breakdown_by_item = {}
+    for t in filtered_transactions:
+        if t['type'] == 'income':
+            item = t.get('item', 'Other')
+            income_breakdown_by_item[item] = income_breakdown_by_item.get(item, 0) + t['amount']
+
+    monthly_summaries = []
+    if period == 'yearly':
+        current_month_start = start_date.replace(day=1)
+        while current_month_start < end_date:
+            next_month_start = (current_month_start.replace(day=28) + timedelta(days=4)).replace(day=1) # Advance to next month
+            if next_month_start > end_date: # Don't go past the year's end
+                next_month_start = end_date
+
+            month_transactions = [
+                t for t in filtered_transactions
+                if current_month_start <= datetime.strptime(t['date'], '%Y-%m-%d') < next_month_start
+            ]
             
-            total_income = sum(s[2] for s in summary_data if s[0] == 'income')
-            total_expense = sum(s[2] for s in summary_data if s[0] == 'expense')
-            total_goal_savings = sum(s[2] for s in summary_data if s[1] == 'Goal Savings')
-            total_general_savings = sum(s[2] for s in summary_data if s[1] == 'General Savings')
-            
-            # Income breakdown by item
-            cur.execute(
-                "SELECT item, SUM(amount) as total FROM transactions "
-                "WHERE type = 'income' AND date >= %s AND date < %s "
-                "GROUP BY item ORDER BY total DESC;",
-                (start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
-            )
-            income_breakdown_by_item = {row[0]: float(row[1]) for row in cur.fetchall()}
+            month_income = sum(t['amount'] for t in month_transactions if t['type'] == 'income')
+            month_expense = sum(t['amount'] for t in month_transactions if t['type'] == 'expense')
+            month_savings = sum(t['amount'] for t in month_transactions if t['type'] == 'expense' and (t['category'] == 'Goal Savings' or t['category'] == 'General Savings'))
+            month_balance = month_income - month_expense
 
-            # Monthly summaries for yearly report
-            monthly_summaries = []
-            if period == 'yearly':
-                cur.execute(
-                    "SELECT TO_CHAR(date, 'YYYY-MM') as month, type, SUM(amount) "
-                    "FROM transactions WHERE date >= %s AND date < %s "
-                    "GROUP BY month, type ORDER BY month;",
-                    (start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
-                )
-                month_data = {}
-                for row in cur.fetchall():
-                    month, trans_type, total = row
-                    if month not in month_data:
-                        month_data[month] = {'total_income': 0, 'total_expense': 0}
-                    if trans_type == 'income':
-                        month_data[month]['total_income'] = float(total)
-                    else:
-                        month_data[month]['total_expense'] += float(total)
+            if month_income > 0 or month_expense > 0 or month_savings > 0: # Only include months with data
+                monthly_summaries.append({
+                    'month': current_month_start.strftime('%Y-%m'),
+                    'total_income': month_income,
+                    'total_expense': month_expense,
+                    'total_savings': month_savings,
+                    'balance': month_balance
+                })
+            current_month_start = next_month_start
 
-                for month, values in sorted(month_data.items()):
-                    monthly_summaries.append({
-                        'month': month,
-                        'total_income': values['total_income'],
-                        'total_expense': values['total_expense'],
-                        'balance': values['total_income'] - values['total_expense']
-                    })
-
-    finally:
-        db.release_db_connection(conn)
 
     return {
         "period": period,
         "start_date": start_date.strftime('%Y-%m-%d'),
-        "end_date": (end_date - timedelta(seconds=1)).strftime('%Y-%m-%d'),
-        "total_income": float(total_income),
-        "total_expense": float(total_expense),
-        "total_savings": float(total_goal_savings + total_general_savings),
-        "total_goal_savings": float(total_goal_savings),
-        "total_general_savings": float(total_general_savings),
-        "balance": float(total_income - total_expense),
+        "end_date": (end_date - timedelta(days=1)).strftime('%Y-%m-%d'),
+        "total_income": total_income,
+        "total_expense": total_expense,
+        "total_savings": total_savings,
+        "total_goal_savings": total_goal_savings,
+        "total_general_savings": total_general_savings,
+        "balance": balance,
         "transactions": filtered_transactions,
         "income_breakdown_by_item": income_breakdown_by_item,
-        "monthly_summaries": monthly_summaries
+        "monthly_summaries": monthly_summaries if period == 'yearly' else []
     }

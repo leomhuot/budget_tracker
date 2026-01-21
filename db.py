@@ -26,7 +26,7 @@ def init_pool():
         )
 
 def get_db_connection():
-    if db_pool is None:
+    if db_pool is None: # Corrected from '==='
         init_pool()
     return db_pool.getconn()
 
@@ -105,7 +105,7 @@ def init_db():
             # Initialize default settings after tables are created
             settings_manager.initialize_default_settings() # Added call
     finally:
-        release_db_connection(conn)
+        db.release_db_connection(conn)
 
 if __name__ == '__main__':
     # This allows you to run `python db.py` to initialize the database manually.
