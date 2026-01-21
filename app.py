@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
 import os # Added os import
+from functools import wraps # Added wraps import
 import budget as budget_logic
 import settings_manager
 import savings_goals as savings_goals_logic
