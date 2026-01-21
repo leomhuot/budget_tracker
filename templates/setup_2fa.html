@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Setup 2FA{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h2>Setup Two-Factor Authentication (2FA)</h2>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-center">Scan the QR code below with your authenticator app (e.g., Google Authenticator, Authy).</p>
+                    <div class="text-center mb-3">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ otpauth_url }}" alt="QR Code">
+                    </div>
+                    <p class="card-text text-center">Or manually enter the secret key:</p>
+                    <p class="text-center"><strong>{{ totp_secret }}</strong></p>
+
+                    <form action="{{ url_for('setup_2fa') }}" method="POST">
+                        <div class="mb-3">
+                            <label for="totp_code" class="form-label">Enter 6-digit code from your authenticator app:</label>
+                            <input type="text" class="form-control" id="totp_code" name="totp_code" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Verify and Enable 2FA</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

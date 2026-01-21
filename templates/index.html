@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Budget Tracker{% endblock %}
+
+{% block content %}
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Add Income</h2>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('index') }}" method="post">
+                        <input type="hidden" name="type" value="income">
+                        <div class="mb-3">
+                            <label for="income-item" class="form-label">Item:</label>
+                            <input type="text" id="income-item" name="item" class="form-control" placeholder="e.g., 1st Payroll, 2nd Payroll" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="income-description" class="form-label">Description (Optional):</label>
+                            <input type="text" id="income-description" name="description" class="form-control" placeholder="e.g., Monthly salary, Bonus">
+                        </div>
+                        <div class="mb-3">
+                            <label for="income-category" class="form-label">Category:</label>
+                            <select id="income-category" name="category" class="form-select">
+                                {% for category in income_categories %}
+                                <option value="{{ category }}">{{ category }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="income-date" class="form-label">Date:</label>
+                            <input type="date" id="income-date" name="date" class="form-control" value="{{ today_date }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="income-amount" class="form-label">Amount ($):</label>
+                            <input type="number" id="income-amount" name="amount" class="form-control" step="0.01" min="0.01" placeholder="e.g., 2500" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Add Income</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Add Expense</h2>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('index') }}" method="post">
+                        <input type="hidden" name="type" value="expense">
+                        <div class="mb-3">
+                            <label for="expense-item" class="form-label">Item:</label>
+                            <input type="text" id="expense-item" name="item" class="form-control" placeholder="e.g., Lunch with colleagues" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="expense-description" class="form-label">Description (Optional):</label>
+                            <input type="text" id="expense-description" name="description" class="form-control" placeholder="e.g., Dinner with client">
+                        </div>
+                        <div class="mb-3">
+                            <label for="expense-date" class="form-label">Date:</label>
+                            <input type="date" id="expense-date" name="date" class="form-control" value="{{ today_date }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="expense-amount" class="form-label">Amount ($):</label>
+                            <input type="number" id="expense-amount" name="amount" class="form-control" step="0.01" min="0.01" placeholder="e.g., 15.50" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="expense-category" class="form-label">Category:</label>
+                            <select id="expense-category" name="category" class="form-select" onchange="toggleSavingsGoal()">
+                                {% for category in categories %}
+                                <option value="{{ category }}">{{ category }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3" id="savings-goal-div" style="display: none;">
+                            <label for="savings-goal" class="form-label">Savings Goal:</label>
+                            <select id="savings-goal" name="savings_goal_id" class="form-select">
+                                <option value="">-- Select a Goal --</option>
+                                {% for goal in savings_goals %}
+                                <option value="{{ goal.id }}">{{ goal.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100">Add Expense</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5 text-center">
+        <a href="{{ url_for('transactions') }}" class="btn btn-primary btn-lg">View All Transactions</a>
+    </div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+    function toggleSavingsGoal() {
+        var categorySelect = document.getElementById('expense-category');
+        var savingsGoalDiv = document.getElementById('savings-goal-div');
+        var savingsGoalSelect = document.getElementById('savings-goal'); // Get the select element
+
+        if (categorySelect.value === 'Goal Savings') { // Check for "Goal Savings"
+            savingsGoalDiv.style.display = 'block';
+            savingsGoalSelect.setAttribute('required', 'required'); // Make it required
+        } else {
+            savingsGoalDiv.style.display = 'none';
+            savingsGoalSelect.removeAttribute('required'); // Remove required
+            savingsGoalSelect.value = ''; // Reset selected value if hidden
+        }
+    }
+    // Run on page load to set initial state
+    toggleSavingsGoal();
+</script>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Manage Categories</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card mb-4">
+        <div class="card-header">
+            Add New Category
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('manage_categories') }}" method="POST" class="form-inline">
+                <div class="form-group mb-2 mr-2">
+                    <label for="new_category_name" class="sr-only">Category Name</label>
+                    <input type="text" class="form-control" id="new_category_name" name="new_category_name" placeholder="New Category Name" required>
+                </div>
+                <div class="form-group mb-2 mr-2">
+                    <label for="new_category_icon" class="sr-only">Category Icon</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="new_category_icon" name="new_category_icon" placeholder="e.g., fa-car">
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#iconPickerModal">Choose Icon</button>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mb-2">Add Category</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            Existing Categories
+        </div>
+        <ul class="list-group list-group-flush">
+            {% for category in expense_categories %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fa {{ category_icons.get(category, category_icons._default) }} mr-2"></i>
+                    {{ category }}
+                </div>
+                <div>
+                    <a href="{{ url_for('edit_category', old_category_name=category) }}" class="btn btn-sm btn-info mr-2">
+                        <i class="fa fa-edit"></i> Edit
+                    </a>
+                    <a href="{{ url_for('delete_category', category_name=category) }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this category? This action cannot be undone and will affect past transactions.')">
+                        <i class="fa fa-trash"></i> Delete
+                    </a>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<!-- Icon Picker Modal -->
+<div class="modal fade" id="iconPickerModal" tabindex="-1" aria-labelledby="iconPickerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="iconPickerModalLabel">Choose an Icon</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="icon-grid">
+          {% set icons = ['fa-utensils', 'fa-mug-saucer', 'fa-coffee', 'fa-car', 'fa-house', 'fa-lightbulb', 'fa-bag-shopping', 'fa-film', 'fa-dumbbell', 'fa-calendar-check', 'fa-gas-pump', 'fa-people-group', 'fa-piggy-bank', 'fa-vault', 'fa-plane', 'fa-cut', 'fa-ellipsis-h', 'fa-gamepad', 'fa-money-bill-wave', 'fa-gift', 'fa-laptop-code', 'fa-search-dollar', 'fa-plus', 'fa-minus', 'fa-credit-card', 'fa-receipt', 'fa-chart-pie', 'fa-chart-line', 'fa-wallet', 'fa-landmark', 'fa-book', 'fa-graduation-cap', 'fa-briefcase', 'fa-tools', 'fa-medkit', 'fa-heart', 'fa-paw', 'fa-wifi', 'fa-leaf', 'fa-cloud', 'fa-sun', 'fa-moon', 'fa-star', 'fa-bell', 'fa-gift', 'fa-trophy', 'fa-umbrella', 'fa-fire', 'fa-water', 'fa-globe', 'fa-lock', 'fa-key', 'fa-tag', 'fa-pencil-alt', 'fa-trash-alt', 'fa-redo', 'fa-undo', 'fa-sync-alt', 'fa-cog', 'fa-wrench', 'fa-brush', 'fa-paint-brush', 'fa-palette', 'fa-camera', 'fa-video', 'fa-microphone', 'fa-headphones', 'fa-music', 'fa-calculator', 'fa-calendar-alt', 'fa-clock', 'fa-hourglass-half', 'fa-map-marker-alt', 'fa-globe-americas', 'fa-phone', 'fa-envelope', 'fa-comment', 'fa-comments', 'fa-share-alt', 'fa-download', 'fa-upload', 'fa-print', 'fa-question-circle', 'fa-info-circle', 'fa-exclamation-circle', 'fa-check-circle', 'fa-times-circle', 'fa-user', 'fa-users', 'fa-user-tie', 'fa-child', 'fa-baby', 'fa-senior-citizen', 'fa-wheelchair', 'fa-shopping-cart', 'fa-truck', 'fa-box', 'fa-boxes', 'fa-clipboard', 'fa-file-alt', 'fa-folder', 'fa-folder-open', 'fa-database', 'fa-server', 'fa-terminal', 'fa-code', 'fa-bug', 'fa-lightbulb', 'fa-seedling', 'fa-tree', 'fa-mountain', 'fa-campground', 'fa-bicycle', 'fa-walking', 'fa-running', 'fa-swimmer', 'fa-person-booth', 'fa-mask', 'fa-robot', 'fa-ghost', 'fa-skull', 'fa-poo', 'fa-pizza-slice', 'fa-hamburger', 'fa-ice-cream', 'fa-cookie-bite', 'fa-carrot', 'fa-apple-alt', 'fa-lemon', 'fa-pepper-hot', 'fa-bacon', 'fa-egg', 'fa-bread-slice', 'fa-wine-glass-alt', 'fa-beer', 'fa-cocktail', 'fa-birthday-cake', 'fa-candy-cane', 'fa-gift', 'fa-holly-berry', 'fa-mitten', 'fa-snowman', 'fa-hat-wizard', 'fa-dragon', 'fa-cat', 'fa-dog', 'fa-fish', 'fa-horse', 'fa-spider', 'fa-frog'] %}
+          {% for icon in icons %}
+            <div class="icon-item" data-icon-class="{{ icon }}">
+              <i class="fa {{ icon }} fa-2x"></i>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts_extra %}
+<style>
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 10px;
+  text-align: center;
+}
+.icon-item {
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 5px;
+}
+.icon-item:hover {
+  background-color: #f0f0f0;
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const iconItems = document.querySelectorAll('.icon-item');
+  const iconInput = document.getElementById('new_category_icon');
+  const iconPickerModal = new bootstrap.Modal(document.getElementById('iconPickerModal'));
+
+  iconItems.forEach(item => {
+    item.addEventListener('click', function() {
+      const iconClass = this.dataset.iconClass;
+      iconInput.value = iconClass;
+      iconPickerModal.hide();
+    });
+  });
+});
+</script>
+{% endblock %}

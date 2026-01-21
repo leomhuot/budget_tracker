@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings - Budget Tracker{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Settings</h1>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-circle-info me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Monthly Savings Goal</h2>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('settings') }}" method="post">
+                <div class="mb-3">
+                    <label for="monthly_savings_goal" class="form-label">Monthly Savings Goal ($):</label>
+                    <input type="number" id="monthly_savings_goal" name="monthly_savings_goal" class="form-control" value="{{ settings.monthly_savings_goal }}" step="0.01" min="0" required>
+                    <div class="form-text">The amount you plan to set aside for savings each month.</div>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Settings</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Account Settings</h2>
+        </div>
+        <div class="card-body">
+            <p>Update your account password.</p>
+            <a href="{{ url_for('change_password') }}" class="btn btn-primary">Change Password</a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Two-Factor Authentication (2FA)</h2>
+        </div>
+        <div class="card-body">
+            {% if current_user.totp_secret %}
+            <p>Two-Factor Authentication is currently <strong>Enabled</strong>.</p>
+            <form action="{{ url_for('disable_2fa') }}" method="POST">
+                <button type="submit" class="btn btn-warning" onclick="return confirm('Are you sure you want to disable 2FA?');">Disable 2FA</button>
+            </form>
+            {% else %}
+            <p>Two-Factor Authentication is currently <strong>Disabled</strong>.</p>
+            <a href="{{ url_for('setup_2fa') }}" class="btn btn-info">Setup 2FA</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Expense Categories</h2>
+        </div>
+        <div class="card-body">
+            <p>Manage your custom expense categories and their icons.</p>
+            <a href="{{ url_for('manage_categories') }}" class="btn btn-primary">Manage Categories</a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Income Categories</h2>
+        </div>
+        <div class="card-body">
+            <p>Manage your custom income categories and their icons.</p>
+            <a href="{{ url_for('manage_income_categories') }}" class="btn btn-primary">Manage Income Categories</a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Savings Goals</h2>
+        </div>
+        <div class="card-body">
+            <p>Manage your savings goals.</p>
+            <a href="{{ url_for('manage_savings_goals') }}" class="btn btn-primary">Manage Savings Goals</a>
+        </div>
+    </div>
+{% endblock %}

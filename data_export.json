@@ -1,0 +1,1333 @@
+{
+    "transactions": [
+        {
+            "transaction_id": "20251226114442765867",
+            "date": "2025-12-25",
+            "type": "income",
+            "category": "payroll",
+            "item": "2nd Payroll",
+            "amount": 635.94,
+            "description": "December",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251226114715312500",
+            "date": "2025-12-25",
+            "type": "expense",
+            "category": "Shopping",
+            "item": "bag",
+            "amount": 15.0,
+            "description": "gift for mom",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251226114737128845",
+            "date": "2025-12-25",
+            "type": "expense",
+            "category": "Family",
+            "item": "Brother ",
+            "amount": 15.0,
+            "description": "give away",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251226114833458409",
+            "date": "2025-12-25",
+            "type": "expense",
+            "category": "Shopping",
+            "item": "YuuPin Mall",
+            "amount": 10.08,
+            "description": "food shopping",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251226115000321967",
+            "date": "2025-12-25",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch ",
+            "amount": 3.8,
+            "description": "team gathering",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251226115021795546",
+            "date": "2025-12-25",
+            "type": "expense",
+            "category": "Drink",
+            "item": "drink",
+            "amount": 1.85,
+            "description": "matcha",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251226115055376735",
+            "date": "2025-12-25",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "coffee",
+            "amount": 0.75,
+            "description": "coffee",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251226115145198560",
+            "date": "2025-12-25",
+            "type": "expense",
+            "category": "Food",
+            "item": "breakfast",
+            "amount": 0.75,
+            "description": "breakfast",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251226150949448659",
+            "date": "2025-12-26",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "coffee",
+            "amount": 2.0,
+            "description": "morning and noon",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251226151042728151",
+            "date": "2025-12-26",
+            "type": "expense",
+            "category": "Food",
+            "item": "breakfast",
+            "amount": 0.75,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251226151056215449",
+            "date": "2025-12-26",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 1.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251226151637340074",
+            "date": "2025-12-26",
+            "type": "expense",
+            "category": "Annual Trip",
+            "item": "Siem Reap Trip",
+            "amount": 250.0,
+            "description": "budget for trip",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251226152716553423",
+            "date": "2025-12-27",
+            "type": "expense",
+            "category": "Family",
+            "item": "Mom",
+            "amount": 50.0,
+            "description": "monthly gift",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251226153014842107",
+            "date": "2025-12-26",
+            "type": "expense",
+            "category": "Petroleum",
+            "item": "moto",
+            "amount": 3.83,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251226210133026288",
+            "date": "2025-12-26",
+            "type": "expense",
+            "category": "Food",
+            "item": "dinner ",
+            "amount": 2.75,
+            "description": "sach jruk ang",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251227145034667263",
+            "date": "2025-12-27",
+            "type": "expense",
+            "category": "Shopping",
+            "item": "clothes",
+            "amount": 15.0,
+            "description": "shirt",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251227145048816597",
+            "date": "2025-12-27",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 2.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251227145136294020",
+            "date": "2025-12-27",
+            "type": "expense",
+            "category": "Utilities",
+            "item": "YouTube Subscription",
+            "amount": 3.86,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251227145154434738",
+            "date": "2025-12-27",
+            "type": "expense",
+            "category": "Internet Bill",
+            "item": "card",
+            "amount": 1.0,
+            "description": "phone",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251229105822806764",
+            "date": "2025-12-28",
+            "type": "expense",
+            "category": "Event",
+            "item": "Wedding",
+            "amount": 25.0,
+            "description": "Friend Try Sreyna",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251229105843917974",
+            "date": "2025-12-28",
+            "type": "expense",
+            "category": "Entertainment",
+            "item": "buy movie",
+            "amount": 1.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251229105905421716",
+            "date": "2025-12-28",
+            "type": "expense",
+            "category": "Drink",
+            "item": "drink",
+            "amount": 1.25,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251229105939326586",
+            "date": "2025-12-28",
+            "type": "expense",
+            "category": "Utilities",
+            "item": "Electricity Bill",
+            "amount": 8.8,
+            "description": "for december",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251229110004520221",
+            "date": "2025-12-28",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 5.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251229110021222452",
+            "date": "2025-12-28",
+            "type": "expense",
+            "category": "Shopping",
+            "item": "short pants",
+            "amount": 5.0,
+            "description": "leo",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251229110208379831",
+            "date": "2025-12-29",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 0.75,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251231085311960810",
+            "date": "2025-12-30",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 2.25,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251231085325223845",
+            "date": "2025-12-30",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 1.25,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251231085354003826",
+            "date": "2025-12-30",
+            "type": "expense",
+            "category": "Food",
+            "item": "dinner ",
+            "amount": 0.75,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20251231085510840972",
+            "date": "2025-12-29",
+            "type": "expense",
+            "category": "Food",
+            "item": "dinner",
+            "amount": 1.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260101121518352120",
+            "date": "2026-01-01",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 1.25,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102082442370066",
+            "date": "2025-12-30",
+            "type": "expense",
+            "category": "Food",
+            "item": "dinner",
+            "amount": 0.62,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102082511384934",
+            "date": "2025-12-31",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 1.4,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102082526546290",
+            "date": "2025-12-31",
+            "type": "expense",
+            "category": "Food",
+            "item": "breakfast",
+            "amount": 0.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102082540577275",
+            "date": "2025-12-31",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 1.75,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102082602520345",
+            "date": "2025-12-31",
+            "type": "expense",
+            "category": "Food",
+            "item": "buffet",
+            "amount": 10.63,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102082622481023",
+            "date": "2025-12-31",
+            "type": "expense",
+            "category": "Haircut",
+            "item": "haircut",
+            "amount": 3.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102082653870670",
+            "date": "2025-12-31",
+            "type": "expense",
+            "category": "Petroleum",
+            "item": "pertroleum",
+            "amount": 3.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102082723586276",
+            "date": "2026-01-01",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 1.25,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102082737684151",
+            "date": "2026-01-01",
+            "type": "expense",
+            "category": "Food",
+            "item": "breakfast",
+            "amount": 1.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102082747822920",
+            "date": "2026-01-01",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 1.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102082913276219",
+            "date": "2026-01-01",
+            "type": "expense",
+            "category": "Shopping",
+            "item": "pants",
+            "amount": 5.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102082942306874",
+            "date": "2026-01-01",
+            "type": "expense",
+            "category": "Other",
+            "item": "screen ph",
+            "amount": 5.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102083020835329",
+            "date": "2026-01-01",
+            "type": "expense",
+            "category": "Family",
+            "item": "gift brother",
+            "amount": 13.75,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102083044352263",
+            "date": "2026-01-01",
+            "type": "expense",
+            "category": "Food",
+            "item": "dinner",
+            "amount": 2.75,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102151512377968",
+            "date": "2026-01-02",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 1.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102151522126219",
+            "date": "2026-01-02",
+            "type": "expense",
+            "category": "Food",
+            "item": "breakfast",
+            "amount": 0.75,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102151532072491",
+            "date": "2026-01-02",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 1.9,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102164612859302",
+            "date": "2026-01-02",
+            "type": "expense",
+            "category": "Shopping",
+            "item": "protection",
+            "amount": 9.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260102164945236549",
+            "date": "2026-01-02",
+            "type": "expense",
+            "category": "Entertainment",
+            "item": "mlbb",
+            "amount": 3.59,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260106130726366744",
+            "date": "2026-01-06",
+            "type": "expense",
+            "category": "Food",
+            "item": "breakfast",
+            "amount": 0.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260106130737704996",
+            "date": "2026-01-06",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 1.75,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260106130747716008",
+            "date": "2026-01-06",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 1.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260107130204567521",
+            "date": "2026-01-06",
+            "type": "expense",
+            "category": "Shopping",
+            "item": "shoe shampo",
+            "amount": 2.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260107130231520894",
+            "date": "2026-01-07",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 5.1,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260107130241823544",
+            "date": "2026-01-07",
+            "type": "expense",
+            "category": "Food",
+            "item": "breakfast",
+            "amount": 0.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260107130254717241",
+            "date": "2026-01-07",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 1.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260107130320072173",
+            "date": "2026-01-07",
+            "type": "expense",
+            "category": "Gym",
+            "item": "sport",
+            "amount": 4.0,
+            "description": "badminton",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260107131255291745",
+            "date": "2026-01-07",
+            "type": "expense",
+            "category": "Entertainment",
+            "item": "mlbb",
+            "amount": 3.39,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260108143012057298",
+            "date": "2026-01-07",
+            "type": "expense",
+            "category": "Food",
+            "item": "dinner",
+            "amount": 6.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260108143023424650",
+            "date": "2026-01-08",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 1.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260108143040331951",
+            "date": "2026-01-08",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 1.9,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260108143753889455",
+            "date": "2026-01-07",
+            "type": "expense",
+            "category": "Shopping",
+            "item": "house item",
+            "amount": 3.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260109094800791278",
+            "date": "2026-01-08",
+            "type": "expense",
+            "category": "Food",
+            "item": "dinner",
+            "amount": 3.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260109094903317495",
+            "date": "2026-01-09",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 1.25,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260109094909887146",
+            "date": "2026-01-09",
+            "type": "expense",
+            "category": "Food",
+            "item": "breakfast",
+            "amount": 1.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260109094937584254",
+            "date": "2026-01-09",
+            "type": "income",
+            "category": "Salary",
+            "item": "January 1st payroll ",
+            "amount": 297.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260109095034317285",
+            "date": "2026-01-09",
+            "type": "expense",
+            "category": "Goal Savings",
+            "item": "saving goal ",
+            "amount": 115.0,
+            "description": "",
+            "savings_goal_id": "1"
+        },
+        {
+            "transaction_id": "20260109100758936185",
+            "date": "2026-01-09",
+            "type": "income",
+            "category": "payroll",
+            "item": "Old saving",
+            "amount": 731.25,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260109100818013484",
+            "date": "2026-01-09",
+            "type": "expense",
+            "category": "Goal Savings",
+            "item": "saving goal ",
+            "amount": 731.25,
+            "description": "",
+            "savings_goal_id": "1"
+        },
+        {
+            "transaction_id": "20260109130655355579",
+            "date": "2026-01-09",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 1.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260109130710165653",
+            "date": "2026-01-09",
+            "type": "expense",
+            "category": "Drink",
+            "item": "drink",
+            "amount": 0.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260109195210485995",
+            "date": "2026-01-09",
+            "type": "expense",
+            "category": "Food",
+            "item": "dinner",
+            "amount": 7.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260109195236509649",
+            "date": "2026-01-09",
+            "type": "expense",
+            "category": "Rent",
+            "item": "house rental",
+            "amount": 10.89,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260109204359389445",
+            "date": "2026-01-09",
+            "type": "income",
+            "category": "Bonus",
+            "item": "Personal save",
+            "amount": 50.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260109204425373261",
+            "date": "2026-01-09",
+            "type": "expense",
+            "category": "General Savings",
+            "item": "own saving",
+            "amount": 50.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260110101101417583",
+            "date": "2026-01-10",
+            "type": "expense",
+            "category": "Food",
+            "item": "breakfast",
+            "amount": 0.75,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260110101111745581",
+            "date": "2026-01-10",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 0.75,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260110194540126925",
+            "date": "2026-01-10",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 2.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260110194608112041",
+            "date": "2026-01-10",
+            "type": "expense",
+            "category": "Petroleum",
+            "item": "petroleum",
+            "amount": 3.37,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260110194643634478",
+            "date": "2026-01-10",
+            "type": "expense",
+            "category": "Family",
+            "item": "Mom",
+            "amount": 50.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260110194658150524",
+            "date": "2026-01-10",
+            "type": "expense",
+            "category": "Food",
+            "item": "dinner",
+            "amount": 5.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260112135510291022",
+            "date": "2026-01-11",
+            "type": "expense",
+            "category": "Game",
+            "item": "mlbb",
+            "amount": 1.58,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260112135523894101",
+            "date": "2026-01-11",
+            "type": "expense",
+            "category": "Drink",
+            "item": "drink",
+            "amount": 0.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260112135543714873",
+            "date": "2026-01-12",
+            "type": "expense",
+            "category": "Food",
+            "item": "breakfast",
+            "amount": 0.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260112135554614414",
+            "date": "2026-01-12",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 1.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260112135603611294",
+            "date": "2026-01-12",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 1.9,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260113083338338658",
+            "date": "2026-01-12",
+            "type": "expense",
+            "category": "Food",
+            "item": "dinner",
+            "amount": 2.15,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260113083346030921",
+            "date": "2026-01-13",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 1.25,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260113083354710522",
+            "date": "2026-01-13",
+            "type": "expense",
+            "category": "Food",
+            "item": "breakfast",
+            "amount": 0.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260113155444088113",
+            "date": "2026-01-13",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 1.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260113172240298459",
+            "date": "2026-01-11",
+            "type": "expense",
+            "category": "Internet Bill",
+            "item": "card phone",
+            "amount": 2.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260113172827163962",
+            "date": "2026-01-13",
+            "type": "expense",
+            "category": "Game",
+            "item": "mlbb",
+            "amount": 1.45,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260114101101639580",
+            "date": "2026-01-13",
+            "type": "expense",
+            "category": "Food",
+            "item": "dinner",
+            "amount": 2.75,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260114101108488858",
+            "date": "2026-01-14",
+            "type": "expense",
+            "category": "Food",
+            "item": "breakfast",
+            "amount": 0.75,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260114101127750720",
+            "date": "2026-01-14",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 1.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260114123920627722",
+            "date": "2026-01-14",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 1.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260114124005960093",
+            "date": "2026-01-14",
+            "type": "expense",
+            "category": "Investment",
+            "item": "tong tin",
+            "amount": 5.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260114175538574400",
+            "date": "2026-01-14",
+            "type": "expense",
+            "category": "Drink",
+            "item": "passion",
+            "amount": 2.93,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260114205557487650",
+            "date": "2026-01-14",
+            "type": "expense",
+            "category": "Food",
+            "item": "dinner",
+            "amount": 6.25,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260115093424920060",
+            "date": "2026-01-15",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 1.25,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260115093438402006",
+            "date": "2026-01-15",
+            "type": "expense",
+            "category": "Food",
+            "item": "breakfast",
+            "amount": 0.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260115111255245161",
+            "date": "2026-01-15",
+            "type": "expense",
+            "category": "Event",
+            "item": "birthday boss",
+            "amount": 3.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260115130935195497",
+            "date": "2026-01-15",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 1.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260115152200673963",
+            "date": "2026-01-15",
+            "type": "expense",
+            "category": "Shopping",
+            "item": "sunscreen",
+            "amount": 8.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260116101223939800",
+            "date": "2026-01-15",
+            "type": "expense",
+            "category": "Food",
+            "item": "dinner",
+            "amount": 5.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260116101234544532",
+            "date": "2026-01-16",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 1.25,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260116101258371156",
+            "date": "2026-01-16",
+            "type": "expense",
+            "category": "Food",
+            "item": "breakfast",
+            "amount": 0.62,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260116152443684893",
+            "date": "2026-01-16",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 1.9,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260116152458916151",
+            "date": "2026-01-16",
+            "type": "expense",
+            "category": "Game",
+            "item": "mlbb",
+            "amount": 3.59,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260116152513678981",
+            "date": "2026-01-16",
+            "type": "expense",
+            "category": "Family",
+            "item": "give brother",
+            "amount": 2.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260116194043803000",
+            "date": "2026-01-16",
+            "type": "expense",
+            "category": "Food",
+            "item": "dinner",
+            "amount": 3.87,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260116194515206283",
+            "date": "2026-01-16",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 0.75,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260117175506152451",
+            "date": "2026-01-17",
+            "type": "expense",
+            "category": "Petroleum",
+            "item": "pertroleum",
+            "amount": 3.76,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260117175519616827",
+            "date": "2026-01-17",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 2.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260117175534832526",
+            "date": "2026-01-17",
+            "type": "expense",
+            "category": "Game",
+            "item": "mlbb",
+            "amount": 0.85,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260117175609759714",
+            "date": "2026-01-17",
+            "type": "expense",
+            "category": "Internet Bill",
+            "item": "card phone",
+            "amount": 1.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260118185839502409",
+            "date": "2026-01-17",
+            "type": "expense",
+            "category": "Drink",
+            "item": "drink",
+            "amount": 1.25,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260118185852136013",
+            "date": "2026-01-18",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 7.5,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260118185906931939",
+            "date": "2026-01-18",
+            "type": "expense",
+            "category": "Internet Bill",
+            "item": "card phone",
+            "amount": 1.0,
+            "description": "for grandpa",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260118185917926278",
+            "date": "2026-01-18",
+            "type": "expense",
+            "category": "Food",
+            "item": "dinner",
+            "amount": 3.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260119134407205679",
+            "date": "2026-01-19",
+            "type": "expense",
+            "category": "Food",
+            "item": "breakfast",
+            "amount": 1.25,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260119134416742999",
+            "date": "2026-01-19",
+            "type": "expense",
+            "category": "Coffee",
+            "item": "cafe",
+            "amount": 1.25,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260119134424138497",
+            "date": "2026-01-19",
+            "type": "expense",
+            "category": "Internet Bill",
+            "item": "card phone",
+            "amount": 1.0,
+            "description": "",
+            "savings_goal_id": ""
+        },
+        {
+            "transaction_id": "20260119134438716087",
+            "date": "2026-01-19",
+            "type": "expense",
+            "category": "Food",
+            "item": "lunch",
+            "amount": 1.25,
+            "description": "",
+            "savings_goal_id": ""
+        }
+    ],
+    "savings_goals": [
+        {
+            "id": "1",
+            "name": "Married Plan",
+            "target_amount": 12000.0,
+            "saved_amount": 846.25
+        }
+    ],
+    "settings": {
+        "monthly_savings_goal": 115.0,
+        "expense_categories": [
+            "Food",
+            "Drink",
+            "Coffee",
+            "Transportation",
+            "Rent",
+            "Utilities",
+            "Shopping",
+            "Entertainment",
+            "Gym",
+            "Event",
+            "Petroleum",
+            "Family",
+            "Goal Savings",
+            "General Savings",
+            "Annual Trip",
+            "Haircut",
+            "Other",
+            "Game",
+            "Investment",
+            "Internet Bill",
+            "Repair"
+        ],
+        "category_icons": {
+            "_default": "fa-tags",
+            "Food": "fa-utensils",
+            "Coffee": "fa-coffee",
+            "Transportation": "fa-car",
+            "Rent": "fa-house",
+            "Shopping": "fa-bag-shopping",
+            "Entertainment": "fa-film",
+            "Gym": "fa-dumbbell",
+            "Petroleum": "fa-gas-pump",
+            "Family": "fa-people-group",
+            "Goal Savings": "fa-piggy-bank",
+            "General Savings": "fa-vault",
+            "Annual Trip": "fa-plane",
+            "Haircut": "fa-cut",
+            "Other": "fa-ellipsis-h",
+            "Game": "fa-gamepad",
+            "Utilities": "fa-lightbulb",
+            "Drink": "fa-cocktail",
+            "Investment": "fa-chart-line",
+            "Event": "fa-birthday-cake",
+            "Internet Bill": "fa-wifi",
+            "Repair": "fa-wrench"
+        },
+        "income_categories": [
+            "Salary",
+            "Bonus",
+            "Freelance",
+            "Other"
+        ],
+        "income_category_icons": {
+            "_default": "fa-briefcase",
+            "Salary": "fa-money-bill-wave",
+            "Bonus": "fa-gift",
+            "Freelance": "fa-laptop-code",
+            "Other": "fa-search-dollar"
+        }
+    },
+    "users": [
+        {
+            "id": "1",
+            "username": "pov.limhuot",
+            "password": "pbkdf2:sha256:1000000$fx6ogZoltslpPHZV$e6c4f123b278e5966809a5da3d1e0fbb54fc8e727cf9dd66bc07bddacccbca49",
+            "role": "admin"
+        }
+    ]
+}

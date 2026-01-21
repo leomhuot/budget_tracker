@@ -1,0 +1,7 @@
+Flask
+Flask-Login
+Flask-Mail
+gunicorn
+pyotp
+gspread
+oauth2client

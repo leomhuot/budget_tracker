@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Budget Tracker{% endblock %}</title>
+    <link id="theme-link" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/cerulean/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}">
+    {% block head_extra %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid d-flex align-items-center">
+        <!-- Left-aligned: Toggler, Brand and Date/Time -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="d-flex flex-column text-start ms-2"> <!-- ms-2 for a small margin from toggler -->
+            <a class="navbar-brand m-0" href="{{ url_for('index') }}">Budget Tracker</a>
+            <span id="current-datetime" class="navbar-text d-none d-md-block"></span> <!-- Smaller font for date/time -->
+        </div>
+        
+        <!-- Right-aligned: Nav Links and Theme Toggle -->
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav align-items-center">
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('report') }}">Reports</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('settings') }}">
+                            <i class="fa-solid fa-gear"></i> Settings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <span class="nav-link disabled">
+                            <i class="fa-solid fa-user"></i> {{ current_user.username }}
+                        </span>
+                    </li>
+                    {% if current_user.role == 'admin' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_users') }}">
+                            <i class="fa-solid fa-users-cog"></i> User Management
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">
+                            <i class="fa-solid fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                    </li>
+                {% endif %}
+                <li class="nav-item ms-2">
+                    <button id="theme-toggle" class="btn btn-link nav-link">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid my-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-circle-info me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% block content %}
+    {# Child templates will fill this section #}
+    {% endblock %}
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Date and Time Display
+        const dateTimeSpan = document.getElementById('current-datetime');
+
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            dateTimeSpan.textContent = now.toLocaleDateString(undefined, options);
+        }
+
+        // Initial call and update every second
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+
+
+        // Theme toggle logic
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeLink = document.getElementById('theme-link');
+        const lightTheme = "https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/flatly/bootstrap.min.css"; // New light theme
+        const darkTheme = "https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/vapor/bootstrap.min.css"; // New dark theme
+
+        let currentTheme = localStorage.getItem('theme') || 'light';
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                themeLink.href = darkTheme;
+                themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>'; 
+            } else {
+                themeLink.href = lightTheme;
+                themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>'; 
+            }
+            currentTheme = theme;
+            localStorage.setItem('theme', theme);
+            updateNavbarTheme(theme);
+        }
+
+        function updateNavbarTheme(theme) {
+            const navbar = document.querySelector('.navbar');
+            navbar.classList.remove('navbar-dark', 'bg-dark', 'navbar-light', 'bg-primary');
+            
+            if (theme === 'dark') {
+                navbar.classList.add('navbar-dark', 'bg-dark');
+            } else {
+                navbar.classList.add('navbar-light', 'bg-light'); // Changed from bg-primary to bg-light
+            }
+        }
+
+        // Apply theme on page load
+        applyTheme(currentTheme);
+
+        // Toggle theme on button click
+        themeToggle.addEventListener('click', function() {
+            if (currentTheme === 'light') {
+                applyTheme('dark');
+            } else {
+                applyTheme('light');
+            }
+        });
+    });
+</script>
+{% block scripts_extra %}{% endblock %}
+</body>
+</html>

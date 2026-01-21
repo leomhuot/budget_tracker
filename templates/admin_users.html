@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}User Management - Budget Tracker{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h2 class="h5 mb-0">User Management</h2>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.role }}</td>
+                        <td>
+                            {% if user.id != current_user.id %}
+                                <a href="{{ url_for('delete_user', user_id=user.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
+                                {% if user.role == 'user' %}
+                                    <a href="{{ url_for('promote_user', user_id=user.id) }}" class="btn btn-success btn-sm">Promote to Admin</a>
+                                {% else %}
+                                    <a href="{{ url_for('demote_user', user_id=user.id) }}" class="btn btn-warning btn-sm">Demote to User</a>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">You cannot modify your own account here.</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

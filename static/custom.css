@@ -1,0 +1,37 @@
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.75rem; /* Increased font size */
+}
+
+#current-datetime {
+    font-size: 1.25rem; /* Adjusted font size to match h5 */
+}
+
+.card {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.btn {
+    border-radius: 0.3rem;
+}
+
+.table-fixed-header th {
+    position: sticky;
+    top: 0;
+    background-color: var(--bs-body-bg); /* Use Bootstrap's body background variable */
+    z-index: 1;
+}
+
+.login-page {
+    background-image: url('images/background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
