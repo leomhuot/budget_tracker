@@ -144,20 +144,20 @@ def migrate_data(local_data_dir):
                     )
                 
                 # Migrate expense categories
-                default_expense_categories_data = settings_data.get('expense_categories', [])
-                category_icons_map = settings_data.get('category_icons', {{}})
-                for cat_name in default_expense_categories_data:
-                    icon = category_icons_map.get(cat_name, category_icons_map.get('_default', 'fa-tags'))
+                category_icons_map = settings_data.get('category_icons', {})
+                for cat_name, icon in category_icons_map.items(): # Iterate over items directly
+                    if cat_name == '_default': # Skip default as it's not a category itself
+                        continue
                     cur.execute(
                         "INSERT INTO expense_categories (name, icon) VALUES (%s, %s) ON CONFLICT (name) DO UPDATE SET icon = EXCLUDED.icon;",
                         (cat_name, icon)
                     )
                 
                 # Migrate income categories
-                default_income_categories_data = settings_data.get('income_categories', [])
-                income_category_icons_map = settings_data.get('income_category_icons', {{}})
-                for cat_name in default_income_categories_data:
-                    icon = income_category_icons_map.get(cat_name, income_category_icons_map.get('_default', 'fa-briefcase'))
+                income_category_icons_map = settings_data.get('income_category_icons', {})
+                for cat_name, icon in income_category_icons_map.items(): # Iterate over items directly
+                    if cat_name == '_default': # Skip default as it's not a category itself
+                        continue
                     cur.execute(
                         "INSERT INTO income_categories (name, icon) VALUES (%s, %s) ON CONFLICT (name) DO UPDATE SET icon = EXCLUDED.icon;",
                         (cat_name, icon)
