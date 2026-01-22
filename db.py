@@ -36,9 +36,12 @@ def release_db_connection(conn):
 
 def init_db():
     """Initializes the database and creates tables if they don't exist."""
+    print("DEBUG: init_db() started.")
     conn = get_db_connection()
+    print("DEBUG: Connection obtained in init_db().")
     try:
         with conn.cursor() as cur:
+            print("DEBUG: Cursor obtained. Creating tables...")
             # User Table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS users (
@@ -50,7 +53,7 @@ def init_db():
                     totp_secret TEXT
                 );
             """)
-
+            print("DEBUG: Table 'users' creation statement executed.")
             # Savings Goals Table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS savings_goals (
@@ -60,7 +63,7 @@ def init_db():
                     saved_amount NUMERIC DEFAULT 0.0
                 );
             """)
-
+            print("DEBUG: Table 'savings_goals' creation statement executed.")
             # Transactions Table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS transactions (
@@ -74,7 +77,7 @@ def init_db():
                     savings_goal_id INTEGER REFERENCES savings_goals(id) ON DELETE SET NULL
                 );
             """)
-
+            print("DEBUG: Table 'transactions' creation statement executed.")
             # Expense Categories Table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS expense_categories (
@@ -83,7 +86,7 @@ def init_db():
                     icon TEXT
                 );
             """)
-
+            print("DEBUG: Table 'expense_categories' creation statement executed.")
             # Income Categories Table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS income_categories (
@@ -92,7 +95,7 @@ def init_db():
                     icon TEXT
                 );
             """)
-            
+            print("DEBUG: Table 'income_categories' creation statement executed.")
             # Settings Table (Key-Value Store)
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS settings (
@@ -100,12 +103,20 @@ def init_db():
                     value TEXT
                 );
             """)
+            print("DEBUG: Table 'settings' creation statement executed.")
 
             conn.commit()
+            print("DEBUG: All table creation committed. Initializing default settings...")
             # Initialize default settings after tables are created
             settings_manager.initialize_default_settings() # Added call
+            print("DEBUG: Default settings initialization called.")
+    except Exception as e:
+        print(f"DEBUG: An error occurred during init_db: {e}")
+        if conn:
+            conn.rollback()
     finally:
         release_db_connection(conn)
+        print("DEBUG: init_db() finished.")
 
 if __name__ == '__main__':
     # This allows you to run `python db.py` to initialize the database manually.
