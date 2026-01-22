@@ -25,7 +25,26 @@ def run_migration():
             print("Column 'id' already exists in 'transactions' table. Skipping migration.")
             return
 
-        print("Adding 'id' column to 'transactions' table...")
+        print("Starting migration for 'transactions' table...")
+
+        # 1. Drop existing PRIMARY KEY constraint on transaction_id if it exists
+        # We need to find the name of the constraint first
+        cur.execute("""
+            SELECT constraint_name
+            FROM information_schema.table_constraints
+            WHERE table_name = 'transactions' AND constraint_type = 'PRIMARY KEY';
+        """)
+        pk_constraint = cur.fetchone()
+        if pk_constraint:
+            print(f"Dropping existing primary key constraint '{pk_constraint[0]}' from 'transactions' table...")
+            cur.execute(f"ALTER TABLE transactions DROP CONSTRAINT {pk_constraint[0]};")
+            conn.commit() # Commit this change immediately
+            print("Existing primary key constraint dropped.")
+        else:
+            print("No existing primary key constraint found on 'transactions' table.")
+
+        # 2. Add the new 'id' column as SERIAL PRIMARY KEY
+        print("Adding 'id' column as SERIAL PRIMARY KEY to 'transactions' table...")
         cur.execute("ALTER TABLE transactions ADD COLUMN id SERIAL PRIMARY KEY;")
         conn.commit()
         print("Successfully added 'id' column as SERIAL PRIMARY KEY to 'transactions' table.")
