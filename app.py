@@ -908,7 +908,7 @@ def disable_2fa():
         flash('Two-Factor Authentication is not enabled for your account.', 'warning')
     return redirect(url_for('settings'))
 
-@app.route('/delete/<transaction_id>')
+@app.route('/delete/<int:transaction_id>')
 @login_required
 def delete(transaction_id):
     # Before deleting the transaction, if it's a Saving expense,
