@@ -7,7 +7,7 @@
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <form action="{{ url_for('edit', transaction_id=transaction.transaction_id) }}" method="post">
+            <form action="{{ url_for('edit', transaction_id=transaction.id) }}" method="post">
                 <div class="mb-3">
                     <label for="date" class="form-label">Date:</label>
                     <input type="date" id="date" name="date" class="form-control" value="{{ transaction.date }}" required>

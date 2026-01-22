@@ -923,7 +923,7 @@ def delete(transaction_id):
     return redirect(request.referrer or url_for('index'))
 
 
-@app.route('/edit/<transaction_id>', methods=['GET', 'POST'])
+@app.route('/edit/<int:transaction_id>', methods=['GET', 'POST'])
 @login_required
 def edit(transaction_id):
     app_settings = settings_manager.get_settings()

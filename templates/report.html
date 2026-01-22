@@ -312,7 +312,7 @@
                                         ${{ "%.2f"|format(t.amount) }}
                                     </td>
                                     <td class="text-center action-buttons">
-                                        <a href="{{ url_for('edit', transaction_id=t.transaction_id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                        <a href="{{ url_for('edit', transaction_id=t.id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
                                             <i class="fa-solid fa-pencil"></i>
                                         </a>
                                         <a href="{{ url_for('delete', transaction_id=t.transaction_id) }}" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this item?');">
