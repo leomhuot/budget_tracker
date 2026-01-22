@@ -952,8 +952,9 @@ def edit(transaction_id):
         
         new_amount = updated_data['amount']
         new_category = updated_data['category']
-        new_savings_goal_id = request.form.get('savings_goal_id')
-
+        new_savings_goal_id_raw = request.form.get('savings_goal_id') # Get raw value
+        # Convert to int or None, handling empty string safely
+        new_savings_goal_id = int(new_savings_goal_id_raw) if new_savings_goal_id_raw and new_savings_goal_id_raw.isdigit() else None
 
         # Handle savings goal amount updates
         # 1. Undo effect of original transaction on its savings goal (if applicable)
@@ -962,16 +963,14 @@ def edit(transaction_id):
 
         # 2. Apply effect of new transaction on its savings goal (if applicable)
         if updated_data['type'] == 'expense' and new_category == 'Goal Savings':
-            # Ensure a savings_goal_id is provided for "Goal Savings"
-            if not new_savings_goal_id:
+            if new_savings_goal_id is None: # Check if a goal was actually selected
                 flash('Please select a savings goal for "Goal Savings" category.', 'danger')
                 return redirect(url_for('edit', transaction_id=transaction_id))
             
             savings_goals_logic.update_saved_amount(new_savings_goal_id, new_amount)
             updated_data['savings_goal_id'] = new_savings_goal_id # Set the ID in the updated data
-        elif new_category == 'General Savings' or (new_category != 'Goal Savings' and new_category != 'General Savings'):
-            # For General Savings or any other non-Goal Saving category, ensure no savings_goal_id is set
-            updated_data['savings_goal_id'] = ''
+        else: # For General Savings or any other non-Goal Saving category, ensure it's None
+            updated_data['savings_goal_id'] = None
         
         budget_logic.update_transaction(transaction_id, updated_data)
         flash('Transaction updated successfully.', 'success')
