@@ -258,9 +258,6 @@ def forgot_password():
             user = get_user_by_email(username_or_email)
 
         if user and user.email:
-            token = s.dumps(user.id, salt='password-reset-salt')
-            reset_url = url_for('reset_password', token=token, _external=True)
-            print(f"Password reset URL: {reset_url}") # Temporary print for testing
             msg = Message('Password Reset Request', sender=app.config['MAIL_DEFAULT_SENDER'], recipients=[user.email])
             msg.body = f'To reset your password, visit the following link: {reset_url}\n\n' \
                        f'If you did not request a password reset, please ignore this email.'
