@@ -11,6 +11,7 @@ import settings_manager
 import savings_goals as savings_goals_logic
 from datetime import datetime
 import db  # Import the new db module
+import migrate # New import
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -25,6 +26,13 @@ app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
 # Initialize the database
 with app.app_context():
     db.init_db()
+
+    # --- ONE-TIME MIGRATION EXECUTION ---
+    if os.environ.get('RUN_MIGRATION') == 'True':
+        print("Running one-time database migration...")
+        migrate.run_migration()
+        print("One-time database migration complete.")
+    # --- END ONE-TIME MIGRATION EXECUTION ---
 
 mail = Mail(app)
 s = URLSafeTimedSerializer(app.secret_key)
