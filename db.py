@@ -67,7 +67,8 @@ def init_db():
             # Transactions Table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS transactions (
-                    transaction_id SERIAL PRIMARY KEY,
+                    id SERIAL PRIMARY KEY,
+                    transaction_id TEXT NOT NULL, -- Keeping this as a unique identifier for existing data if needed
                     type TEXT NOT NULL,
                     category TEXT NOT NULL,
                     item TEXT NOT NULL,
