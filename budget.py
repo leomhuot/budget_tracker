@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import db # Import the db module for database interaction
+import uuid # Import uuid for generating unique transaction IDs
 
 
 
@@ -9,12 +10,14 @@ def add_transaction(type, category, item, amount, date, description, savings_goa
     conn = db.get_db_connection()
     try:
         with conn.cursor() as cur:
+            # Generate a unique transaction_id using UUID
+            transaction_id = str(uuid.uuid4())
             cur.execute(
                 """
-                INSERT INTO transactions (type, category, item, amount, date, description, savings_goal_id)
-                VALUES (%s, %s, %s, %s, %s, %s, %s);
+                INSERT INTO transactions (transaction_id, type, category, item, amount, date, description, savings_goal_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
                 """,
-                (type, category, item, amount, date, description, savings_goal_id if savings_goal_id else None)
+                (transaction_id, type, category, item, amount, date, description, savings_goal_id if savings_goal_id else None)
             )
             conn.commit()
     finally:
@@ -25,60 +28,62 @@ def get_transactions(sort_by_date=True):
     conn = db.get_db_connection()
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT transaction_id, date, type, category, item, amount, description, savings_goal_id FROM transactions ORDER BY date DESC;")
+            cur.execute("SELECT id, transaction_id, date, type, category, item, amount, description, savings_goal_id FROM transactions ORDER BY date DESC;")
             # Convert rows to a list of dictionaries for consistency with original CSV output
             # Also convert Decimal to float for JSON serialization later
             for row in cur.fetchall():
                 transaction_dict = {
-                    'transaction_id': str(row[0]), # Ensure ID is string for consistency
-                    'date': str(row[1]),
-                    'type': row[2],
-                    'category': row[3],
-                    'item': row[4],
-                    'amount': float(row[5]), # Convert Decimal to float
-                    'description': row[6],
-                    'savings_goal_id': str(row[7]) if row[7] else '' # Ensure ID is string
+                    'id': str(row[0]), # The new auto-generated ID
+                    'transaction_id': str(row[1]), # The UUID
+                    'date': str(row[2]),
+                    'type': row[3],
+                    'category': row[4],
+                    'item': row[5],
+                    'amount': float(row[6]), # Convert Decimal to float
+                    'description': row[7],
+                    'savings_goal_id': str(row[8]) if row[8] else '' # Ensure ID is string
                 }
                 transactions.append(transaction_dict)
     finally:
         db.release_db_connection(conn)
     return transactions
 
-def get_transaction(transaction_id):
+def get_transaction(transaction_id): # Renaming parameter to 'id' would be clearer but keeping original for minimal change
     """Retrieves a single transaction by its ID from the database."""
     conn = db.get_db_connection()
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT transaction_id, date, type, category, item, amount, description, savings_goal_id FROM transactions WHERE transaction_id = %s;",
-                (transaction_id,)
+                "SELECT id, transaction_id, date, type, category, item, amount, description, savings_goal_id FROM transactions WHERE id = %s;",
+                (transaction_id,) # Assuming transaction_id parameter is actually the new 'id'
             )
             row = cur.fetchone()
             if row:
                 transaction_dict = {
-                    'transaction_id': str(row[0]),
-                    'date': str(row[1]),
-                    'type': row[2],
-                    'category': row[3],
-                    'item': row[4],
-                    'amount': float(row[5]),
-                    'description': row[6],
-                    'savings_goal_id': str(row[7]) if row[7] else ''
+                    'id': str(row[0]),
+                    'transaction_id': str(row[1]),
+                    'date': str(row[2]),
+                    'type': row[3],
+                    'category': row[4],
+                    'item': row[5],
+                    'amount': float(row[6]),
+                    'description': row[7],
+                    'savings_goal_id': str(row[8]) if row[8] else ''
                 }
                 return transaction_dict
     finally:
         db.release_db_connection(conn)
     return None
-def delete_transaction(transaction_id):
+def delete_transaction(transaction_id): # Renaming parameter to 'id' would be clearer but keeping original for minimal change
     """Deletes a transaction by its ID from the database."""
     conn = db.get_db_connection()
     try:
         with conn.cursor() as cur:
-            cur.execute("DELETE FROM transactions WHERE transaction_id = %s;", (transaction_id,))
+            cur.execute("DELETE FROM transactions WHERE id = %s;", (transaction_id,))
             conn.commit()
     finally:
         db.release_db_connection(conn)
-def update_transaction(transaction_id, data):
+def update_transaction(transaction_id, data): # Renaming parameter to 'id' would be clearer but keeping original for minimal change
     """Updates a transaction by its ID in the database."""
     conn = db.get_db_connection()
     try:
@@ -87,17 +92,17 @@ def update_transaction(transaction_id, data):
             set_clauses = []
             values = []
             for key, value in data.items():
-                if key != 'transaction_id': # transaction_id is in WHERE clause
+                if key != 'id': # Query by 'id', not 'transaction_id'
                     set_clauses.append(f"{key} = %s")
                     values.append(value)
             
-            values.append(transaction_id) # Add transaction_id for WHERE clause
+            values.append(transaction_id) # Add transaction_id (which is now the 'id') for WHERE clause
 
             cur.execute(
                 f"""
                 UPDATE transactions
                 SET {', '.join(set_clauses)}
-                WHERE transaction_id = %s;
+                WHERE id = %s;
                 """,
                 tuple(values)
             )
