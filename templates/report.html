@@ -30,22 +30,22 @@
             <div class="card-header">
                 <ul class="nav nav-pills card-header-pills flex-nowrap overflow-auto">
                     <li class="nav-item">
-                        <a class="nav-link {{ 'active' if report.period == 'daily' }}" href="{{ url_for('report', period='daily') }}">Daily</a>
+                        <a class="nav-link text-nowrap {{ 'active' if report.period == 'daily' }}" href="{{ url_for('report', period='daily') }}">Daily</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ 'active' if report.period == 'weekly' }}" href="{{ url_for('report', period='weekly') }}">Weekly</a>
+                        <a class="nav-link text-nowrap {{ 'active' if report.period == 'weekly' }}" href="{{ url_for('report', period='weekly') }}">Weekly</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ 'active' if report.period == 'monthly' }}" href="{{ url_for('report', period='monthly') }}">Monthly</a>
+                        <a class="nav-link text-nowrap {{ 'active' if report.period == 'monthly' }}" href="{{ url_for('report', period='monthly') }}">Monthly</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ 'active' if report.period == 'yearly' }}" href="{{ url_for('report', period='yearly') }}">Yearly</a>
+                        <a class="nav-link text-nowrap {{ 'active' if report.period == 'yearly' }}" href="{{ url_for('report', period='yearly') }}">Yearly</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ 'active' if report.period == 'last_year_to_date' }}" href="{{ url_for('report', period='last_year_to_date') }}">Last Year to Date</a>
+                        <a class="nav-link text-nowrap {{ 'active' if report.period == 'last_year_to_date' }}" href="{{ url_for('report', period='last_year_to_date') }}">Last Year to Date</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ 'active' if report.period == 'custom' }}" href="{{ url_for('report', period='custom') }}">Custom</a>
+                        <a class="nav-link text-nowrap {{ 'active' if report.period == 'custom' }}" href="{{ url_for('report', period='custom') }}">Custom</a>
                     </li>
                 </ul>
             </div>
