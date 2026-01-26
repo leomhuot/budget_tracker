@@ -483,6 +483,10 @@
             if (chartLabels.length > 0) {
                 const colors = getChartColors();
                 const pieCtx = document.getElementById('expensePieChart').getContext('2d');
+                
+                // Determine legend position based on screen width
+                const legendPosition = window.innerWidth < 768 ? 'bottom' : 'right';
+
                 expensePieChart = new Chart(pieCtx, {
                     type: 'pie',
                     data: {
@@ -498,7 +502,7 @@
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                position: 'right',
+                                position: legendPosition, // Use dynamic position
                                 labels: {
                                     color: colors.textColor
                                 }
@@ -550,6 +554,13 @@
         
         // Initial chart creation
         createOrUpdateChart();
+
+        // Re-create chart on window resize
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(createOrUpdateChart, 250); // Debounce resize event
+        });
 
         // Listen for theme changes from the theme-toggle button in base.html
         const themeToggle = document.getElementById('theme-toggle');
