@@ -454,6 +454,7 @@
     let incomeExpenseBarChart; // To hold the bar chart instance
     let pieChartLabels = [];
     let pieChartData = [];
+    let remainingSpending; // Declare globally
 
     document.addEventListener('DOMContentLoaded', function() {
         // Data for Pie Chart
@@ -474,6 +475,7 @@
         // Data for Bar Chart
         const totalIncome = {{ report.total_income | default(0) | tojson }};
         const displayedTotalExpense = {{ displayed_total_expense | default(0) | tojson }};
+        remainingSpending = {{ report.remaining_spending | default(0) | tojson }};
 
         function getChartThemeColors() {
             const currentTheme = localStorage.getItem('theme') || 'light';
@@ -636,7 +638,6 @@
         document.getElementById('pdf-total-budget').innerText = ({{ report.total_budget | default(0) | tojson }}).toFixed(2);
         document.getElementById('pdf-savings-goal').innerText = ({{ report.savings_goal | default(0) | tojson }}).toFixed(2);
         const remainingSpendingEl = document.getElementById('pdf-remaining-spending');
-        const remainingSpending = {{ report.remaining_spending | default(0) | tojson }};
         remainingSpendingEl.innerText = `$${remainingSpending.toFixed(2)}`;
         remainingSpendingEl.style.color = remainingSpending >= 0 ? 'green' : 'red';
         {% endif %}
@@ -710,7 +711,6 @@
         yPos += 7;
         doc.text(`Savings Goal: $${({{ report.savings_goal | default(0) | tojson }}).toFixed(2)}`, pdfWidth / 2, yPos, { align: 'center' });
         yPos += 7;
-        const remainingSpending = {{ report.remaining_spending | default(0) | tojson }};
         doc.setTextColor(remainingSpending >= 0 ? 0 : 255, remainingSpending >= 0 ? 128 : 0, 0);
         doc.text(`Remaining to Spend: $${remainingSpending.toFixed(2)}`, pdfWidth / 2, yPos, { align: 'center' });
         doc.setTextColor(0, 0, 0); // Reset color
