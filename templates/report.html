@@ -449,6 +449,8 @@
 <script>
     let expensePieChart; // To hold the pie chart instance
     let incomeExpenseBarChart; // To hold the bar chart instance
+    let pieChartLabels = [];
+    let pieChartData = [];
 
     document.addEventListener('DOMContentLoaded', function() {
         // Data for Pie Chart
@@ -457,8 +459,9 @@
             .sort(([, amountA], [, amountB]) => amountB - amountA)
             .slice(0, 10); // Get top 10
 
-        const pieChartLabels = sortedExpenseCategories.map(([category, amount]) => `${category}: $${amount.toFixed(2)}`);
-        const pieChartData = sortedExpenseCategories.map(([, amount]) => amount);
+        pieChartLabels = sortedExpenseCategories.map(([category, amount]) => `${category}: $${amount.toFixed(2)}`);
+        pieChartData = sortedExpenseCategories.map(([, amount]) => amount);
+        
         const pieChartColors = [
             '#0d6efd', '#6610f2', '#6f42c1', '#d63384', '#dc3545',
             '#fd7e14', '#ffc107', '#198754', '#20c997', '#0dcaf0',
