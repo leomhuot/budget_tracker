@@ -248,6 +248,17 @@
                 </div>
 
                 <div class="card shadow-sm mb-4">
+                    <div class="card-header">Income vs Expense</div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-center">
+                            <div style="width: 100%; max-width: 400px; height: 300px;">
+                                <canvas id="incomeExpenseBarChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
                     <div class="card-header">Income Breakdown by Item</div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -438,19 +449,8 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Data for Chart.js
-        const expenseCategories = {};
-        {% if report and report.transactions %}
-            {% for t in report.transactions %}
-                {% if t.type == 'expense' %}
-                    if (expenseCategories['{{ t.category }}']) {
-                        expenseCategories['{{ t.category }}'] += {{ t.amount }};
-                    } else {
-                        expenseCategories['{{ t.category }}'] = {{ t.amount }};
-                    }
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-
+        const expenseCategories = JSON.parse('{{ expense_categories_distribution | tojson | safe }}');
+        
         // Convert to array, sort, and get top 10
         const sortedExpenseCategories = Object.entries(expenseCategories)
             .sort(([, amountA], [, amountB]) => amountB - amountA)
@@ -554,12 +554,16 @@
         
         // Initial chart creation
         createOrUpdateChart();
+        createOrUpdateBarChart();
 
         // Re-create chart on window resize
         let resizeTimeout;
         window.addEventListener('resize', function() {
             clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(createOrUpdateChart, 250); // Debounce resize event
+            resizeTimeout = setTimeout(() => {
+                createOrUpdateChart();
+                createOrUpdateBarChart();
+            }, 250); // Debounce resize event
         });
 
         // Listen for theme changes from the theme-toggle button in base.html
@@ -567,7 +571,10 @@
         if (themeToggle) {
             themeToggle.addEventListener('click', function() {
                 // We need to wait a moment for the localStorage to be updated by the other script
-                setTimeout(createOrUpdateChart, 100);
+                setTimeout(() => {
+                    createOrUpdateChart();
+                    createOrUpdateBarChart();
+                }, 100);
             });
         }
 
@@ -678,6 +685,85 @@
 
             doc.save('budget_report_structured.pdf');
         };
+
+        let incomeExpenseBarChart;
+
+        function createOrUpdateBarChart() {
+            if (incomeExpenseBarChart) {
+                incomeExpenseBarChart.destroy();
+            }
+
+            const totalIncome = {{ report.total_income | tojson }};
+            const displayedTotalExpense = {{ displayed_total_expense | tojson }};
+
+            const colors = getChartColors();
+            const barCtx = document.getElementById('incomeExpenseBarChart');
+
+            if (barCtx) {
+                incomeExpenseBarChart = new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Income', 'Expense'],
+                        datasets: [{
+                            label: 'Amount ($)',
+                            data: [totalIncome, displayedTotalExpense],
+                            backgroundColor: [
+                                'rgba(75, 192, 192, 0.6)', // Income
+                                'rgba(255, 99, 132, 0.6)'  // Expense
+                            ],
+                            borderColor: [
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(255, 99, 132, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false,
+                                labels: {
+                                    color: colors.textColor
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Income vs Expense',
+                                color: colors.textColor
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += `$${context.raw.toFixed(2)}`;
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: colors.textColor
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: colors.textColor
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    });
     });
 </script>
 {% endblock %}

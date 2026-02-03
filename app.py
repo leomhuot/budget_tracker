@@ -563,6 +563,13 @@ def report():
     end_index = start_index + per_page
     paginated_transactions_for_report = transactions_to_paginate[start_index:end_index]
 
+    # Calculate expense distribution for chart
+    expense_categories_distribution = {}
+    for t in transactions_to_paginate:
+        if t['type'] == 'expense':
+            category = t['category']
+            expense_categories_distribution[category] = expense_categories_distribution.get(category, 0) + t['amount']
+
     if report_data and report_data['period'] == 'monthly':
         settings = settings_manager.get_settings()
         report_data['total_budget'] = original_total_income
@@ -587,7 +594,8 @@ def report():
                            page=page,
                            per_page=per_page,
                            total_pages=total_pages_in_period,
-                           total_transactions=total_transactions_in_period)
+                           total_transactions=total_transactions_in_period,
+                           expense_categories_distribution=expense_categories_distribution)
 
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
