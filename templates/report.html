@@ -626,7 +626,8 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('p', 'mm', 'a4');
         const margin = 10;
-        const contentWidth = doc.internal.pageSize.getWidth() - 2 * margin;
+        const pdfWidth = doc.internal.pageSize.getWidth(); // Declare pdfWidth here
+        const contentWidth = pdfWidth - 2 * margin;
 
         // Populate hidden PDF fields
         document.getElementById('pdf-period-income').innerText = ({{ report.total_income | default(0) | tojson }}).toFixed(2);
