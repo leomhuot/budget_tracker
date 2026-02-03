@@ -28,6 +28,10 @@ body {
     z-index: 1;
 }
 
+.btn:hover {
+    animation: animate__pulse 0.5s;
+}
+
 .login-page {
     background-image: url('images/background.png');
     background-size: cover;
