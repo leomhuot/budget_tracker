@@ -696,6 +696,9 @@
             const totalIncome = {{ report.total_income | tojson }};
             const displayedTotalExpense = {{ displayed_total_expense | tojson }};
 
+            console.log('Total Income for chart:', totalIncome);
+            console.log('Displayed Total Expense for chart:', displayedTotalExpense);
+
             const colors = getChartColors();
             const barCtx = document.getElementById('incomeExpenseBarChart');
 
