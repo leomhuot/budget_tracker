@@ -447,15 +447,29 @@
 
 {% block scripts_extra %}
 <script>
-    let expensePieChart; // To hold the chart instance
+    let expensePieChart; // To hold the pie chart instance
     let incomeExpenseBarChart; // To hold the bar chart instance
 
     document.addEventListener('DOMContentLoaded', function() {
-        // Data for Chart.js
+        // Data for Pie Chart
         const expenseCategories = JSON.parse('{{ expense_categories_distribution | tojson | safe }}');
-        
-        // Convert to array, sort, and get top 10
         const sortedExpenseCategories = Object.entries(expenseCategories)
+            .sort(([, amountA], [, amountB]) => amountB - amountA)
+            .slice(0, 10); // Get top 10
+
+        const pieChartLabels = sortedExpenseCategories.map(([category, amount]) => `${category}: $${amount.toFixed(2)}`);
+        const pieChartData = sortedExpenseCategories.map(([, amount]) => amount);
+        const pieChartColors = [
+            '#0d6efd', '#6610f2', '#6f42c1', '#d63384', '#dc3545',
+            '#fd7e14', '#ffc107', '#198754', '#20c997', '#0dcaf0',
+            '#6c757d', '#adb5bd', '#6f42c1'
+        ];
+
+        // Data for Bar Chart
+        const totalIncome = {{ report.total_income | default(0) | tojson }};
+        const displayedTotalExpense = {{ displayed_total_expense | default(0) | tojson }};
+
+        function getChartThemeColors() {
             const currentTheme = localStorage.getItem('theme') || 'light';
             return {
                 textColor: currentTheme === 'dark' ? '#CCCCCC' : '#333333',
@@ -463,25 +477,25 @@
             };
         }
 
-        function createOrUpdateChart() {
+        function createOrUpdatePieChart() {
             if (expensePieChart) {
-                expensePieChart.destroy(); // Destroy existing chart to redraw
+                expensePieChart.destroy();
             }
 
-            if (chartLabels.length > 0) {
-                const colors = getChartColors();
-                const pieCtx = document.getElementById('expensePieChart').getContext('2d');
-                
-                // Determine legend position based on screen width
+            const pieCtx = document.getElementById('expensePieChart');
+            if (!pieCtx) return;
+
+            if (pieChartLabels.length > 0) {
+                const colors = getChartThemeColors();
                 const legendPosition = window.innerWidth < 768 ? 'bottom' : 'right';
 
-                expensePieChart = new Chart(pieCtx, {
+                expensePieChart = new Chart(pieCtx.getContext('2d'), {
                     type: 'pie',
                     data: {
-                        labels: chartLabels,
+                        labels: pieChartLabels,
                         datasets: [{
-                            data: chartData,
-                            backgroundColor: chartColors,
+                            data: pieChartData,
+                            backgroundColor: pieChartColors,
                             hoverOffset: 4
                         }]
                     },
@@ -489,17 +503,8 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: {
-                                position: legendPosition, // Use dynamic position
-                                labels: {
-                                    color: colors.textColor
-                                }
-                            },
-                            title: {
-                                display: true,
-                                text: 'Expense Breakdown by Category',
-                                color: colors.textColor
-                            },
+                            legend: { position: legendPosition, labels: { color: colors.textColor } },
+                            title: { display: true, text: 'Expense Breakdown by Category', color: colors.textColor },
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
@@ -529,9 +534,9 @@
                     plugins: [ChartDataLabels]
                 });
             } else {
-                document.getElementById('expensePieChart').style.display = 'none';
-                const chartDiv = document.getElementById('expensePieChart').closest('.card-body');
-                if (!chartDiv.querySelector('.no-data-message')) { // Avoid adding multiple messages
+                pieCtx.style.display = 'none';
+                const chartDiv = pieCtx.closest('.card-body');
+                if (!chartDiv.querySelector('.no-data-message')) {
                     const noDataMessage = document.createElement('p');
                     noDataMessage.className = 'text-center text-muted no-data-message';
                     noDataMessage.textContent = 'No expense data to display for this period.';
@@ -539,221 +544,136 @@
                 }
             }
         }
-        
-        // Initial chart creation
-        createOrUpdateChart();
-        createOrUpdateBarChart();
-
-        // Re-create chart on window resize
-        let resizeTimeout;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                createOrUpdateChart();
-                createOrUpdateBarChart();
-            }, 250); // Debounce resize event
-        });
-
-        // Listen for theme changes from the theme-toggle button in base.html
-        const themeToggle = document.getElementById('theme-toggle');
-        if (themeToggle) {
-            themeToggle.addEventListener('click', function() {
-                // We need to wait a moment for the localStorage to be updated by the other script
-                setTimeout(() => {
-                    createOrUpdateChart();
-                    createOrUpdateBarChart();
-                }, 100);
-            });
-        }
-
-        // Export to PDF function
-        window.exportReportToPdf = async function() { // Make it global for onclick and async
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = doc.internal.pageSize.getWidth();
-            const margin = 10;
-            const contentWidth = pdfWidth - 2 * margin;
-
-            // --- DATA POPULATION ---
-            document.getElementById('pdf-period-income').innerText = ({{ report.total_income | tojson }} !== null ? ({{ report.total_income | tojson }}).toFixed(2) : '0.00');
-            document.getElementById('pdf-period-expense').innerText = ({{ displayed_total_expense | tojson }} !== null ? ({{ displayed_total_expense | tojson }}).toFixed(2) : '0.00');
-            document.getElementById('pdf-period-balance').innerText = ({{ report.balance | tojson }} !== null ? ({{ report.balance | tojson }}).toFixed(2) : '0.00');
-            document.getElementById('pdf-goal-savings').innerText = ({{ report.total_goal_savings | tojson }} !== null ? ({{ report.total_goal_savings | tojson }}).toFixed(2) : '0.00');
-            document.getElementById('pdf-general-savings').innerText = ({{ report.total_general_savings | tojson }} !== null ? ({{ report.total_general_savings | tojson }}).toFixed(2) : '0.00');
-
-            {% if report and report.period == 'monthly' %}
-            document.getElementById('pdf-total-budget').innerText = ({{ report.total_budget | tojson }}).toFixed(2);
-            document.getElementById('pdf-savings-goal').innerText = ({{ report.savings_goal | tojson }}).toFixed(2);
-            const remainingSpendingEl = document.getElementById('pdf-remaining-spending');
-            const remainingSpending = {{ report.remaining_spending | tojson }};
-            remainingSpendingEl.innerText = `$${remainingSpending.toFixed(2)}`;
-            remainingSpendingEl.style.color = remainingSpending >= 0 ? 'green' : 'red';
-            {% endif %}
-            // --- END DATA POPULATION ---
-
-            const structuredPdfContent = document.getElementById('structured-pdf-content');
-            const pdfSummaryPage = document.getElementById('pdf-summary-page');
-            const mainReportContent = document.getElementById('report-content'); // The visible report content
-
-            // Temporarily hide main report content to prevent rendering issues with hidden divs
-            mainReportContent.style.display = 'none';
-            structuredPdfContent.style.display = 'block'; // Show the wrapper for rendering
-
-            // 1. Prepare and capture Summary Page (Page 1)
-            // Capture pie chart image from its canvas
-            const pieChartCanvas = document.getElementById('expensePieChart');
-            if (pieChartCanvas) {
-                const pieChartImg = pieChartCanvas.toDataURL('image/png');
-                const pieChartPlaceholder = document.getElementById('pdf-pie-chart-placeholder');
-                if (pieChartPlaceholder) {
-                    pieChartPlaceholder.innerHTML = `<img src="${pieChartImg}" style="width: 100mm; height: 100mm;"/>`; // Adjust size for PDF
-                }
-            }
-
-            // Render summary page
-            const summaryCanvas = await html2canvas(pdfSummaryPage, { scale: 2 });
-            const summaryImgData = summaryCanvas.toDataURL('image/png');
-            const summaryImgProps = doc.getImageProperties(summaryImgData);
-            let summaryImgHeight = (summaryImgProps.height * contentWidth) / summaryImgProps.width;
-            
-            // Add summary page content
-            doc.addImage(summaryImgData, 'PNG', margin, margin, contentWidth, summaryImgHeight);
-
-            // 2. Add Transactions Table (Page 2 onwards) using autoTable
-            doc.addPage();
-            doc.text("All Transactions Details", margin, margin); // Title for transactions page
-
-            const transactionsData = [];
-            const transactionsHeaders = [
-                ['Date', 'Type', 'Category', 'Item', 'Description', 'Amount']
-            ];
-
-            {% for t in report.transactions %}
-            transactionsData.push([
-                "{{ t.date }}",
-                "{{ t.type|capitalize }}",
-                "{{ t.category|capitalize }}",
-                "{{ t.item }}",
-                "{{ t.description }}",
-                "$ {{ "%.2f"|format(t.amount) }}"
-            ]);
-            {% endfor %}
-
-            doc.autoTable({
-                startY: margin + 10, // Start below the title
-                head: transactionsHeaders,
-                body: transactionsData,
-                theme: 'striped',
-                headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0] },
-                styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
-                columnStyles: {
-                    0: { cellWidth: 20 }, // Date
-                    1: { cellWidth: 15 }, // Type
-                    2: { cellWidth: 20 }, // Category
-                    3: { cellWidth: 30 }, // Item
-                    4: { cellWidth: 85 }, // Description
-                    5: { cellWidth: 20, halign: 'right' } // Amount
-                },
-                margin: { top: margin, left: margin, right: margin, bottom: margin },
-                didParseCell: function(data) {
-                    if (data.column.index === 5 && data.row.section === 'body') { // Amount column
-                        const transactionType = data.row.raw[1]; // Get the value of the 'Type' column
-                        if (transactionType && transactionType.toLowerCase() === 'expense') {
-                            data.cell.styles.textColor = [255, 0, 0]; // Red for expense
-                        } else if (transactionType && transactionType.toLowerCase() === 'income') {
-                            data.cell.styles.textColor = [0, 128, 0]; // Green for income
-                        }
-                    }
-                }
-            });
-
-            // Revert visibility
-            structuredPdfContent.style.display = 'none';
-            mainReportContent.style.display = 'block';
-
-            doc.save('budget_report_structured.pdf');
-        };
-
-        let incomeExpenseBarChart;
 
         function createOrUpdateBarChart() {
             if (incomeExpenseBarChart) {
                 incomeExpenseBarChart.destroy();
             }
 
-            const totalIncome = {{ report.total_income | tojson }};
-            const displayedTotalExpense = {{ displayed_total_expense | tojson }};
-
-            console.log('Total Income for chart:', totalIncome);
-            console.log('Displayed Total Expense for chart:', displayedTotalExpense);
-
-            const colors = getChartColors();
             const barCtx = document.getElementById('incomeExpenseBarChart');
+            if (!barCtx) return;
 
-            if (barCtx) {
-                incomeExpenseBarChart = new Chart(barCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Income', 'Expense'],
-                        datasets: [{
-                            label: 'Amount ($)',
-                            data: [totalIncome, displayedTotalExpense],
-                            backgroundColor: [
-                                'rgba(75, 192, 192, 0.6)', // Income
-                                'rgba(255, 99, 132, 0.6)'  // Expense
-                            ],
-                            borderColor: [
-                                'rgba(75, 192, 192, 1)',
-                                'rgba(255, 99, 132, 1)'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false,
-                                labels: {
-                                    color: colors.textColor
-                                }
-                            },
-                            title: {
-                                display: true,
-                                text: 'Income vs Expense',
-                                color: colors.textColor
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        let label = context.dataset.label || '';
-                                        if (label) {
-                                            label += ': ';
-                                        }
-                                        label += `$${context.raw.toFixed(2)}`;
-                                        return label;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    color: colors.textColor
-                                }
-                            },
-                            x: {
-                                ticks: {
-                                    color: colors.textColor
+            const colors = getChartThemeColors();
+            incomeExpenseBarChart = new Chart(barCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Income', 'Expense'],
+                    datasets: [{
+                        label: 'Amount ($)',
+                        data: [totalIncome, displayedTotalExpense],
+                        backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 99, 132, 0.6)'],
+                        borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Income vs Expense', color: colors.textColor },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label || ''}: $${context.raw.toFixed(2)}`;
                                 }
                             }
                         }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: colors.textColor } },
+                        x: { ticks: { color: colors.textColor } }
                     }
-                });
-            }
+                }
+            });
+        }
+
+        // Initial chart creation
+        createOrUpdatePieChart();
+        createOrUpdateBarChart();
+
+        // --- Event Listeners ---
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                createOrUpdatePieChart();
+                createOrUpdateBarChart();
+            }, 250);
+        });
+
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function() {
+                setTimeout(() => {
+                    createOrUpdatePieChart();
+                    createOrUpdateBarChart();
+                }, 100);
+            });
         }
     });
+
+    // --- PDF Export Functionality ---
+    window.exportReportToPdf = async function() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const margin = 10;
+        const contentWidth = doc.internal.pageSize.getWidth() - 2 * margin;
+
+        // Populate hidden PDF fields
+        document.getElementById('pdf-period-income').innerText = ({{ report.total_income | default(0) | tojson }}).toFixed(2);
+        document.getElementById('pdf-period-expense').innerText = ({{ displayed_total_expense | default(0) | tojson }}).toFixed(2);
+        document.getElementById('pdf-period-balance').innerText = ({{ report.balance | default(0) | tojson }}).toFixed(2);
+        document.getElementById('pdf-goal-savings').innerText = ({{ report.total_goal_savings | default(0) | tojson }}).toFixed(2);
+        document.getElementById('pdf-general-savings').innerText = ({{ report.total_general_savings | default(0) | tojson }}).toFixed(2);
+        {% if report and report.period == 'monthly' %}
+        document.getElementById('pdf-total-budget').innerText = ({{ report.total_budget | default(0) | tojson }}).toFixed(2);
+        document.getElementById('pdf-savings-goal').innerText = ({{ report.savings_goal | default(0) | tojson }}).toFixed(2);
+        const remainingSpendingEl = document.getElementById('pdf-remaining-spending');
+        const remainingSpending = {{ report.remaining_spending | default(0) | tojson }};
+        remainingSpendingEl.innerText = `$${remainingSpending.toFixed(2)}`;
+        remainingSpendingEl.style.color = remainingSpending >= 0 ? 'green' : 'red';
+        {% endif %}
+        
+        const structuredPdfContent = document.getElementById('structured-pdf-content');
+        const mainReportContent = document.getElementById('report-content');
+        mainReportContent.style.display = 'none';
+        structuredPdfContent.style.display = 'block';
+
+        // Capture pie chart image
+        const pieChartCanvas = document.getElementById('expensePieChart');
+        if (pieChartCanvas && pieChartLabels.length > 0) {
+            document.getElementById('pdf-pie-chart-placeholder').innerHTML = `<img src="${pieChartCanvas.toDataURL('image/png')}" style="width: 100mm; height: 100mm;"/>`;
+        }
+
+        // Render summary page
+        const summaryCanvas = await html2canvas(document.getElementById('pdf-summary-page'), { scale: 2 });
+        const summaryImgData = summaryCanvas.toDataURL('image/png');
+        const summaryImgProps = doc.getImageProperties(summaryImgData);
+        let summaryImgHeight = (summaryImgProps.height * contentWidth) / summaryImgProps.width;
+        doc.addImage(summaryImgData, 'PNG', margin, margin, contentWidth, summaryImgHeight);
+
+        // Add Transactions Table
+        doc.addPage();
+        doc.text("All Transactions Details", margin, margin);
+        const transactionsData = [
+            {% for t in report.transactions %}
+            ["{{ t.date }}", "{{ t.type|capitalize }}", "{{ t.category|capitalize }}", "{{ t.item | replace('"', '""') }}", "{{ t.description | replace('"', '""') }}", "$ {{ "%.2f"|format(t.amount) }}"],
+            {% endfor %}
+        ];
+        doc.autoTable({
+            startY: margin + 10,
+            head: [['Date', 'Type', 'Category', 'Item', 'Description', 'Amount']],
+            body: transactionsData,
+            theme: 'striped',
+            headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0] },
+            styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+            columnStyles: { 5: { halign: 'right' } }
+        });
+
+        structuredPdfContent.style.display = 'none';
+        mainReportContent.style.display = 'block';
+        doc.save('budget_report.pdf');
+    };
 </script>
 {% endblock %}
