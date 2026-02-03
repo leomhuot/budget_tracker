@@ -719,7 +719,7 @@
 
         // Add Pie Chart
         if (pieChartImgData) {
-            const pieChartWidth = contentWidth * 0.7; // 70% of content width
+            const pieChartWidth = contentWidth * 0.65; // 65% of content width
             const pieChartHeight = pieChartWidth; // Assuming square aspect ratio for pie chart
             doc.text("Expense Breakdown by Category", pdfWidth / 2, yPos, { align: 'center' });
             yPos += 5;
@@ -729,7 +729,7 @@
 
         // Add Bar Chart
         if (barChartImgData) {
-            const barChartWidth = contentWidth * 0.7; // 70% of content width
+            const barChartWidth = contentWidth * 0.65; // 65% of content width
             const barChartHeight = barChartWidth * (300 / 400); // Maintain aspect ratio (original was 400x300)
             doc.text("Income vs Expense", pdfWidth / 2, yPos, { align: 'center' });
             yPos += 5;
