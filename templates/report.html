@@ -435,6 +435,9 @@
             <div id="pdf-pie-chart-placeholder" style="text-align: center; margin-top: 5mm;">
                 <!-- Pie chart image will be injected here by JS -->
             </div>
+            <div id="pdf-bar-chart-placeholder" style="text-align: center; margin-top: 5mm;">
+                <!-- Bar chart image will be injected here by JS -->
+            </div>
         </div>
     </div>
 
@@ -647,6 +650,12 @@
         const pieChartCanvas = document.getElementById('expensePieChart');
         if (pieChartCanvas && pieChartLabels.length > 0) {
             document.getElementById('pdf-pie-chart-placeholder').innerHTML = `<img src="${pieChartCanvas.toDataURL('image/png')}" style="width: 100mm; height: 100mm;"/>`;
+        }
+
+        // Capture bar chart image
+        const barChartCanvas = document.getElementById('incomeExpenseBarChart');
+        if (barChartCanvas) {
+            document.getElementById('pdf-bar-chart-placeholder').innerHTML = `<img src="${barChartCanvas.toDataURL('image/png')}" style="width: 100mm; height: 75mm;"/>`;
         }
 
         // Render summary page
