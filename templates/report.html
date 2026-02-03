@@ -447,27 +447,15 @@
 
 {% block scripts_extra %}
 <script>
+    let expensePieChart; // To hold the chart instance
+    let incomeExpenseBarChart; // To hold the bar chart instance
+
     document.addEventListener('DOMContentLoaded', function() {
         // Data for Chart.js
         const expenseCategories = JSON.parse('{{ expense_categories_distribution | tojson | safe }}');
         
         // Convert to array, sort, and get top 10
         const sortedExpenseCategories = Object.entries(expenseCategories)
-            .sort(([, amountA], [, amountB]) => amountB - amountA)
-            .slice(0, 10); // Get top 10
-
-        const chartLabels = sortedExpenseCategories.map(([category, amount]) => `${category}: $${amount.toFixed(2)}`);
-        const chartData = sortedExpenseCategories.map(([, amount]) => amount);
-
-        const chartColors = [
-            '#0d6efd', '#6610f2', '#6f42c1', '#d63384', '#dc3545',
-            '#fd7e14', '#ffc107', '#198754', '#20c997', '#0dcaf0',
-            '#6c757d', '#adb5bd', '#6f42c1'
-        ];
-
-        let expensePieChart; // To hold the chart instance
-
-        function getChartColors() {
             const currentTheme = localStorage.getItem('theme') || 'light';
             return {
                 textColor: currentTheme === 'dark' ? '#CCCCCC' : '#333333',
