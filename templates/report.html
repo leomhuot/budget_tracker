@@ -648,14 +648,18 @@
 
         // Capture pie chart image
         const pieChartCanvas = document.getElementById('expensePieChart');
+        let pieChartImgData = '';
         if (pieChartCanvas && pieChartLabels.length > 0) {
-            document.getElementById('pdf-pie-chart-placeholder').innerHTML = `<img src="${pieChartCanvas.toDataURL('image/png')}" style="width: 100mm; height: 100mm;"/>`;
+            pieChartImgData = pieChartCanvas.toDataURL('image/png', 1.0); // Quality 1.0
+            document.getElementById('pdf-pie-chart-placeholder').innerHTML = `<img src="${pieChartImgData}" style="width: 100%; max-width: 120mm; display: block; margin: 0 auto;"/>`;
         }
 
         // Capture bar chart image
         const barChartCanvas = document.getElementById('incomeExpenseBarChart');
+        let barChartImgData = '';
         if (barChartCanvas) {
-            document.getElementById('pdf-bar-chart-placeholder').innerHTML = `<img src="${barChartCanvas.toDataURL('image/png')}" style="width: 100mm; height: 75mm;"/>`;
+            barChartImgData = barChartCanvas.toDataURL('image/png', 1.0); // Quality 1.0
+            document.getElementById('pdf-bar-chart-placeholder').innerHTML = `<img src="${barChartImgData}" style="width: 100%; max-width: 120mm; display: block; margin: 0 auto;"/>`;
         }
 
         // Render summary page
