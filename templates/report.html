@@ -577,10 +577,9 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        title: { display: true, text: 'Income vs Expense', color: colors.textColor },
-                        tooltip: {
+                                            plugins: {
+                                                legend: { display: false },
+                                                title: { display: false, text: 'Income vs Expense', color: colors.textColor },                        tooltip: {
                             callbacks: {
                                 label: function(context) {
                                     return `${context.dataset.label || ''}: $${context.raw.toFixed(2)}`;
@@ -670,7 +669,7 @@
         doc.text("Budget Report", pdfWidth / 2, margin + 10, { align: 'center' });
         doc.setFontSize(16);
         doc.text(`Report for: {{ report.period|capitalize }} ({{ report.start_date }} to {{ report.end_date }})`, pdfWidth / 2, margin + 20, { align: 'center' });
-        let yPos = margin + 35; // Starting Y position after title and subtitle
+        let yPos = margin + 30; // Starting Y position after title and subtitle
         
         // Add Period Income, Expense, Balance
         doc.setFontSize(12);
@@ -688,7 +687,7 @@
         doc.setTextColor(0, 0, 255); // Blue
         doc.text(`$${({{ report.balance | default(0) | tojson }}).toFixed(2)}`, pdfWidth * 0.75, yPos + 7, { align: 'center' });
         
-        yPos += 20; // Move Y position down for next section
+        yPos += 15; // Reduced space for next section
 
         // Add Goal Savings and General Savings
         doc.setTextColor(0, 0, 0); // Black
@@ -701,10 +700,10 @@
         doc.setTextColor(255, 165, 0); // Orange
         doc.text(`$${({{ report.total_general_savings | default(0) | tojson }}).toFixed(2)}`, pdfWidth * 0.5, yPos + 7, { align: 'center' });
 
-        yPos += 20; // Move Y position down
+        yPos += 15; // Reduced space for next section
 
         {% if report and report.period == 'monthly' %}
-        yPos += 10;
+        yPos += 5; // Reduced space
         doc.setTextColor(0, 0, 0);
         doc.text("Monthly Budget Goals", pdfWidth / 2, yPos, { align: 'center' });
         yPos += 7;
@@ -715,7 +714,7 @@
         doc.setTextColor(remainingSpending >= 0 ? 0 : 255, remainingSpending >= 0 ? 128 : 0, 0);
         doc.text(`Remaining to Spend: $${remainingSpending.toFixed(2)}`, pdfWidth / 2, yPos, { align: 'center' });
         doc.setTextColor(0, 0, 0); // Reset color
-        yPos += 15;
+        yPos += 7; // Reduced space
         {% endif %}
 
         // Add Pie Chart
@@ -725,7 +724,7 @@
             doc.text("Expense Breakdown by Category", pdfWidth / 2, yPos, { align: 'center' });
             yPos += 5;
             doc.addImage(pieChartImgData, 'PNG', pdfWidth / 2 - pieChartWidth / 2, yPos, pieChartWidth, pieChartHeight);
-            yPos += pieChartHeight + 10;
+            yPos += pieChartHeight + 5; // Reduced space after pie chart
         }
 
         // Add Bar Chart
@@ -735,7 +734,7 @@
             doc.text("Income vs Expense", pdfWidth / 2, yPos, { align: 'center' });
             yPos += 5;
             doc.addImage(barChartImgData, 'PNG', pdfWidth / 2 - barChartWidth / 2, yPos, barChartWidth, barChartHeight);
-            yPos += barChartHeight + 10;
+            yPos += barChartHeight + 5; // Reduced space after bar chart
         }
 
         // Add Transactions Table
