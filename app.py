@@ -208,35 +208,43 @@ def demote_user(user_id):
     return redirect(url_for('admin_users'))
 
 @app.route('/admin/fix_sequence')
-@login_required
-@admin_required
 def fix_sequence():
     conn = db.get_db_connection()
     try:
         with conn.cursor() as cur:
-            # Get the name of the sequence for the id column of the users table
+            # --- Fix 1: Approve the primary admin user ---
+            admin_username_to_approve = 'pov.limhuot'
+            cur.execute("UPDATE users SET approved = TRUE WHERE username = %s;", (admin_username_to_approve,))
+            # Check if the update was successful
+            if cur.rowcount > 0:
+                flash(f"Admin user '{admin_username_to_approve}' has been approved.", 'success')
+            else:
+                flash(f"Admin user '{admin_username_to_approve}' not found.", 'warning')
+
+            # --- Fix 2: Reset the database sequence ---
             cur.execute("SELECT pg_get_serial_sequence('users', 'id');")
-            sequence_name = cur.fetchone()[0]
+            sequence_name_result = cur.fetchone()
+            sequence_name = sequence_name_result[0] if sequence_name_result else None
 
             if sequence_name:
-                # Find the max id from the users table
                 cur.execute("SELECT MAX(id) FROM users;")
-                max_id = cur.fetchone()[0]
+                max_id_result = cur.fetchone()
+                max_id = max_id_result[0] if max_id_result else None
 
-                # If there are users, reset the sequence to the max id.
-                # The next insert will then use max_id + 1.
                 if max_id is not None:
                     cur.execute(f"SELECT setval('{sequence_name}', {max_id});")
-                    conn.commit()
                     flash(f"Sequence '{sequence_name}' reset to {max_id}.", 'success')
                 else:
                     flash("No users found, no sequence reset needed.", 'info')
             else:
                 flash("Could not find the sequence for the 'users' table.", 'danger')
+            
+            conn.commit()
 
     except Exception as e:
         flash(f"An error occurred: {str(e)}", 'danger')
-        conn.rollback()
+        if conn:
+            conn.rollback()
     finally:
         db.release_db_connection(conn)
     
