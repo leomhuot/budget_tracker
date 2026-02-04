@@ -732,16 +732,6 @@
         yPos += 7; // Reduced space
         {% endif %}
 
-        // Add Pie Chart
-        if (pieChartImgData) {
-            const pieChartWidth = contentWidth * 0.65; // 65% of content width
-            const pieChartHeight = pieChartWidth; // Assuming square aspect ratio for pie chart
-            doc.text("Expense Breakdown by Category", pdfWidth / 2, yPos, { align: 'center' });
-            yPos += 5;
-            doc.addImage(pieChartImgData, 'PNG', pdfWidth / 2 - pieChartWidth / 2, yPos, pieChartWidth, pieChartHeight);
-            yPos += pieChartHeight + 5; // Reduced space after pie chart
-        }
-
         // Add Bar Chart
         if (barChartImgData) {
             const barChartWidth = contentWidth * 0.65; // 65% of content width
@@ -750,6 +740,16 @@
             yPos += 5;
             doc.addImage(barChartImgData, 'PNG', pdfWidth / 2 - barChartWidth / 2, yPos, barChartWidth, barChartHeight);
             yPos += barChartHeight + 5; // Reduced space after bar chart
+        }
+
+        // Add Pie Chart
+        if (pieChartImgData) {
+            const pieChartWidth = contentWidth * 0.65; // 65% of content width
+            const pieChartHeight = pieChartWidth; // Assuming square aspect ratio for pie chart
+            doc.text("Expense Breakdown by Category", pdfWidth / 2, yPos, { align: 'center' });
+            yPos += 5;
+            doc.addImage(pieChartImgData, 'PNG', pdfWidth / 2 - pieChartWidth / 2, yPos, pieChartWidth, pieChartHeight);
+            yPos += pieChartHeight + 5; // Reduced space after pie chart
         }
 
         // Add Transactions Table
