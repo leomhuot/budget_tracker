@@ -588,8 +588,23 @@
                         }
                     },
                     scales: {
-                        y: { beginAtZero: true, ticks: { color: colors.textColor } },
-                        x: { ticks: { color: colors.textColor } }
+                        y: { 
+                            beginAtZero: true, 
+                            ticks: { color: colors.textColor },
+                            title: {
+                                display: true,
+                                text: 'Amount ($)',
+                                color: colors.textColor // Use theme color for axis title
+                            }
+                        },
+                        x: { 
+                            ticks: { color: colors.textColor },
+                            title: {
+                                display: true,
+                                text: 'Category', // Or 'Type' or 'Metric' depending on context
+                                color: colors.textColor // Use theme color for axis title
+                            }
+                        }
                     }
                 }
             });
@@ -736,10 +751,6 @@
             doc.addImage(barChartImgData, 'PNG', pdfWidth / 2 - barChartWidth / 2, yPos, barChartWidth, barChartHeight);
             yPos += barChartHeight + 5; // Reduced space after bar chart
         }
-
-        // Add Transactions Table
-        doc.addPage();
-        doc.text("All Transactions Details", margin, margin);
 
         // Add Transactions Table
         doc.addPage();
