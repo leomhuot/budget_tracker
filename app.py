@@ -207,6 +207,41 @@ def demote_user(user_id):
     flash('User demoted to user.', 'success')
     return redirect(url_for('admin_users'))
 
+@app.route('/admin/fix_sequence')
+@login_required
+@admin_required
+def fix_sequence():
+    conn = db.get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            # Get the name of the sequence for the id column of the users table
+            cur.execute("SELECT pg_get_serial_sequence('users', 'id');")
+            sequence_name = cur.fetchone()[0]
+
+            if sequence_name:
+                # Find the max id from the users table
+                cur.execute("SELECT MAX(id) FROM users;")
+                max_id = cur.fetchone()[0]
+
+                # If there are users, reset the sequence to the max id.
+                # The next insert will then use max_id + 1.
+                if max_id is not None:
+                    cur.execute(f"SELECT setval('{sequence_name}', {max_id});")
+                    conn.commit()
+                    flash(f"Sequence '{sequence_name}' reset to {max_id}.", 'success')
+                else:
+                    flash("No users found, no sequence reset needed.", 'info')
+            else:
+                flash("Could not find the sequence for the 'users' table.", 'danger')
+
+    except Exception as e:
+        flash(f"An error occurred: {str(e)}", 'danger')
+        conn.rollback()
+    finally:
+        db.release_db_connection(conn)
+    
+    return redirect(url_for('admin_users'))
+
 @app.route('/admin/users/approve/<int:user_id>')
 @login_required
 @admin_required
@@ -431,10 +466,33 @@ def register():
                     (username, email, password_hash, role)
                 )
                 conn.commit()
+
+                # Notify admins of the new registration
+                try:
+                    with conn.cursor() as cur:
+                        cur.execute("SELECT email FROM users WHERE role = 'admin' AND email IS NOT NULL;")
+                        admin_emails = [row[0] for row in cur.fetchall()]
+                    
+                    if admin_emails:
+                        msg = Message(
+                            'New User Registration - Awaiting Approval',
+                            sender=app.config['MAIL_DEFAULT_SENDER'],
+                            recipients=admin_emails
+                        )
+                        msg.body = (f"A new user, '{username}', has registered for Budget Tracker.\n"
+                                    f"Please log in to the admin panel to approve or reject their account.\n\n"
+                                    f"User Details:\n"
+                                    f"Username: {username}\n"
+                                    f"Email: {email}\n")
+                        mail.send(msg)
+                except Exception as e:
+                    # Log the error but don't block the user's registration
+                    print(f"Error sending admin notification email: {e}")
+
         finally:
             db.release_db_connection(conn)
             
-        flash('Registration successful! Please log in.', 'success')
+        flash('Registration successful! Your account is now awaiting approval from an administrator.', 'success')
         return redirect(url_for('login'))
         
     return render_template('register.html')
