@@ -680,7 +680,7 @@
         doc.setTextColor(0, 0, 0); // Black
         doc.text("Period Expense", pdfWidth * 0.5, yPos, { align: 'center' });
         doc.setTextColor(255, 0, 0); // Red
-        doc.text(`$${({{ displayed_total_expense | default(0) | tojson }}).toFixed(2)}`, pdfWidth * 0.5, yPos + 7, { align: 'center' });
+        doc.text(`$${({{ report.total_expense | default(0) | tojson }}).toFixed(2)}`, pdfWidth * 0.5, yPos + 7, { align: 'center' });
 
         doc.setTextColor(0, 0, 0); // Black
         doc.text("Period Balance", pdfWidth * 0.75, yPos, { align: 'center' });
