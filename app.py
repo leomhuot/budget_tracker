@@ -53,13 +53,14 @@ def admin_required(f):
 
 
 class User(UserMixin):
-    def __init__(self, id, username, email, password_hash, role='user', totp_secret=None):
+    def __init__(self, id, username, email, password_hash, role='user', totp_secret=None, approved=True):
         self.id = id
         self.username = username
         self.email = email
         self.password_hash = password_hash
         self.role = role
         self.totp_secret = totp_secret
+        self.approved = approved
 
 def get_user_by_username(username):
     conn = db.get_db_connection()
@@ -68,7 +69,7 @@ def get_user_by_username(username):
             cur.execute("SELECT * FROM users WHERE username = %s;", (username,))
             user_data = cur.fetchone()
             if user_data:
-                return User(id=user_data[0], username=user_data[1], email=user_data[2], password_hash=user_data[3], role=user_data[4], totp_secret=user_data[5])
+                return User(id=user_data[0], username=user_data[1], email=user_data[2], password_hash=user_data[3], role=user_data[4], totp_secret=user_data[5], approved=user_data[6])
     finally:
         db.release_db_connection(conn)
     return None
@@ -80,7 +81,7 @@ def get_user_by_id(user_id):
             cur.execute("SELECT * FROM users WHERE id = %s;", (user_id,))
             user_data = cur.fetchone()
             if user_data:
-                return User(id=user_data[0], username=user_data[1], email=user_data[2], password_hash=user_data[3], role=user_data[4], totp_secret=user_data[5])
+                return User(id=user_data[0], username=user_data[1], email=user_data[2], password_hash=user_data[3], role=user_data[4], totp_secret=user_data[5], approved=user_data[6])
     finally:
         db.release_db_connection(conn)
     return None
@@ -92,7 +93,7 @@ def get_user_by_email(email):
             cur.execute("SELECT * FROM users WHERE email = %s;", (email,))
             user_data = cur.fetchone()
             if user_data:
-                return User(id=user_data[0], username=user_data[1], email=user_data[2], password_hash=user_data[3], role=user_data[4], totp_secret=user_data[5])
+                return User(id=user_data[0], username=user_data[1], email=user_data[2], password_hash=user_data[3], role=user_data[4], totp_secret=user_data[5], approved=user_data[6])
     finally:
         db.release_db_connection(conn)
     return None
@@ -110,7 +111,7 @@ def get_all_users():
         with conn.cursor() as cur:
             cur.execute("SELECT * FROM users ORDER BY id;")
             for row in cur.fetchall():
-                users.append(User(id=row[0], username=row[1], email=row[2], password_hash=row[3], role=row[4], totp_secret=row[5]))
+                users.append(User(id=row[0], username=row[1], email=row[2], password_hash=row[3], role=row[4], totp_secret=row[5], approved=row[6]))
     finally:
         db.release_db_connection(conn)
     return users
@@ -129,6 +130,15 @@ def update_user_password(user_id, new_password_hash):
     try:
         with conn.cursor() as cur:
             cur.execute("UPDATE users SET password_hash = %s WHERE id = %s;", (new_password_hash, user_id))
+            conn.commit()
+    finally:
+        db.release_db_connection(conn)
+
+def update_user_approval_status(user_id, status):
+    conn = db.get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE users SET approved = %s WHERE id = %s;", (status, user_id))
             conn.commit()
     finally:
         db.release_db_connection(conn)
@@ -197,6 +207,40 @@ def demote_user(user_id):
     flash('User demoted to user.', 'success')
     return redirect(url_for('admin_users'))
 
+@app.route('/admin/users/approve/<int:user_id>')
+@login_required
+@admin_required
+def approve_user(user_id):
+    user_to_approve = get_user_by_id(user_id)
+    if not user_to_approve:
+        flash('User not found.', 'danger')
+        return redirect(url_for('admin_users'))
+    
+    if user_to_approve.approved:
+        flash('User is already approved.', 'info')
+        return redirect(url_for('admin_users'))
+
+    update_user_approval_status(user_id, True)
+    flash(f'User "{user_to_approve.username}" approved successfully.', 'success')
+    return redirect(url_for('admin_users'))
+
+@app.route('/admin/users/reject/<int:user_id>')
+@login_required
+@admin_required
+def reject_user(user_id):
+    user_to_reject = get_user_by_id(user_id)
+    if not user_to_reject:
+        flash('User not found.', 'danger')
+        return redirect(url_for('admin_users'))
+
+    if not user_to_reject.approved:
+        flash('User is already rejected or not yet approved.', 'info')
+        return redirect(url_for('admin_users'))
+
+    update_user_approval_status(user_id, False)
+    flash(f'User "{user_to_reject.username}" approval revoked successfully.', 'success')
+    return redirect(url_for('admin_users'))
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -243,6 +287,10 @@ def login():
         user = get_user_by_username(username)
 
         if user and check_password_hash(user.password_hash, password):
+            if not user.approved:
+                flash('Your account is awaiting approval. Please contact an administrator.', 'warning')
+                return redirect(url_for('login'))
+
             if user.totp_secret:
                 session['temp_user_id'] = user.id
                 return redirect(url_for('verify_2fa'))
@@ -379,7 +427,7 @@ def register():
                 role = 'admin' if user_count == 0 else 'user'
                 
                 cur.execute(
-                    "INSERT INTO users (username, email, password_hash, role) VALUES (%s, %s, %s, %s);",
+                    "INSERT INTO users (username, email, password_hash, role, approved) VALUES (%s, %s, %s, %s, FALSE);",
                     (username, email, password_hash, role)
                 )
                 conn.commit()

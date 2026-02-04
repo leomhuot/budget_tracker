@@ -15,6 +15,7 @@
                         <th>ID</th>
                         <th>Username</th>
                         <th>Role</th>
+                        <th>Approved</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -25,12 +26,24 @@
                         <td>{{ user.username }}</td>
                         <td>{{ user.role }}</td>
                         <td>
+                            {% if user.approved %}
+                                <span class="badge bg-success">Yes</span>
+                            {% else %}
+                                <span class="badge bg-warning">No</span>
+                            {% endif %}
+                        </td>
+                        <td>
                             {% if user.id != current_user.id %}
                                 <a href="{{ url_for('delete_user', user_id=user.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
                                 {% if user.role == 'user' %}
                                     <a href="{{ url_for('promote_user', user_id=user.id) }}" class="btn btn-success btn-sm">Promote to Admin</a>
                                 {% else %}
                                     <a href="{{ url_for('demote_user', user_id=user.id) }}" class="btn btn-warning btn-sm">Demote to User</a>
+                                {% endif %}
+                                {% if not user.approved %}
+                                    <a href="{{ url_for('approve_user', user_id=user.id) }}" class="btn btn-success btn-sm">Approve</a>
+                                {% else %}
+                                    <a href="{{ url_for('reject_user', user_id=user.id) }}" class="btn btn-warning btn-sm">Reject</a>
                                 {% endif %}
                             {% else %}
                                 <span class="text-muted">You cannot modify your own account here.</span>

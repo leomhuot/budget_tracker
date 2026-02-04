@@ -50,7 +50,8 @@ def init_db():
                     email TEXT,
                     password_hash TEXT NOT NULL,
                     role TEXT NOT NULL,
-                    totp_secret TEXT
+                    totp_secret TEXT,
+                    approved BOOLEAN DEFAULT FALSE NOT NULL
                 );
             """)
             print("DEBUG: Table 'users' creation statement executed.")

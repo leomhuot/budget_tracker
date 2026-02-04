@@ -19,6 +19,16 @@ def run_migration():
         )
         cur = conn.cursor()
 
+        # Check if the 'approved' column already exists in 'users' table
+        cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name='users' AND column_name='approved';")
+        if not cur.fetchone():
+            print("Adding 'approved' column to 'users' table...")
+            cur.execute("ALTER TABLE users ADD COLUMN approved BOOLEAN DEFAULT FALSE NOT NULL;")
+            conn.commit()
+            print("Successfully added 'approved' column to 'users' table.")
+        else:
+            print("Column 'approved' already exists in 'users' table. Skipping migration.")
+
         # Check if the 'id' column already exists to prevent errors on re-runs
         cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name='transactions' AND column_name='id';")
         if cur.fetchone():
