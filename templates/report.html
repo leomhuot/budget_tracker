@@ -746,7 +746,7 @@
         if (pieChartImgData) {
             const pieChartWidth = contentWidth * 0.65; // 65% of content width
             const pieChartHeight = pieChartWidth; // Assuming square aspect ratio for pie chart
-            doc.text("Expense Breakdown by Category", pdfWidth / 2, yPos, { align: 'center' });
+
             yPos += 5;
             doc.addImage(pieChartImgData, 'PNG', pdfWidth / 2 - pieChartWidth / 2, yPos, pieChartWidth, pieChartHeight);
             yPos += pieChartHeight + 5; // Reduced space after pie chart
