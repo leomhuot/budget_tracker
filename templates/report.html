@@ -601,7 +601,7 @@
                             ticks: { color: colors.textColor },
                             title: {
                                 display: true,
-                                text: 'Category', // Or 'Type' or 'Metric' depending on context
+                                text: 'Type', // Updated X-axis title
                                 color: colors.textColor // Use theme color for axis title
                             }
                         }
@@ -760,15 +760,20 @@
             ["{{ t.date }}", "{{ t.type|capitalize }}", "{{ t.category|capitalize }}", "{{ t.item | replace('"', '""') }}", "{{ t.description | replace('"', '""') }}", "$ {{ "%.2f"|format(t.amount) }}"],
             {% endfor %}
         ];
-        doc.autoTable({
-            startY: margin + 10,
-            head: [['Date', 'Type', 'Category', 'Item', 'Description', 'Amount']],
-            body: transactionsData,
-            theme: 'striped',
-            headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0] },
-            styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
-            columnStyles: { 5: { halign: 'right' } }
-        });
+        
+        if (transactionsData.length > 0) {
+            doc.autoTable({
+                startY: margin + 10,
+                head: [['Date', 'Type', 'Category', 'Item', 'Description', 'Amount']],
+                body: transactionsData,
+                theme: 'striped',
+                headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0] },
+                styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+                columnStyles: { 5: { halign: 'right' } }
+            });
+        } else {
+            doc.text("No transactions found for this period.", pdfWidth / 2, margin + 20, { align: 'center' });
+        }
 
         structuredPdfContent.style.display = 'none';
         mainReportContent.style.display = 'block';
