@@ -24,10 +24,22 @@ def run_migration():
         if not cur.fetchone():
             print("Adding 'approved' column to 'users' table...")
             cur.execute("ALTER TABLE users ADD COLUMN approved BOOLEAN DEFAULT FALSE NOT NULL;")
-            conn.commit()
             print("Successfully added 'approved' column to 'users' table.")
+            
+            # Immediately approve the primary admin user 'pov.limhuot'
+            print("Approving admin user 'pov.limhuot'...")
+            cur.execute("UPDATE users SET approved = TRUE WHERE username = 'pov.limhuot';")
+            print("Admin user 'pov.limhuot' approved.")
+            conn.commit() # Commit this change immediately
         else:
-            print("Column 'approved' already exists in 'users' table. Skipping migration.")
+            print("Column 'approved' already exists in 'users' table. Skipping addition.")
+            # If the column already exists, ensure 'pov.limhuot' is approved just in case
+            cur.execute("UPDATE users SET approved = TRUE WHERE username = 'pov.limhuot' AND approved = FALSE;")
+            if cur.rowcount > 0:
+                print("Admin user 'pov.limhuot' was unapproved and has now been approved.")
+                conn.commit()
+            else:
+                print("Admin user 'pov.limhuot' is already approved or does not exist.")
 
         # Check if the 'id' column already exists to prevent errors on re-runs
         cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name='transactions' AND column_name='id';")
