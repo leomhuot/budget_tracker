@@ -169,53 +169,32 @@
 {% block scripts_extra %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Handler for the original income modal
-    const incomeModalEl = document.getElementById('iconPickerModal');
-    if (incomeModalEl) {
-        const incomeModal = new bootstrap.Modal(incomeModalEl);
-        incomeModalEl.addEventListener('shown.bs.modal', function () {
-            const backdrop = document.querySelector('.modal-backdrop');
-            if (backdrop) {
-                backdrop.style.pointerEvents = "none"; // Make backdrop ignore clicks
-            }
-            incomeModalEl.style.pointerEvents = "auto"; // Ensure modal itself is clickable
+    function setupModal(modalId) {
+        const modalEl = document.getElementById(modalId);
+        if (modalEl) {
+            const modal = new bootstrap.Modal(modalEl);
+            modalEl.addEventListener('shown.bs.modal', function () {
+                const iconItems = modalEl.querySelectorAll('.icon-item');
+                const iconInput = document.getElementById('new_category_icon');
 
-            const iconItems = incomeModalEl.querySelectorAll('.icon-item');
-            const iconInput = document.getElementById('new_category_icon');
-            iconItems.forEach(item => {
-                function handleIconClick() {
-                    if (iconInput) { iconInput.value = this.dataset.iconClass; }
-                    incomeModal.hide();
-                }
-                item.removeEventListener('click', handleIconClick);
-                item.addEventListener('click', handleIconClick);
+                iconItems.forEach(item => {
+                    function handleIconClick() {
+                        if (iconInput) {
+                            iconInput.value = this.dataset.iconClass;
+                        }
+                        modal.hide();
+                    }
+                    // Add a fresh listener. Note: this doesn't handle removing old listeners perfectly
+                    // but is sufficient since the modal content is re-rendered on each page load.
+                    item.addEventListener('click', handleIconClick);
+                });
             });
-        });
+        }
     }
 
-    // Handler for the new expense modal
-    const expenseModalEl = document.getElementById('expenseIconPickerModal');
-    if (expenseModalEl) {
-        const expenseModal = new bootstrap.Modal(expenseModalEl);
-        expenseModalEl.addEventListener('shown.bs.modal', function () {
-            const backdrop = document.querySelector('.modal-backdrop');
-            if (backdrop) {
-                backdrop.style.pointerEvents = "none"; // Make backdrop ignore clicks
-            }
-            expenseModalEl.style.pointerEvents = "auto"; // Ensure modal itself is clickable
-
-            const iconItems = expenseModalEl.querySelectorAll('.icon-item');
-            const iconInput = document.getElementById('new_category_icon');
-            iconItems.forEach(item => {
-                function handleIconClick() {
-                    if (iconInput) { iconInput.value = this.dataset.iconClass; }
-                    expenseModal.hide();
-                }
-                item.removeEventListener('click', handleIconClick);
-                item.addEventListener('click', handleIconClick);
-            });
-        });
-    }
+    // Setup for both modal types
+    setupModal('iconPickerModal');
+    setupModal('expenseIconPickerModal');
 });
 </script>
 {% endblock %}
