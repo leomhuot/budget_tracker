@@ -26,9 +26,7 @@
                     <label for="new_category_icon" class="sr-only">Category Icon</label>
                     <div class="input-group">
                         <input type="text" class="form-control" id="new_category_icon" name="new_category_icon" placeholder="e.g., fa-car">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#iconPickerModal">Choose Icon</button>
-                        </div>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#iconPickerModal">Choose Icon</button>
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary mb-2">Add Category</button>
@@ -85,4 +83,19 @@
 
 {% endblock %}
 
-{% block scripts_extra %}{% endblock %}
+{% block scripts_extra %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    alert('DEBUG: categories.html script block is running.');
+    const modalEl = document.getElementById('iconPickerModal');
+    if (modalEl) {
+      alert('DEBUG: Found iconPickerModal element on categories.html.');
+      modalEl.addEventListener('shown.bs.modal', function () {
+        alert('SUCCESS: shown.bs.modal event fired on categories.html!');
+      });
+    } else {
+      alert('ERROR: Could NOT find iconPickerModal element on categories.html.');
+    }
+});
+</script>
+{% endblock %}
