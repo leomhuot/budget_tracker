@@ -169,36 +169,47 @@
 {% block scripts_extra %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const iconPickerModalEl = document.getElementById('iconPickerModal');
-
-    // Check if the modal exists on the current page
-    if (iconPickerModalEl) {
-        const iconPickerModal = new bootstrap.Modal(iconPickerModalEl);
-
-        // Use the 'shown.bs.modal' event to set up listeners after the modal is fully visible
-        iconPickerModalEl.addEventListener('shown.bs.modal', function () {
-            // Force z-index with JavaScript to rule out CSS conflicts
-            iconPickerModalEl.style.zIndex = "1060"; // Increased to be very high
-
-            // Find the backdrop and force its z-index to be lower
+    // Handler for the original income modal
+    const incomeModalEl = document.getElementById('iconPickerModal');
+    if (incomeModalEl) {
+        const incomeModal = new bootstrap.Modal(incomeModalEl);
+        incomeModalEl.addEventListener('shown.bs.modal', function () {
+            incomeModalEl.style.zIndex = "1060";
             const backdrop = document.querySelector('.modal-backdrop');
             if (backdrop) {
                 backdrop.style.zIndex = "1059";
             }
-
-            const iconItems = iconPickerModalEl.querySelectorAll('.icon-item');
+            const iconItems = incomeModalEl.querySelectorAll('.icon-item');
             const iconInput = document.getElementById('new_category_icon');
-
             iconItems.forEach(item => {
-                // Use a named function to make it possible to remove the listener later if needed
                 function handleIconClick() {
-                    if (iconInput) {
-                        iconInput.value = this.dataset.iconClass;
-                    }
-                    iconPickerModal.hide();
+                    if (iconInput) { iconInput.value = this.dataset.iconClass; }
+                    incomeModal.hide();
                 }
+                item.removeEventListener('click', handleIconClick);
+                item.addEventListener('click', handleIconClick);
+            });
+        });
+    }
 
-                // Remove any existing listener to prevent duplicates, then add it
+    // Handler for the new expense modal
+    const expenseModalEl = document.getElementById('expenseIconPickerModal');
+    if (expenseModalEl) {
+        const expenseModal = new bootstrap.Modal(expenseModalEl);
+        expenseModalEl.addEventListener('shown.bs.modal', function () {
+            expenseModalEl.style.zIndex = "1060";
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                // This might select the wrong backdrop if two are open, but we assume only one is open at a time.
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.style.zIndex = "1059");
+            }
+            const iconItems = expenseModalEl.querySelectorAll('.icon-item');
+            const iconInput = document.getElementById('new_category_icon');
+            iconItems.forEach(item => {
+                function handleIconClick() {
+                    if (iconInput) { iconInput.value = this.dataset.iconClass; }
+                    expenseModal.hide();
+                }
                 item.removeEventListener('click', handleIconClick);
                 item.addEventListener('click', handleIconClick);
             });
