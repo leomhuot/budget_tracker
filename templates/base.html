@@ -177,17 +177,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Use the 'shown.bs.modal' event to set up listeners after the modal is fully visible
         iconPickerModalEl.addEventListener('shown.bs.modal', function () {
-            alert('Icon picker modal shown and event listener fired!'); // Diagnostic alert
             const iconItems = iconPickerModalEl.querySelectorAll('.icon-item');
             const iconInput = document.getElementById('new_category_icon');
 
             iconItems.forEach(item => {
                 // Use a named function to make it possible to remove the listener later if needed
                 function handleIconClick() {
-                    if (iconInput) {
-                        iconInput.value = this.dataset.iconClass;
-                    }
-                    iconPickerModal.hide();
+                    alert('Icon clicked!'); // Testing click registration
                 }
 
                 // Remove any existing listener to prevent duplicates, then add it

@@ -83,19 +83,4 @@
 
 {% endblock %}
 
-{% block scripts_extra %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    alert('DEBUG: categories.html script block is running.');
-    const modalEl = document.getElementById('iconPickerModal');
-    if (modalEl) {
-      alert('DEBUG: Found iconPickerModal element on categories.html.');
-      modalEl.addEventListener('shown.bs.modal', function () {
-        alert('SUCCESS: shown.bs.modal event fired on categories.html!');
-      });
-    } else {
-      alert('ERROR: Could NOT find iconPickerModal element on categories.html.');
-    }
-});
-</script>
-{% endblock %}
+{% block scripts_extra %}{% endblock %}
