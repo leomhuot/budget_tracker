@@ -172,23 +172,23 @@ document.addEventListener('DOMContentLoaded', function() {
     function setupModal(modalId) {
         const modalEl = document.getElementById(modalId);
         if (modalEl) {
-            const modal = new bootstrap.Modal(modalEl, {backdrop: false});
-            modalEl.addEventListener('shown.bs.modal', function () {
-                const iconItems = modalEl.querySelectorAll('.icon-item');
-                const iconInput = document.getElementById('new_category_icon');
+            const modal = new bootstrap.Modal(modalEl, {backdrop: false}); 
 
-                iconItems.forEach(item => {
-                    function handleIconClick() {
+            // Attach ONE click listener to the modal-body itself
+            const modalBody = modalEl.querySelector('.modal-body');
+            if (modalBody) {
+                modalBody.addEventListener('click', function(event) {
+                    // Check if the clicked element (or its closest parent) is an icon-item
+                    const clickedItem = event.target.closest('.icon-item');
+                    if (clickedItem) {
+                        const iconInput = document.getElementById('new_category_icon');
                         if (iconInput) {
-                            iconInput.value = this.dataset.iconClass;
+                            iconInput.value = clickedItem.dataset.iconClass;
                         }
                         modal.hide();
                     }
-                    // Add a fresh listener. Note: this doesn't handle removing old listeners perfectly
-                    // but is sufficient since the modal content is re-rendered on each page load.
-                    item.addEventListener('click', handleIconClick);
                 });
-            });
+            }
         }
     }
 
