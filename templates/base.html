@@ -177,13 +177,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Use the 'shown.bs.modal' event to set up listeners after the modal is fully visible
         iconPickerModalEl.addEventListener('shown.bs.modal', function () {
+            // Force z-index with JavaScript to rule out CSS conflicts
+            iconPickerModalEl.style.zIndex = "1060"; // Increased to be very high
+
+            // Find the backdrop and force its z-index to be lower
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.style.zIndex = "1059";
+            }
+
             const iconItems = iconPickerModalEl.querySelectorAll('.icon-item');
             const iconInput = document.getElementById('new_category_icon');
 
             iconItems.forEach(item => {
                 // Use a named function to make it possible to remove the listener later if needed
                 function handleIconClick() {
-                    alert('Icon clicked!'); // Testing click registration
+                    if (iconInput) {
+                        iconInput.value = this.dataset.iconClass;
+                    }
+                    iconPickerModal.hide();
                 }
 
                 // Remove any existing listener to prevent duplicates, then add it
