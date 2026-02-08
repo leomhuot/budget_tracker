@@ -20,11 +20,9 @@
                     <input type="text" class="form-control" id="new_category_name" name="new_category_name" value="{{ category_name }}" required>
                 </div>
                 <div class="form-group mb-3">
-                    <label for="new_category_icon">New Category Icon</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="new_category_icon" name="new_category_icon" value="{{ category_icon }}">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#iconPickerModal">Choose Icon</button>
-                    </div>
+                    <label for="new_category_icon">New Category Icon (e.g., fa-car)</label>
+                    <input type="text" class="form-control" id="new_category_icon" name="new_category_icon" value="{{ category_icon }}">
+                    <small class="form-text text-muted">Find icons at <a href="https://icons.getbootstrap.com/" target="_blank">Bootstrap Icons</a>. For Font Awesome, use classes like 'fa-utensils'.</small>
                 </div>
                 <button type="submit" class="btn btn-primary">Update Category</button>
                 <a href="{{ url_for('manage_income_categories') }}" class="btn btn-secondary">Cancel</a>
@@ -32,35 +30,4 @@
         </div>
     </div>
 </div>
-
-<!-- Icon Picker Modal -->
-<div class="modal fade" id="iconPickerModal" tabindex="-1" aria-labelledby="iconPickerModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="iconPickerModalLabel">Choose an Icon</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="icon-grid">
-          <div class="icon-item" data-icon-class="fa-car">
-            <i class="fa-solid fa-car fa-2x"></i>
-          </div>
-          <div class="icon-item" data-icon-class="fa-house">
-            <i class="fa-solid fa-house fa-2x"></i>
-          </div>
-          <div class="icon-item" data-icon-class="fa-utensils">
-            <i class="fa-solid fa-utensils fa-2x"></i>
-          </div>
-          <div class="icon-item" data-icon-class="fa-wallet">
-            <i class="fa-solid fa-wallet fa-2x"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 {% endblock %}
-
-{% block scripts_extra %}{% endblock %}

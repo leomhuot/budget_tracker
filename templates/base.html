@@ -8,24 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}">
-    {% block head_extra %}
-    <style>
-    .icon-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-      gap: 10px;
-      text-align: center;
-    }
-    .icon-item {
-      cursor: pointer;
-      padding: 10px;
-      border-radius: 5px;
-    }
-    .icon-item:hover {
-      background-color: #f0f0f0;
-    }
-    </style>
-    {% endblock %}
+    {% block head_extra %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
 <nav class="navbar navbar-expand-lg">
@@ -166,37 +149,6 @@
         });
     });
 </script>
-{% block scripts_extra %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    function setupModal(modalId) {
-        const modalEl = document.getElementById(modalId);
-        if (modalEl) {
-            const modal = new bootstrap.Modal(modalEl, {backdrop: false}); 
-
-            // Attach ONE click listener to the modal-body itself
-            const modalBody = modalEl.querySelector('.modal-body');
-            if (modalBody) {
-                modalBody.addEventListener('click', function(event) {
-                    // Check if the clicked element (or its closest parent) is an icon-item
-                    const clickedItem = event.target.closest('.icon-item');
-                    if (clickedItem) {
-                        const iconInput = document.getElementById('new_category_icon');
-                        if (iconInput) {
-                            iconInput.value = clickedItem.dataset.iconClass;
-                        }
-                        modal.hide();
-                    }
-                });
-            }
-        }
-    }
-
-    // Setup for both modal types
-    setupModal('iconPickerModal');
-    setupModal('expenseIconPickerModal');
-});
-</script>
-{% endblock %}
+{% block scripts_extra %}{% endblock %}
 </body>
 </html>

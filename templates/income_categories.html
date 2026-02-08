@@ -23,11 +23,8 @@
                     <input type="text" class="form-control" id="new_category_name" name="new_category_name" placeholder="New Category Name" required>
                 </div>
                 <div class="form-group mb-2 mr-2">
-                    <label for="new_category_icon" class="sr-only">Category Icon</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="new_category_icon" name="new_category_icon" placeholder="e.g., fa-car">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#iconPickerModal">Choose Icon</button>
-                        </div>
+                    <label for="new_category_icon" class="sr-only">Category Icon (e.g., fa-car)</label>
+                    <input type="text" class="form-control" id="new_category_icon" name="new_category_icon" placeholder="Bootstrap Icon (e.g., fa-car)">
                 </div>
                 <button type="submit" class="btn btn-primary mb-2">Add Category</button>
             </form>
@@ -42,7 +39,7 @@
             {% for category in income_categories %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <div>
-                    <i class="fa-solid {{ income_category_icons.get(category, income_category_icons._default) }} mr-2"></i>
+                    <i class="fa {{ income_category_icons.get(category, income_category_icons._default) }} mr-2"></i>
                     {{ category }}
                 </div>
                 <div>
@@ -58,35 +55,4 @@
         </ul>
     </div>
 </div>
-
-<!-- Icon Picker Modal -->
-<div class="modal fade" id="iconPickerModal" tabindex="-1" aria-labelledby="iconPickerModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="iconPickerModalLabel">Choose an Icon</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="icon-grid">
-          <div class="icon-item" data-icon-class="fa-car">
-            <i class="fa-solid fa-car fa-2x"></i>
-          </div>
-          <div class="icon-item" data-icon-class="fa-house">
-            <i class="fa-solid fa-house fa-2x"></i>
-          </div>
-          <div class="icon-item" data-icon-class="fa-utensils">
-            <i class="fa-solid fa-utensils fa-2x"></i>
-          </div>
-          <div class="icon-item" data-icon-class="fa-wallet">
-            <i class="fa-solid fa-wallet fa-2x"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 {% endblock %}
-
-{% block scripts_extra %}{% endblock %}
