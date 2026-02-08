@@ -78,16 +78,36 @@
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Check if Bootstrap is available
+  if (typeof bootstrap === 'undefined' || typeof bootstrap.Modal === 'undefined') {
+    console.error("Bootstrap or Bootstrap Modal not found. Check script loading order.");
+    alert("Error: Bootstrap libraries not fully loaded. Cannot interact with modal."); // Added alert for user
+    return; // Exit if Bootstrap is not ready
+  }
+
   const iconItems = document.querySelectorAll('.icon-item');
   const iconInput = document.getElementById('new_category_icon');
-  const iconPickerModal = new bootstrap.Modal(document.getElementById('iconPickerModal'));
+  
+  let iconPickerModal;
+  try {
+    iconPickerModal = new bootstrap.Modal(document.getElementById('iconPickerModal'));
+  } catch (e) {
+    console.error("Error initializing Bootstrap Modal:", e);
+    alert("Error: Could not initialize icon picker modal. See console for details."); // Added alert for user
+    return;
+  }
 
   iconItems.forEach(item => {
     item.addEventListener('click', function() {
-      const iconClass = this.dataset.iconClass;
-      alert('Selected icon: ' + iconClass); // Diagnostic alert
-      iconInput.value = iconClass;
-      iconPickerModal.hide();
+      try {
+        const iconClass = this.dataset.iconClass;
+        // alert('Selected icon: ' + iconClass); // Removed generic diagnostic alert
+        iconInput.value = iconClass;
+        iconPickerModal.hide();
+      } catch (e) {
+        console.error("Error during icon selection click:", e);
+        alert("Error: Problem selecting icon. See console for details."); // Added alert for user
+      }
     });
   });
 });
