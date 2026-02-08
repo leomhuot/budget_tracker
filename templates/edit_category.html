@@ -14,7 +14,7 @@
 
     <div class="card mb-4">
         <div class="card-body">
-            <form action="{{ url_for('edit_.html', old_category_name=category_name) }}" method="POST">
+            <form action="{{ url_for('edit_category', old_category_name=category_name) }}" method="POST">
                 <div class="form-group mb-3">
                     <label for="new_category_name">New Category Name</label>
                     <input type="text" class="form-control" id="new_category_name" name="new_category_name" value="{{ category_name }}" required>
@@ -43,12 +43,18 @@
       </div>
       <div class="modal-body">
         <div class="icon-grid">
-          {% set icons = ['fa-car', 'fa-house', 'fa-utensils', 'fa-wallet', 'fa-plane', 'fa-gift', 'fa-film', 'fa-gamepad'] %}
-          {% for icon in icons %}
-            <div class="icon-item" data-icon-class="{{ icon }}">
-              <i class="fa-solid {{ icon }} fa-2x"></i>
-            </div>
-          {% endfor %}
+          <div class="icon-item" data-icon-class="fa-car">
+            <i class="fa-solid fa-car fa-2x"></i>
+          </div>
+          <div class="icon-item" data-icon-class="fa-house">
+            <i class="fa-solid fa-house fa-2x"></i>
+          </div>
+          <div class="icon-item" data-icon-class="fa-utensils">
+            <i class="fa-solid fa-utensils fa-2x"></i>
+          </div>
+          <div class="icon-item" data-icon-class="fa-wallet">
+            <i class="fa-solid fa-wallet fa-2x"></i>
+          </div>
         </div>
       </div>
     </div>
