@@ -85,6 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
   iconItems.forEach(item => {
     item.addEventListener('click', function() {
       const iconClass = this.dataset.iconClass;
+      alert('Selected icon: ' + iconClass); // Diagnostic alert
       iconInput.value = iconClass;
       iconPickerModal.hide();
     });
