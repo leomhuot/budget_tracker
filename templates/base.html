@@ -8,15 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}">
-    <style>
-        /* Force modal content to be above backdrop */
-        .modal.fade.show {
-            z-index: 1056 !important; /* Higher than default backdrop z-index (1055) */
-        }
-        .modal-backdrop.fade.show {
-            z-index: 1055 !important; /* Ensure backdrop is behind modal */
-        }
-    </style>
     {% block head_extra %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -158,6 +149,53 @@
         });
     });
 </script>
-{% block scripts_extra %}{% endblock %}
+{% block scripts_extra %}
+<style>
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 10px;
+  text-align: center;
+}
+.icon-item {
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 5px;
+}
+.icon-item:hover {
+  background-color: #f0f0f0;
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const iconPickerModalEl = document.getElementById('iconPickerModal');
+
+    // Check if the modal exists on the current page
+    if (iconPickerModalEl) {
+        const iconPickerModal = new bootstrap.Modal(iconPickerModalEl);
+
+        // Use the 'shown.bs.modal' event to set up listeners after the modal is fully visible
+        iconPickerModalEl.addEventListener('shown.bs.modal', function () {
+            const iconItems = iconPickerModalEl.querySelectorAll('.icon-item');
+            const iconInput = document.getElementById('new_category_icon');
+
+            iconItems.forEach(item => {
+                // Use a named function to make it possible to remove the listener later if needed
+                function handleIconClick() {
+                    if (iconInput) {
+                        iconInput.value = this.dataset.iconClass;
+                    }
+                    iconPickerModal.hide();
+                }
+
+                // Remove any existing listener to prevent duplicates, then add it
+                item.removeEventListener('click', handleIconClick);
+                item.addEventListener('click', handleIconClick);
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
 </body>
 </html>

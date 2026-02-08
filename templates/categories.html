@@ -85,36 +85,4 @@
 
 {% endblock %}
 
-{% block scripts_extra %}
-<style>
-.icon-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-  gap: 10px;
-  text-align: center;
-}
-.icon-item {
-  cursor: pointer;
-  padding: 10px;
-  border-radius: 5px;
-}
-.icon-item:hover {
-  background-color: #f0f0f0;
-}
-</style>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const iconItems = document.querySelectorAll('.icon-item');
-  const iconInput = document.getElementById('new_category_icon');
-  const iconPickerModal = new bootstrap.Modal(document.getElementById('iconPickerModal'));
-
-  iconItems.forEach(item => {
-    item.addEventListener('click', function() {
-      const iconClass = this.dataset.iconClass;
-      iconInput.value = iconClass;
-      iconPickerModal.hide();
-    });
-  });
-});
-</script>
-{% endblock %}
+{% block scripts_extra %}{% endblock %}
