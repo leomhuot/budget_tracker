@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function setupModal(modalId) {
         const modalEl = document.getElementById(modalId);
         if (modalEl) {
-            const modal = new bootstrap.Modal(modalEl);
+            const modal = new bootstrap.Modal(modalEl, {backdrop: false});
             modalEl.addEventListener('shown.bs.modal', function () {
                 const iconItems = modalEl.querySelectorAll('.icon-item');
                 const iconInput = document.getElementById('new_category_icon');
