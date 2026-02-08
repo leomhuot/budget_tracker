@@ -174,11 +174,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (incomeModalEl) {
         const incomeModal = new bootstrap.Modal(incomeModalEl);
         incomeModalEl.addEventListener('shown.bs.modal', function () {
-            incomeModalEl.style.zIndex = "1060";
             const backdrop = document.querySelector('.modal-backdrop');
             if (backdrop) {
-                backdrop.style.zIndex = "1059";
+                backdrop.style.pointerEvents = "none"; // Make backdrop ignore clicks
             }
+            incomeModalEl.style.pointerEvents = "auto"; // Ensure modal itself is clickable
+
             const iconItems = incomeModalEl.querySelectorAll('.icon-item');
             const iconInput = document.getElementById('new_category_icon');
             iconItems.forEach(item => {
@@ -197,12 +198,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (expenseModalEl) {
         const expenseModal = new bootstrap.Modal(expenseModalEl);
         expenseModalEl.addEventListener('shown.bs.modal', function () {
-            expenseModalEl.style.zIndex = "1060";
             const backdrop = document.querySelector('.modal-backdrop');
             if (backdrop) {
-                // This might select the wrong backdrop if two are open, but we assume only one is open at a time.
-                document.querySelectorAll('.modal-backdrop').forEach(el => el.style.zIndex = "1059");
+                backdrop.style.pointerEvents = "none"; // Make backdrop ignore clicks
             }
+            expenseModalEl.style.pointerEvents = "auto"; // Ensure modal itself is clickable
+
             const iconItems = expenseModalEl.querySelectorAll('.icon-item');
             const iconInput = document.getElementById('new_category_icon');
             iconItems.forEach(item => {
