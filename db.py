@@ -34,11 +34,10 @@ def init_pool():
             database=url.path[1:]
         )
 
-def get_db_connection():
-    if db_pool is None:
-        init_pool()
-    return db_pool.getconn(timeout=15) # Added timeout
-def release_db_connection(conn):
+    def get_db_connection():
+        if db_pool is None:
+            init_pool()
+        return db_pool.getconn() # Removed timeout=15def release_db_connection(conn):
     if db_pool is not None:
         db_pool.putconn(conn)
 
