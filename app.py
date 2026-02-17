@@ -65,39 +65,39 @@ class User(UserMixin):
         self.approved = approved
 
 def get_user_by_username(username):
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cur:
+        with db.get_db_cursor(commit=False) as cur: # commit=False for SELECT operations
             cur.execute("SELECT * FROM users WHERE username = %s;", (username,))
             user_data = cur.fetchone()
             if user_data:
                 return User(id=user_data[0], username=user_data[1], email=user_data[2], password_hash=user_data[3], role=user_data[4], totp_secret=user_data[5], approved=user_data[6])
-    finally:
-        db.release_db_connection(conn)
+    except psycopg2.pool.PoolError:
+        flash('Database is temporarily unavailable. Please try again later.', 'danger')
+        return None
     return None
 
 def get_user_by_id(user_id):
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cur:
+        with db.get_db_cursor(commit=False) as cur: # commit=False for SELECT operations
             cur.execute("SELECT * FROM users WHERE id = %s;", (user_id,))
             user_data = cur.fetchone()
             if user_data:
                 return User(id=user_data[0], username=user_data[1], email=user_data[2], password_hash=user_data[3], role=user_data[4], totp_secret=user_data[5], approved=user_data[6])
-    finally:
-        db.release_db_connection(conn)
+    except psycopg2.pool.PoolError:
+        flash('Database is temporarily unavailable. Please try again later.', 'danger')
+        return None
     return None
 
 def get_user_by_email(email):
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cur:
+        with db.get_db_cursor(commit=False) as cur: # commit=False for SELECT operations
             cur.execute("SELECT * FROM users WHERE email = %s;", (email,))
             user_data = cur.fetchone()
             if user_data:
                 return User(id=user_data[0], username=user_data[1], email=user_data[2], password_hash=user_data[3], role=user_data[4], totp_secret=user_data[5], approved=user_data[6])
-    finally:
-        db.release_db_connection(conn)
+    except psycopg2.pool.PoolError:
+        flash('Database is temporarily unavailable. Please try again later.', 'danger')
+        return None
     return None
 
 
@@ -108,42 +108,39 @@ def load_user(user_id):
 
 def get_all_users():
     users = []
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cur:
+        with db.get_db_cursor(commit=False) as cur: # commit=False for SELECT operations
             cur.execute("SELECT * FROM users ORDER BY id;")
             for row in cur.fetchall():
                 users.append(User(id=row[0], username=row[1], email=row[2], password_hash=row[3], role=row[4], totp_secret=row[5], approved=row[6]))
-    finally:
-        db.release_db_connection(conn)
+    except psycopg2.pool.PoolError:
+        flash('Database is temporarily unavailable. Please try again later.', 'danger')
+        return [] # Return empty list on error
     return users
 
 def update_user_totp_secret(user_id, totp_secret):
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cur:
+        with db.get_db_cursor() as cur: # commit=True by default for UPDATE operations
             cur.execute("UPDATE users SET totp_secret = %s WHERE id = %s;", (totp_secret, user_id))
-            conn.commit()
-    finally:
-        db.release_db_connection(conn)
+    except psycopg2.pool.PoolError:
+        flash('Database is temporarily unavailable. Unable to update TOTP secret.', 'danger')
+        # Consider re-raising or logging more specifically if this is a critical operation
 
 def update_user_password(user_id, new_password_hash):
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cur:
+        with db.get_db_cursor() as cur: # commit=True by default for UPDATE operations
             cur.execute("UPDATE users SET password_hash = %s WHERE id = %s;", (new_password_hash, user_id))
-            conn.commit()
-    finally:
-        db.release_db_connection(conn)
+    except psycopg2.pool.PoolError:
+        flash('Database is temporarily unavailable. Unable to update password.', 'danger')
+        # Consider re-raising or logging more specifically if this is a critical operation
 
 def update_user_approval_status(user_id, status):
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cur:
+        with db.get_db_cursor() as cur: # commit=True by default for UPDATE operations
             cur.execute("UPDATE users SET approved = %s WHERE id = %s;", (status, user_id))
-            conn.commit()
-    finally:
-        db.release_db_connection(conn)
+    except psycopg2.pool.PoolError:
+        flash('Database is temporarily unavailable. Unable to update user approval status.', 'danger')
+        # Consider re-raising or logging more specifically if this is a critical operation
 
 @app.route('/admin/users')
 @login_required
@@ -160,13 +157,12 @@ def delete_user(user_id):
         flash("You cannot delete your own account.", 'danger')
         return redirect(url_for('admin_users'))
     
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cur:
+        with db.get_db_cursor() as cur: # commit=True by default for DELETE operations
             cur.execute("DELETE FROM users WHERE id = %s;", (user_id,))
-            conn.commit()
-    finally:
-        db.release_db_connection(conn)
+    except psycopg2.pool.PoolError:
+        flash('Database is temporarily unavailable. Unable to delete user.', 'danger')
+        return redirect(url_for('admin_users'))
 
     flash('User deleted successfully.', 'success')
     return redirect(url_for('admin_users'))
@@ -179,13 +175,12 @@ def promote_user(user_id):
         flash("You cannot change your own role.", 'danger')
         return redirect(url_for('admin_users'))
 
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cur:
+        with db.get_db_cursor() as cur: # commit=True by default for UPDATE operations
             cur.execute("UPDATE users SET role = 'admin' WHERE id = %s;", (user_id,))
-            conn.commit()
-    finally:
-        db.release_db_connection(conn)
+    except psycopg2.pool.PoolError:
+        flash('Database is temporarily unavailable. Unable to promote user.', 'danger')
+        return redirect(url_for('admin_users'))
 
     flash('User promoted to admin.', 'success')
     return redirect(url_for('admin_users'))
@@ -198,22 +193,20 @@ def demote_user(user_id):
         flash("You cannot change your own role.", 'danger')
         return redirect(url_for('admin_users'))
 
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cur:
+        with db.get_db_cursor() as cur: # commit=True by default for UPDATE operations
             cur.execute("UPDATE users SET role = 'user' WHERE id = %s;", (user_id,))
-            conn.commit()
-    finally:
-        db.release_db_connection(conn)
+    except psycopg2.pool.PoolError:
+        flash('Database is temporarily unavailable. Unable to demote user.', 'danger')
+        return redirect(url_for('admin_users'))
 
     flash('User demoted to user.', 'success')
     return redirect(url_for('admin_users'))
 
 @app.route('/admin/fix_sequence')
 def fix_sequence():
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cur:
+        with db.get_db_cursor() as cur: # commit=True by default for this transaction
             # --- Fix 1: Approve the primary admin user ---
             admin_username_to_approve = 'pov.limhuot'
             cur.execute("UPDATE users SET approved = TRUE WHERE username = %s;", (admin_username_to_approve,))
@@ -234,6 +227,9 @@ def fix_sequence():
                 max_id = max_id_result[0] if max_id_result else None
 
                 if max_id is not None:
+                    # Note: f-strings for SQL queries should be used with extreme caution
+                    # and only when the variable (sequence_name) cannot be user-controlled
+                    # to prevent SQL injection. Here, sequence_name comes from pg_get_serial_sequence.
                     cur.execute(f"SELECT setval('{sequence_name}', {max_id});")
                     flash(f"Sequence '{sequence_name}' reset to {max_id}.", 'success')
                 else:
@@ -241,14 +237,12 @@ def fix_sequence():
             else:
                 flash("Could not find the sequence for the 'users' table.", 'danger')
             
-            conn.commit()
+            # commit is handled by the context manager
 
-    except Exception as e:
-        flash(f"An error occurred: {str(e)}", 'danger')
-        if conn:
-            conn.rollback()
-    finally:
-        db.release_db_connection(conn)
+    except psycopg2.pool.PoolError:
+        flash('Database is temporarily unavailable. Unable to fix sequence.', 'danger')
+    except Exception as e: # Catch other potential database-related exceptions
+        flash(f"An error occurred during sequence fix: {str(e)}", 'danger')
     
     return redirect(url_for('admin_users'))
 
@@ -464,9 +458,8 @@ def register():
             
         password_hash = generate_password_hash(password, method='pbkdf2:sha256')
         
-        conn = db.get_db_connection()
         try:
-            with conn.cursor() as cur:
+            with db.get_db_cursor() as cur: # commit=True by default for INSERT operation
                 cur.execute("SELECT COUNT(*) FROM users;")
                 user_count = cur.fetchone()[0]
                 role = 'admin' if user_count == 0 else 'user'
@@ -475,13 +468,13 @@ def register():
                     "INSERT INTO users (username, email, password_hash, role, approved) VALUES (%s, %s, %s, %s, FALSE);",
                     (username, email, password_hash, role)
                 )
-                conn.commit()
 
                 # Notify admins of the new registration
                 try:
-                    with conn.cursor() as cur:
-                        cur.execute("SELECT email FROM users WHERE role = 'admin' AND email IS NOT NULL;")
-                        admin_emails = [row[0] for row in cur.fetchall()]
+                    admin_emails = []
+                    with db.get_db_cursor(commit=False) as admin_cur: # Separate cursor for this read operation
+                        admin_cur.execute("SELECT email FROM users WHERE role = 'admin' AND email IS NOT NULL;")
+                        admin_emails = [row[0] for row in admin_cur.fetchall()]
                     
                     if admin_emails:
                         msg = Message(
@@ -499,8 +492,12 @@ def register():
                     # Log the error but don't block the user's registration
                     print(f"Error sending admin notification email: {e}")
 
-        finally:
-            db.release_db_connection(conn)
+        except psycopg2.pool.PoolError:
+            flash('Database is temporarily unavailable. Unable to register.', 'danger')
+            return redirect(url_for('register'))
+        except Exception as e:
+            flash(f'An error occurred during registration: {str(e)}', 'danger')
+            return redirect(url_for('register'))
             
         flash('Registration successful! Your account is now awaiting approval from an administrator.', 'success')
         return redirect(url_for('login'))

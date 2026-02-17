@@ -7,9 +7,8 @@ import uuid # Import uuid for generating unique transaction IDs
 
 def add_transaction(type, category, item, amount, date, description, savings_goal_id=None):
     """Adds a single transaction to the database."""
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cur:
+        with db.get_db_cursor() as cur: # commit=True by default for INSERT operation
             # Generate a unique transaction_id using UUID
             transaction_id = str(uuid.uuid4())
             cur.execute(
@@ -19,15 +18,14 @@ def add_transaction(type, category, item, amount, date, description, savings_goa
                 """,
                 (transaction_id, type, category, item, amount, date, description, savings_goal_id if savings_goal_id else None)
             )
-            conn.commit()
-    finally:
-        db.release_db_connection(conn)
+    except psycopg2.pool.PoolError:
+        print("ERROR: Database is temporarily unavailable. Unable to add transaction.")
+        raise # Re-raise to be handled by calling function/Flask
 def get_transactions(sort_by_date=True):
     """Reads all transactions from the database."""
     transactions = []
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cur:
+        with db.get_db_cursor(commit=False) as cur: # commit=False for SELECT operation
             cur.execute("SELECT id, transaction_id, date, type, category, item, amount, description, savings_goal_id FROM transactions ORDER BY date DESC;")
             # Convert rows to a list of dictionaries for consistency with original CSV output
             # Also convert Decimal to float for JSON serialization later
@@ -44,18 +42,18 @@ def get_transactions(sort_by_date=True):
                     'savings_goal_id': str(row[8]) if row[8] else '' # Ensure ID is string
                 }
                 transactions.append(transaction_dict)
-    finally:
-        db.release_db_connection(conn)
+    except psycopg2.pool.PoolError:
+        print("ERROR: Database is temporarily unavailable. Unable to retrieve transactions.")
+        raise # Re-raise to be handled by calling function/Flask
     return transactions
 
-def get_transaction(transaction_id): # Renaming parameter to 'id' would be clearer but keeping original for minimal change
+def get_transaction(transaction_id):
     """Retrieves a single transaction by its ID from the database."""
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cur:
+        with db.get_db_cursor(commit=False) as cur: # commit=False for SELECT operation
             cur.execute(
                 "SELECT id, transaction_id, date, type, category, item, amount, description, savings_goal_id FROM transactions WHERE id = %s;",
-                (transaction_id,) # Assuming transaction_id parameter is actually the new 'id'
+                (transaction_id,)
             )
             row = cur.fetchone()
             if row:
@@ -71,23 +69,24 @@ def get_transaction(transaction_id): # Renaming parameter to 'id' would be clear
                     'savings_goal_id': str(row[8]) if row[8] else ''
                 }
                 return transaction_dict
-    finally:
-        db.release_db_connection(conn)
+    except psycopg2.pool.PoolError:
+        print("ERROR: Database is temporarily unavailable. Unable to retrieve transaction.")
+        raise # Re-raise to be handled by calling function/Flask
     return None
-def delete_transaction(transaction_id): # Renaming parameter to 'id' would be clearer but keeping original for minimal change
+
+def delete_transaction(transaction_id):
     """Deletes a transaction by its ID from the database."""
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cur:
+        with db.get_db_cursor() as cur: # commit=True by default for DELETE operation
             cur.execute("DELETE FROM transactions WHERE id = %s;", (transaction_id,))
-            conn.commit()
-    finally:
-        db.release_db_connection(conn)
-def update_transaction(transaction_id, data): # Renaming parameter to 'id' would be clearer but keeping original for minimal change
+    except psycopg2.pool.PoolError:
+        print("ERROR: Database is temporarily unavailable. Unable to delete transaction.")
+        raise # Re-raise to be handled by calling function/Flask
+
+def update_transaction(transaction_id, data):
     """Updates a transaction by its ID in the database."""
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cur:
+        with db.get_db_cursor() as cur: # commit=True by default for UPDATE operation
             # Construct the SET part of the SQL query dynamically
             set_clauses = []
             values = []
@@ -106,9 +105,10 @@ def update_transaction(transaction_id, data): # Renaming parameter to 'id' would
                 """,
                 tuple(values)
             )
-            conn.commit()
-    finally:
-        db.release_db_connection(conn)
+    except psycopg2.pool.PoolError:
+        print("ERROR: Database is temporarily unavailable. Unable to update transaction.")
+        raise # Re-raise to be handled by calling function/Flask
+
 def generate_report_data(period=None, start_date_str=None, end_date_str=None):
     """Generates budget report data for a given period or custom date range."""
     transactions = get_transactions(sort_by_date=False)

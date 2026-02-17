@@ -3,6 +3,7 @@ import psycopg2
 from psycopg2 import pool
 import urllib.parse as urlparse
 import settings_manager # Added import
+import contextlib # Added for context manager
 
 # Create a connection pool
 db_pool = None
@@ -15,9 +16,17 @@ def init_pool():
             raise ValueError("DATABASE_URL environment variable is not set")
 
         url = urlparse.urlparse(database_url)
+def init_pool():
+    global db_pool
+    if db_pool is None:
+        database_url = os.environ.get('DATABASE_URL')
+        if not database_url:
+            raise ValueError("DATABASE_URL environment variable is not set")
+
+        url = urlparse.urlparse(database_url)
         db_pool = psycopg2.pool.SimpleConnectionPool(
             minconn=1,
-            maxconn=10,
+            maxconn=30, # Increased from 10
             user=url.username,
             password=url.password,
             host=url.hostname,
@@ -26,13 +35,42 @@ def init_pool():
         )
 
 def get_db_connection():
-    if db_pool is None: # Corrected from '==='
+    if db_pool is None:
         init_pool()
-    return db_pool.getconn()
-
+    return db_pool.getconn(timeout=15) # Added timeout
 def release_db_connection(conn):
     if db_pool is not None:
         db_pool.putconn(conn)
+
+@contextlib.contextmanager
+def get_db_cursor(commit=True):
+    conn = None
+    cur = None # Initialize cur
+    try:
+        conn = get_db_connection()
+        if conn is None:
+            # This case should ideally not be reached if get_db_connection handles PoolError
+            # or blocks, but as a safeguard.
+            raise psycopg2.pool.PoolError("Failed to acquire database connection.")
+        
+        cur = conn.cursor()
+        yield cur
+        if commit:
+            conn.commit()
+    except psycopg2.pool.PoolError as e:
+        print(f"ERROR: Database connection pool exhausted or timed out: {e}")
+        # Re-raise the error so the calling function can handle it
+        raise # Re-raise the exception after logging
+    except Exception as e:
+        print(f"ERROR: An error occurred during database operation: {e}")
+        if conn:
+            conn.rollback()
+        raise # Re-raise the exception after logging
+    finally:
+        if cur: # Ensure cursor is closed
+            cur.close()
+        if conn:
+            release_db_connection(conn)
 
 def init_db():
     """Initializes the database and creates tables if they don't exist."""
