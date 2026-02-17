@@ -16,14 +16,6 @@ def init_pool():
             raise ValueError("DATABASE_URL environment variable is not set")
 
         url = urlparse.urlparse(database_url)
-def init_pool():
-    global db_pool
-    if db_pool is None:
-        database_url = os.environ.get('DATABASE_URL')
-        if not database_url:
-            raise ValueError("DATABASE_URL environment variable is not set")
-
-        url = urlparse.urlparse(database_url)
         db_pool = psycopg2.pool.SimpleConnectionPool(
             minconn=1,
             maxconn=30, # Increased from 10
@@ -34,10 +26,12 @@ def init_pool():
             database=url.path[1:]
         )
 
-    def get_db_connection():
-        if db_pool is None:
-            init_pool()
-        return db_pool.getconn() # Removed timeout=15def release_db_connection(conn):
+def get_db_connection():
+    if db_pool is None:
+        init_pool()
+    return db_pool.getconn() # Removed timeout=15
+
+def release_db_connection(conn):
     if db_pool is not None:
         db_pool.putconn(conn)
 
