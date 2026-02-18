@@ -12,6 +12,7 @@ def init_pool():
     global db_pool
     if db_pool is None:
         database_url = os.environ.get('DATABASE_URL')
+        print(f"DEBUG: DATABASE_URL value: {database_url}") # Added debug print
         if not database_url:
             raise ValueError("DATABASE_URL environment variable is not set")
 

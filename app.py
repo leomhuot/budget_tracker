@@ -14,6 +14,7 @@ import savings_goals as savings_goals_logic
 from datetime import datetime
 import db  # Import the new db module
 import migrate # New import
+import psycopg2 # Import psycopg2
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
