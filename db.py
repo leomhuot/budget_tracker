@@ -7,62 +7,84 @@ import contextlib # Added for context manager
 
 # Create a connection pool
 db_pool = None
+_pool_pid = None
 
 def init_pool():
-    global db_pool
-    if db_pool is None:
-        database_url = os.environ.get('DATABASE_URL')
-        print(f"DEBUG: DATABASE_URL value: {database_url}") # Added debug print
-        if not database_url:
-            raise ValueError("DATABASE_URL environment variable is not set")
+    global db_pool, _pool_pid
+    database_url = os.environ.get('DATABASE_URL')
+    print(f"DEBUG: Initializing pool (PID: {os.getpid()}). DATABASE_URL present: {bool(database_url)}")
+    if not database_url:
+        raise ValueError("DATABASE_URL environment variable is not set")
 
-        url = urlparse.urlparse(database_url)
-        db_pool = psycopg2.pool.SimpleConnectionPool(
-            minconn=1,
-            maxconn=30, # Increased from 10
-            user=url.username,
-            password=url.password,
-            host=url.hostname,
-            port=url.port,
-            database=url.path[1:]
-        )
+    url = urlparse.urlparse(database_url)
+    db_pool = psycopg2.pool.ThreadedConnectionPool(
+        minconn=1,
+        maxconn=30,
+        user=url.username,
+        password=url.password,
+        host=url.hostname,
+        port=url.port,
+        database=url.path[1:],
+        sslmode='require',
+        connect_timeout=10,
+        keepalives=1,
+        keepalives_idle=30,
+        keepalives_interval=10,
+        keepalives_count=5
+    )
+    _pool_pid = os.getpid()
 
 def get_db_connection():
-    if db_pool is None:
+    global db_pool, _pool_pid
+    # Re-initialize pool if it doesn't exist OR if we are in a different process (forked)
+    if db_pool is None or _pool_pid != os.getpid():
+        # If we're in a new process, we can't reliably close the old pool's connections
+        # as they belong to the parent process's socket. We just create a new pool.
         init_pool()
-    return db_pool.getconn() # Removed timeout=15
+    return db_pool.getconn()
 
 def release_db_connection(conn):
-    if db_pool is not None:
+    global db_pool, _pool_pid
+    if db_pool is not None and _pool_pid == os.getpid():
         db_pool.putconn(conn)
+    else:
+        # If the pool was created in a different process, just close the connection
+        try:
+            conn.close()
+        except:
+            pass
 
 @contextlib.contextmanager
 def get_db_cursor(commit=True):
     conn = None
-    cur = None # Initialize cur
+    cur = None
     try:
         conn = get_db_connection()
         if conn is None:
-            # This case should ideally not be reached if get_db_connection handles PoolError
-            # or blocks, but as a safeguard.
             raise psycopg2.pool.PoolError("Failed to acquire database connection.")
         
         cur = conn.cursor()
         yield cur
         if commit:
             conn.commit()
-    except psycopg2.pool.PoolError as e:
-        print(f"ERROR: Database connection pool exhausted or timed out: {e}")
-        # Re-raise the error so the calling function can handle it
-        raise # Re-raise the exception after logging
+    except (psycopg2.pool.PoolError, psycopg2.OperationalError) as e:
+        print(f"ERROR: Database connection error (PID: {os.getpid()}): {e}")
+        raise 
     except Exception as e:
         print(f"ERROR: An error occurred during database operation: {e}")
         if conn:
-            conn.rollback()
-        raise # Re-raise the exception after logging
+            try:
+                conn.rollback()
+            except psycopg2.InterfaceError:
+                # Connection is already closed, cannot rollback
+                pass
+        raise 
     finally:
-        if cur: # Ensure cursor is closed
-            cur.close()
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
         if conn:
             release_db_connection(conn)
 
