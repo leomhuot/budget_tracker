@@ -179,13 +179,13 @@
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('date').value = today;
 
-        const expenseCategories = JSON.parse('{{ expense_categories | tojson | safe }}');
+        const expenseCategories = JSON.parse('{{ categories | tojson | safe }}');
         const incomeCategories = JSON.parse('{{ income_categories | tojson | safe }}');
 
         typeSelect.addEventListener('change', function() {
             categorySelect.innerHTML = '';
-            const categories = this.value === 'expense' ? expense_categories : incomeCategories;
-            categories.forEach(cat => {
+            const selectedCategories = this.value === 'expense' ? expenseCategories : incomeCategories;
+            selectedCategories.forEach(cat => {
                 const opt = document.createElement('option');
                 opt.value = cat;
                 opt.textContent = cat;
