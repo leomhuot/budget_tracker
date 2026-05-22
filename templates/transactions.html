@@ -2,104 +2,172 @@
 
 {% block title %}All Transactions - Budget Tracker{% endblock %}
 
-{% block content %}
-    <h2 class="h4">All Transactions</h2>
+{% block head_extra %}
+    <style>
+        .x-small { font-size: 0.7rem; }
+        .ls-wide { letter-spacing: 0.05em; }
+        .bg-dashboard { background-color: #f8f9fc; }
+        .card-header { background-color: #fff; border-bottom: 1px solid #f1f1f1; }
+        .badge { font-size: 0.75rem; letter-spacing: 0.02em; padding: 0.5em 0.8em; }
+        .table thead th { background-color: #f8f9fc; text-transform: uppercase; font-size: 0.75rem; color: #858796; letter-spacing: 0.05em; border-top: none; }
+        
+        /* Advanced Pagination Styling */
+        .pagination .page-link { 
+            color: #858796;
+            transition: all 0.2s ease;
+            border: none;
+            background: transparent;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #4e73df;
+            color: #fff !important;
+            box-shadow: 0 4px 8px rgba(78, 115, 223, 0.3);
+            border-radius: 8px;
+        }
+        .pagination .page-item:not(.active):not(.disabled) .page-link:hover {
+            background-color: #eaecf4;
+            color: #4e73df;
+            border-radius: 8px;
+        }
+        .cursor-pointer { cursor: pointer; }
+    </style>
+{% endblock %}
 
-    <form action="{{ url_for('transactions') }}" method="get" class="row g-3 align-items-end mb-4">
-        <input type="hidden" name="page" value="{{ page }}">
-        <input type="hidden" name="per_page" value="{{ per_page }}">
-        <div class="col-md-8">
-            <label for="search_query" class="form-label visually-hidden">Search Transactions</label>
-            <input type="text" class="form-control" id="search_query" name="search_query" value="{{ search_query if search_query else '' }}" placeholder="Search by item, category, amount, date, etc.">
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header Section -->
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h1 class="h3 mb-0 text-gray-800 fw-bold">All Transactions</h1>
+            <p class="text-muted small mb-0">Manage and track your full transaction history</p>
         </div>
-        <div class="col-md-4">
-            <button type="submit" class="btn btn-primary w-100">Search</button>
+        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+            <a href="{{ url_for('index') }}" class="btn btn-primary shadow-sm">
+                <i class="fa-solid fa-plus me-2"></i>Add Transaction
+            </a>
         </div>
-    </form>
-    
-    <div class="card shadow-sm">
+    </div>
+
+    <!-- Data Table Section -->
+    <div class="card border-0 shadow-sm mb-4 overflow-hidden">
+        <div class="card-header py-3 d-flex align-items-center justify-content-between bg-white">
+            <h6 class="m-0 fw-bold text-primary">Transaction History</h6>
+            <form action="{{ url_for('transactions') }}" method="get" class="d-flex gap-2">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control" name="search_query" value="{{ search_query if search_query else '' }}" placeholder="Filter history...">
+                    <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                </div>
+            </form>
+        </div>
+        <div class="card-body p-0">
+            {% if transactions %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Date</th>
+                            <th>Status</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th class="text-end">Amount</th>
+                            <th class="text-center pe-4">Manage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in transactions %}
+                        <tr>
+                            <td class="ps-4 small text-muted">{{ t.date }}</td>
+                            <td>
+                                <span class="badge {{ 'bg-success' if t.type == 'income' else 'bg-danger' }} bg-opacity-10 text-{{ 'success' if t.type == 'income' else 'danger' }} border border-{{ 'success' if t.type == 'income' else 'danger' }} border-opacity-25 rounded-pill">
+                                    {{ t.type|capitalize }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fa-solid {{ (income_category_icons if t.type == 'income' else category_icons).get(t.category, 'fa-tag') }} text-muted me-2 x-small"></i>
+                                    <span class="small fw-medium">{{ t.category }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark small">{{ t.item }}</div>
+                                <div class="x-small text-muted">{{ t.description[:40] }}{{ '...' if t.description|length > 40 }}</div>
+                            </td>
+                            <td class="text-end fw-bold text-dark pe-3">
+                                <span class="{{ 'text-success' if t.type == 'income' else '' }}">
+                                    {{ '+' if t.type == 'income' else '-' }}${{ "%.2f"|format(t.amount) }}
+                                </span>
+                            </td>
+                            <td class="text-center pe-4">
+                                <div class="btn-group">
+                                    <a href="{{ url_for('edit', transaction_id=t.id) }}" class="btn btn-sm btn-light p-1 px-2 border rounded-start"><i class="fas fa-pen text-primary x-small"></i></a>
+                                    <a href="{{ url_for('delete', transaction_id=t.id) }}" class="btn btn-sm btn-light p-1 px-2 border border-start-0 rounded-end" onclick="return confirm('Delete permanently?');"><i class="fas fa-trash text-danger x-small"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="card-body text-center py-5">
+                <i class="fa-solid fa-receipt fa-3x text-muted mb-3 opacity-25"></i>
+                <p class="lead text-muted">No transactions found.</p>
+                <a href="{{ url_for('index') }}" class="btn btn-sm btn-primary mt-2">Add your first transaction</a>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Footer / Pagination -->
         {% if transactions %}
-        <div class="table-responsive">
-            <table class="table table-striped table-hover mb-0 align-middle">
-                <thead>
-                    <tr>
-                        <th scope="col">Date</th>
-                        <th scope="col">Type</th>
-                        <th scope="col">Category</th>
-                        <th scope="col">Item</th>
-                        <th scope="col">Description</th>
-                        <th scope="col" class="text-end">Amount</th>
-                        <th scope="col" class="text-center">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for t in transactions %}
-                    <tr>
-                        <td>{{ t.date }}</td>
-                        <td>{{ t.type|capitalize }}</td>
-                        <td>
-                            {% if t.type == 'income' %}
-                                <i class="fa-solid {{ income_category_icons.get(t.category, income_category_icons._default) }} me-2"></i>{{ t.category|capitalize }}
-                            {% else %}
-                                <i class="fa-solid {{ category_icons.get(t.category, category_icons._default) }} me-2"></i>{{ t.category|capitalize }}
-                            {% endif %}
-                        </td>
-                        <td>{{ t.item }}</td>
-                        <td>{{ t.description }}</td>
-                        <td class="text-end {{ 'income' if t.type == 'income' else 'expense' }}">
-                            ${{ "%.2f"|format(t.amount) }}
-                        </td>
-                        <td class="text-center action-buttons">
-                            <a href="{{ url_for('edit', transaction_id=t.id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
-                                <i class="fa-solid fa-pencil"></i>
-                            </a>
-                            <a href="{{ url_for('delete', transaction_id=t.id) }}" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this item?');">
-                                <i class="fa-solid fa-trash"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="card-body text-center">
-            <p class="lead">No transactions yet.</p>
+        <div class="card-footer bg-white border-top-0 py-3 px-4">
+            <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
+                <!-- Info Section -->
+                <div class="text-muted small order-2 order-md-1">
+                    Showing <span class="fw-bold text-dark">{{ (page - 1) * per_page + 1 }}</span> to <span class="fw-bold text-dark">{{ (page - 1) * per_page + transactions|length }}</span> of <span class="fw-bold text-dark">{{ total_transactions }}</span> entries
+                </div>
+                
+                <!-- Controls Section -->
+                <div class="d-flex align-items-center gap-3 order-1 order-md-2">
+                    <!-- Per Page Select -->
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="x-small text-uppercase fw-bold text-muted mb-0 d-none d-sm-block">Rows:</label>
+                        <select class="form-select form-select-sm border-0 bg-light shadow-none cursor-pointer fw-bold text-primary" style="width: 70px; border-radius: 8px;" onchange="window.location.href = '{{ url_for('transactions', page=1, search_query=search_query) }}&per_page=' + this.value">
+                            {% for count in [10, 20, 50, 100] %}
+                            <option value="{{ count }}" {% if per_page == count %}selected{% endif %}>{{ count }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Pagination Buttons -->
+                    <nav aria-label="Table navigation">
+                        <ul class="pagination pagination-sm mb-0 gap-1">
+                            <li class="page-item {{ 'disabled' if page == 1 }}">
+                                <a class="page-link shadow-none d-flex align-items-center justify-content-center p-0" style="width: 32px; height: 32px; border-radius: 8px;" href="{{ url_for('transactions', page=page-1, per_page=per_page, search_query=search_query) }}" aria-label="Previous">
+                                    <i class="fas fa-chevron-left x-small"></i>
+                                </a>
+                            </li>
+                            
+                            {% for p in range(1, total_pages + 1) %}
+                                {% if p == 1 or p == total_pages or (p >= page - 1 and p <= page + 1) %}
+                                    <li class="page-item {{ 'active' if p == page }}">
+                                        <a class="page-link px-3 shadow-none fw-bold" href="{{ url_for('transactions', page=p, per_page=per_page, search_query=search_query) }}">{{ p }}</a>
+                                    </li>
+                                {% elif p == 2 or p == total_pages - 1 %}
+                                    <li class="page-item disabled"><span class="page-link border-0 bg-transparent px-1">...</span></li>
+                                {% endif %}
+                            {% endfor %}
+
+                            <li class="page-item {{ 'disabled' if page == total_pages }}">
+                                <a class="page-link shadow-none d-flex align-items-center justify-content-center p-0" style="width: 32px; height: 32px; border-radius: 8px;" href="{{ url_for('transactions', page=page+1, per_page=per_page, search_query=search_query) }}" aria-label="Next">
+                                    <i class="fas fa-chevron-right x-small"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
         </div>
         {% endif %}
     </div>
-
-    <div class="d-block d-md-flex justify-content-between align-items-center mt-3">
-        <div class="mb-2 mb-md-0 text-muted small-text-sm">
-            Showing <span class="d-inline-block">{{ (page - 1) * per_page + 1 }} - {{ (page - 1) * per_page + transactions|length }} of {{ total_transactions }} transactions</span>
-        </div>
-        <div class="mb-2 mb-md-0 d-flex align-items-center">
-            <label for="per_page_select" class="form-label me-2 mb-0 small-text-sm">Per page:</label>
-            <select class="form-select form-select-sm w-auto" id="per_page_select" onchange="window.location.href = '{{ url_for('transactions', page=1, search_query=search_query) }}&per_page=' + this.value">
-                <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
-                <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
-                <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
-                <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
-            </select>
-        </div>
-        <nav aria-label="Page navigation" class="mt-2 mt-md-0 overflow-auto">
-            <ul class="pagination mb-0 justify-content-center pagination-sm">
-                <li class="page-item {% if page == 1 %}disabled{% endif %}">
-                    <a class="page-link" href="{{ url_for('transactions', page=page-1, per_page=per_page, search_query=search_query) }}" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-                </li>
-                {% for p in range(1, total_pages + 1) %}
-                <li class="page-item {% if p == page %}active{% endif %}">
-                    <a class="page-link" href="{{ url_for('transactions', page=p, per_page=per_page, search_query=search_query) }}">{{ p }}</a>
-                </li>
-                {% endfor %}
-                <li class="page-item {% if page == total_pages %}disabled{% endif %}">
-                    <a class="page-link" href="{{ url_for('transactions', page=page+1, per_page=per_page, search_query=search_query) }}" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </div>
+</div>
 {% endblock %}
