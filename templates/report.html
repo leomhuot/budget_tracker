@@ -46,7 +46,7 @@
 {% block content %}
 <div class="container-fluid px-0">
     <!-- Header Section -->
-    <div class="row align-items-center mb-4">
+    <div class="row align-items-center mb-4 animate__animated animate__fadeIn">
         <div class="col-md-6">
             <h1 class="h3 mb-0 text-gray-800 fw-bold">Financial Dashboard</h1>
             <p class="text-muted small mb-0">Analytics and reporting for your budget items</p>
@@ -59,7 +59,7 @@
     </div>
 
     <!-- Period & Filter Card -->
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 animate__animated animate__fadeInDown">
         <div class="card-body p-3">
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <ul class="nav nav-pills small mb-0">
@@ -90,7 +90,7 @@
 
     {% if report and report.period == 'monthly' %}
     <!-- Monthly Performance Banner -->
-    <div class="card border-0 shadow-sm mb-4 overflow-hidden">
+    <div class="card border-0 shadow-sm mb-4 overflow-hidden animate__animated animate__slideInLeft">
         <div class="card-body p-0">
             <div class="row g-0">
                 <!-- Left: Status Summary -->
@@ -143,16 +143,16 @@
     <!-- Key Metrics Grid -->
     <div class="row g-3 mb-4">
         {% set metrics = [
-            ('Income', report.total_income, 'fa-sack-dollar', 'success'),
-            ('Expense', displayed_total_expense, 'fa-wallet', 'danger'),
-            ('Balance', report.balance, 'fa-scale-balanced', 'info'),
-            ('Total Savings', report.total_savings, 'fa-piggy-bank', 'primary'),
-            ('Goal Savings', report.total_goal_savings, 'fa-bullseye', 'warning'),
-            ('Gen. Savings', report.total_general_savings, 'fa-vault', 'secondary')
+            ('Income', report.total_income, 'fa-sack-dollar', 'success', 'animate__fadeInUp delay-1'),
+            ('Expense', displayed_total_expense, 'fa-wallet', 'danger', 'animate__fadeInUp delay-2'),
+            ('Balance', report.balance, 'fa-scale-balanced', 'info', 'animate__fadeInUp delay-3'),
+            ('Total Savings', report.total_savings, 'fa-piggy-bank', 'primary', 'animate__fadeInUp delay-4'),
+            ('Goal Savings', report.total_goal_savings, 'fa-bullseye', 'warning', 'animate__fadeInUp delay-5'),
+            ('Gen. Savings', report.total_general_savings, 'fa-vault', 'secondary', 'animate__fadeInUp delay-5')
         ] %}
-        {% for title, val, icon, color in metrics %}
+        {% for title, val, icon, color, anim in metrics %}
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card border-0 shadow-sm h-100 transition-up">
+            <div class="card border-0 shadow-sm h-100 transition-up animate__animated {{ anim }}">
                 <div class="card-body p-3">
                     <div class="text-uppercase x-small fw-bold text-muted mb-2">{{ title }}</div>
                     <div class="d-flex align-items-center justify-content-between">
@@ -170,7 +170,7 @@
     <!-- Visual Analysis Row -->
     <div class="row g-4 mb-4">
         <!-- Distribution Analysis -->
-        <div class="col-xl-8">
+        <div class="col-xl-8 animate__animated animate__fadeInUp delay-2">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header py-3">
                     <h6 class="m-0 fw-bold text-primary">Expense Distribution Analysis</h6>
@@ -178,14 +178,14 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-md-5">
-                            <div style="height: 280px;">
+                            <div style="height: 280px;" class="animate__animated animate__zoomIn delay-3">
                                 <canvas id="expensePieChart"></canvas>
                             </div>
                         </div>
                         <div class="col-md-7">
                             <div class="ps-md-4 mt-4 mt-md-0">
                                 <h6 class="small fw-bold text-muted mb-3 text-uppercase">Top 10 Expense Items</h6>
-                                <div style="height: 240px;">
+                                <div style="height: 240px;" class="animate__animated animate__zoomIn delay-4">
                                     <canvas id="topExpensesItemChart"></canvas>
                                 </div>
                             </div>
@@ -196,20 +196,20 @@
         </div>
 
         <!-- Comparisons & Goals -->
-        <div class="col-xl-4">
+        <div class="col-xl-4 animate__animated animate__fadeInUp delay-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header py-3">
                     <h6 class="m-0 fw-bold text-primary">Income vs Expense</h6>
                 </div>
                 <div class="card-body">
-                    <div style="height: 220px;" class="mb-4">
+                    <div style="height: 220px;" class="mb-4 animate__animated animate__zoomIn delay-4">
                         <canvas id="incomeExpenseBarChart"></canvas>
                     </div>
                     <hr class="text-light">
                     <h6 class="small fw-bold text-muted text-uppercase mb-3">Priority Savings Goals</h6>
                     {% if savings_goals %}
                         {% for goal in savings_goals[:3] %}
-                        <div class="mb-3">
+                        <div class="mb-3 animate__animated animate__fadeInUp delay-5">
                             <div class="d-flex justify-content-between x-small mb-1">
                                 <span class="fw-bold text-dark">{{ goal.name }}</span>
                                 <span class="text-muted">${{ "%.0f"|format(goal.saved_amount) }} / ${{ "%.0f"|format(goal.target_amount) }}</span>
@@ -228,7 +228,7 @@
     </div>
 
     <!-- Data Table Section -->
-    <div class="card border-0 shadow-sm mb-4 overflow-hidden">
+    <div class="card border-0 shadow-sm mb-4 overflow-hidden animate__animated animate__fadeInUp delay-4">
         <div class="card-header py-3 d-flex align-items-center justify-content-between bg-white">
             <h6 class="m-0 fw-bold text-primary">Detailed Transactions</h6>
             <form action="{{ url_for('report') }}" method="get" class="d-flex gap-2">
