@@ -245,7 +245,7 @@
                     <thead>
                         <tr>
                             <th class="ps-4">Date</th>
-                            <th class="d-none d-sm-table-cell">Status</th>
+                            <th>Status</th>
                             <th>Category</th>
                             <th>Description</th>
                             <th class="text-end">Amount</th>
@@ -256,19 +256,19 @@
                         {% for t in displayed_transactions %}
                         <tr>
                             <td class="ps-4 small text-muted text-nowrap">{{ t.date }}</td>
-                            <td class="d-none d-sm-table-cell">
-                                <span class="badge {{ 'bg-success' if t.type == 'income' else 'bg-danger' }} bg-opacity-10 text-{{ 'success' if t.type == 'income' else 'danger' }} border border-{{ 'success' if t.type == 'income' else 'danger' }} border-opacity-25 rounded-pill">
+                            <td>
+                                <span class="badge {{ 'bg-success' if t.type == 'income' else 'bg-danger' }} bg-opacity-10 text-{{ 'success' if t.type == 'income' else 'danger' }} border border-{{ 'success' if t.type == 'income' else 'danger' }} border-opacity-25 rounded-pill" style="font-size: 0.65rem;">
                                     {{ t.type|capitalize }}
                                 </span>
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <i class="fa-solid {{ (income_category_icons if t.type == 'income' else category_icons).get(t.category, 'fa-tag') }} text-muted me-2 x-small"></i>
-                                    <span class="small fw-medium text-truncate" style="max-width: 80px;">{{ t.category }}</span>
+                                    <span class="small fw-medium text-truncate" style="max-width: 70px;">{{ t.category }}</span>
                                 </div>
                             </td>
                             <td>
-                                <div class="fw-bold text-dark small text-truncate" style="max-width: 120px;">{{ t.item }}</div>
+                                <div class="fw-bold text-dark small text-truncate" style="max-width: 100px;">{{ t.item }}</div>
                             </td>
                             <td class="text-end fw-bold text-dark pe-3 text-nowrap">
                                 <span class="{{ 'text-success' if t.type == 'income' else '' }}">
