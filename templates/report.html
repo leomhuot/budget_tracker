@@ -83,11 +83,11 @@
                                     <div class="small text-muted">Total Budget</div>
                                 </div>
                                 <div class="col-sm-4 border-start border-secondary">
-                                    <div class="display-stats fw-bold text-danger">${{ "%.2f"|format(displayed_total_expense) }}</div>
+                                    <div class="display-stats fw-bold text-danger" style="color: #ff6b6b !important;">${{ "%.2f"|format(displayed_total_expense) }}</div>
                                     <div class="small text-muted">Total Spent</div>
                                 </div>
                                 <div class="col-sm-4 border-start border-secondary">
-                                    <div class="display-stats fw-bold {{ 'text-success' if report.remaining_spending >= 0 else 'text-danger' }}">
+                                    <div class="display-stats fw-bold {{ 'text-success' if report.remaining_spending >= 0 else '' }}" style="{{ 'color: #ff6b6b !important;' if report.remaining_spending < 0 else '' }}">
                                         ${{ "%.2f"|format(report.remaining_spending) }}
                                     </div>
                                     <div class="small text-muted">Available Funds</div>
@@ -98,10 +98,10 @@
                             {% set progress = (displayed_total_expense / report.total_budget * 100) if report.total_budget > 0 else 0 %}
                             <div class="d-flex justify-content-between mb-2 small fw-bold">
                                 <span>Budget Consumption</span>
-                                <span class="{{ 'text-danger' if progress > 90 else 'text-info' }}">{{ "%.1f"|format(progress) }}%</span>
+                                <span style="color: {{ '#ff6b6b' if progress > 90 else '#0dcaf0' }};">{{ "%.1f"|format(progress) }}%</span>
                             </div>
                             <div class="progress bg-secondary bg-opacity-25" style="height: 12px;">
-                                <div class="progress-bar {{ 'bg-danger' if progress > 90 else 'bg-info' }}" role="progressbar" style="width: {{ progress if progress <= 100 else 100 }}%"></div>
+                                <div class="progress-bar" role="progressbar" style="width: {{ progress if progress <= 100 else 100 }}%; background-color: {{ '#ff6b6b' if progress > 90 else '#0dcaf0' }};"></div>
                             </div>
                         </div>
                     </div>
@@ -310,8 +310,11 @@
 
         // Data for Top Items Chart
         const topExpensesByItem = JSON.parse('{{ top_expenses_by_item | tojson | safe }}');
-        itemLabels = Object.keys(topExpensesByItem);
-        itemData = Object.values(topExpensesByItem);
+        const sortedItems = Object.entries(topExpensesByItem)
+            .sort(([, a], [, b]) => b - a);
+        
+        itemLabels = sortedItems.map(([item, amt]) => item);
+        itemData = sortedItems.map(([, amt]) => amt);
 
         // Data for Bar Chart
         const totalIncome = {{ report.total_income | default(0) | tojson }};
