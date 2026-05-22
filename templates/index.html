@@ -1,116 +1,197 @@
 {% extends 'base.html' %}
 
-{% block title %}Home - Budget Tracker{% endblock %}
+{% block title %}Dashboard - Budget Tracker{% endblock %}
 
-{% block content %}
-    <div class="row g-4">
-        <div class="col-lg-6">
-            <div class="card shadow-sm animate__animated animate__slideInUp">
-                <div class="card-header">
-                    <h2 class="h5 mb-0">Add Income</h2>
-                </div>
-                <div class="card-body">
-                    <form action="{{ url_for('index') }}" method="post">
-                        <input type="hidden" name="type" value="income">
-                        <div class="mb-3">
-                            <label for="income-item" class="form-label">Item:</label>
-                            <input type="text" id="income-item" name="item" class="form-control" placeholder="e.g., 1st Payroll, 2nd Payroll" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="income-description" class="form-label">Description (Optional):</label>
-                            <input type="text" id="income-description" name="description" class="form-control" placeholder="e.g., Monthly salary, Bonus">
-                        </div>
-                        <div class="mb-3">
-                            <label for="income-category" class="form-label">Category:</label>
-                            <select id="income-category" name="category" class="form-select">
-                                {% for category in income_categories %}
-                                <option value="{{ category }}">{{ category }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="income-date" class="form-label">Date:</label>
-                            <input type="date" id="income-date" name="date" class="form-control" value="{{ today_date }}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="income-amount" class="form-label">Amount ($):</label>
-                            <input type="number" id="income-amount" name="amount" class="form-control" step="0.01" min="0.01" placeholder="e.g., 2500" required>
-                        </div>
-                        <button type="submit" class="btn btn-success w-100">Add Income</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card shadow-sm animate__animated animate__slideInUp">
-                <div class="card-header">
-                    <h2 class="h5 mb-0">Add Expense</h2>
-                </div>
-                <div class="card-body">
-                    <form action="{{ url_for('index') }}" method="post">
-                        <input type="hidden" name="type" value="expense">
-                        <div class="mb-3">
-                            <label for="expense-item" class="form-label">Item:</label>
-                            <input type="text" id="expense-item" name="item" class="form-control" placeholder="e.g., Lunch with colleagues" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="expense-description" class="form-label">Description (Optional):</label>
-                            <input type="text" id="expense-description" name="description" class="form-control" placeholder="e.g., Dinner with client">
-                        </div>
-                        <div class="mb-3">
-                            <label for="expense-date" class="form-label">Date:</label>
-                            <input type="date" id="expense-date" name="date" class="form-control" value="{{ today_date }}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="expense-amount" class="form-label">Amount ($):</label>
-                            <input type="number" id="expense-amount" name="amount" class="form-control" step="0.01" min="0.01" placeholder="e.g., 15.50" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="expense-category" class="form-label">Category:</label>
-                            <select id="expense-category" name="category" class="form-select" onchange="toggleSavingsGoal()">
-                                {% for category in categories %}
-                                <option value="{{ category }}">{{ category }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="mb-3" id="savings-goal-div" style="display: none;">
-                            <label for="savings-goal" class="form-label">Savings Goal:</label>
-                            <select id="savings-goal" name="savings_goal_id" class="form-select">
-                                <option value="">-- Select a Goal --</option>
-                                {% for goal in savings_goals %}
-                                <option value="{{ goal.id }}">{{ goal.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-danger w-100">Add Expense</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="mt-5 text-center">
-        <a href="{{ url_for('transactions') }}" class="btn btn-primary btn-lg">View All Transactions</a>
-    </div>
+{% block head_extra %}
+<style>
+    .welcome-banner {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        border-radius: 15px;
+        color: white;
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .welcome-banner::after {
+        content: '\f155';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        right: -20px;
+        bottom: -30px;
+        font-size: 10rem;
+        opacity: 0.1;
+        transform: rotate(-15deg);
+    }
+    .quick-action-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        border-radius: 15px;
+    }
+    .quick-action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    .icon-box {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    .form-floating > .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.1);
+    }
+</style>
 {% endblock %}
 
-{% block scripts_extra %}
-<script>
-    function toggleSavingsGoal() {
-        var categorySelect = document.getElementById('expense-category');
-        var savingsGoalDiv = document.getElementById('savings-goal-div');
-        var savingsGoalSelect = document.getElementById('savings-goal'); // Get the select element
+{% block content %}
+<div class="container py-2">
+    <!-- Welcome Header -->
+    <div class="welcome-banner shadow-lg mb-5 animate__animated animate__fadeIn">
+        <div class="row align-items-center">
+            <div class="col-md-7">
+                <h1 class="display-5 fw-bold mb-2">Hello, {{ current_user.username }}!</h1>
+                <p class="lead opacity-75">Ready to manage your finances today? Track your expenses and reach your savings goals.</p>
+                <div class="d-flex gap-3 mt-4">
+                    <a href="{{ url_for('report') }}" class="btn btn-light btn-lg px-4 fw-bold text-primary shadow-sm">
+                        <i class="fa-solid fa-chart-simple me-2"></i>View Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        if (categorySelect.value === 'Goal Savings') { // Check for "Goal Savings"
-            savingsGoalDiv.style.display = 'block';
-            savingsGoalSelect.setAttribute('required', 'required'); // Make it required
-        } else {
-            savingsGoalDiv.style.display = 'none';
-            savingsGoalSelect.removeAttribute('required'); // Remove required
-            savingsGoalSelect.value = ''; // Reset selected value if hidden
-        }
-    }
-    // Run on page load to set initial state
-    toggleSavingsGoal();
+    <div class="row g-4 mb-5">
+        <!-- Add Transaction Card -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 border-0">
+                    <h5 class="mb-0 fw-bold text-primary"><i class="fa-solid fa-plus-circle me-2"></i>New Transaction</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form action="{{ url_for('add') }}" method="POST" class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <select class="form-select border-0 bg-light" id="type" name="type" required>
+                                    <option value="expense">Expense</option>
+                                    <option value="income">Income</option>
+                                </select>
+                                <label for="type">Transaction Type</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <select class="form-select border-0 bg-light" id="category" name="category" required>
+                                    {% for category in expense_categories %}
+                                        <option value="{{ category }}">{{ category }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label for="category">Category</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control border-0 bg-light" id="item" name="item" placeholder="Item Name" required>
+                                <label for="item">Item Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="number" step="0.01" class="form-control border-0 bg-light" id="amount" name="amount" placeholder="0.00" required>
+                                <label for="amount">Amount ($)</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control border-0 bg-light" id="date" name="date" required>
+                                <label for="date">Transaction Date</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control border-0 bg-light" id="description" name="description" placeholder="Description">
+                                <label for="description">Note / Description</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm fw-bold mt-2">
+                                <i class="fa-solid fa-cloud-arrow-up me-2"></i>Record Transaction
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Summary Side -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box bg-success bg-opacity-10 text-success mx-auto">
+                        <i class="fa-solid fa-piggy-bank fa-2x"></i>
+                    </div>
+                    <h6 class="text-muted text-uppercase small fw-bold">Current Savings</h6>
+                    <h2 class="fw-bold text-dark">${{ "%.2f"|format(total_general_savings) }}</h2>
+                    <hr>
+                    <div class="d-grid">
+                        <a href="{{ url_for('manage_savings_goals') }}" class="btn btn-outline-primary btn-sm rounded-pill">Manage Goals</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm overflow-hidden">
+                <div class="card-header bg-white py-3 border-0">
+                    <h6 class="mb-0 fw-bold text-primary">Quick Navigation</h6>
+                </div>
+                <div class="list-group list-group-flush border-0">
+                    <a href="{{ url_for('transactions') }}" class="list-group-item list-group-item-action py-3 border-0">
+                        <div class="d-flex align-items-center">
+                            <i class="fa-solid fa-list-check text-primary me-3"></i>
+                            <div>
+                                <div class="fw-bold small">Transaction History</div>
+                                <div class="x-small text-muted">Review all past records</div>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="{{ url_for('settings') }}" class="list-group-item list-group-item-action py-3 border-0">
+                        <div class="d-flex align-items-center">
+                            <i class="fa-solid fa-sliders text-info me-3"></i>
+                            <div>
+                                <div class="fw-bold small">App Settings</div>
+                                <div class="x-small text-muted">Categories, Goals, Security</div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeSelect = document.getElementById('type');
+        const categorySelect = document.getElementById('category');
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').value = today;
+
+        const expenseCategories = JSON.parse('{{ expense_categories | tojson | safe }}');
+        const incomeCategories = JSON.parse('{{ income_categories | tojson | safe }}');
+
+        typeSelect.addEventListener('change', function() {
+            categorySelect.innerHTML = '';
+            const categories = this.value === 'expense' ? expense_categories : incomeCategories;
+            categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                categorySelect.appendChild(opt);
+            });
+        });
+    });
 </script>
 {% endblock %}

@@ -1,33 +1,170 @@
 {% extends "base.html" %}
 
+{% block title %}Edit Income Category - Budget Tracker{% endblock %}
+
+{% block head_extra %}
+    <style>
+        .x-small { font-size: 0.7rem; }
+        .ls-wide { letter-spacing: 0.05em; }
+        .bg-dashboard { background-color: #f8f9fc; }
+        .card-header { background-color: #fff; border-bottom: 1px solid #f1f1f1; }
+        .badge { font-size: 0.75rem; letter-spacing: 0.02em; padding: 0.5em 0.8em; }
+        .table thead th { background-color: #f8f9fc; text-transform: uppercase; font-size: 0.75rem; color: #858796; letter-spacing: 0.05em; border-top: none; }
+        
+        /* Modal Stacking Context Fix */
+        #iconPickerModal {
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999 !important;
+        }
+        .modal-dialog {
+            z-index: 10000 !important;
+        }
+        
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 15px;
+        }
+        
+        .icon-item {
+            cursor: pointer !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 5px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .icon-item:hover {
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
+        }
+        
+        .icon-wrapper {
+            width: 50px;
+            height: 50px;
+            background-color: #fff;
+            border: 1px solid #eaecf4;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 5px;
+            color: #5a5c69;
+            pointer-events: none;
+        }
+        
+        .icon-item:hover .icon-wrapper {
+            background-color: #1cc88a;
+            color: #fff;
+            border-color: #1cc88a;
+        }
+        
+        .icon-label {
+            font-size: 0.6rem;
+            color: #858796;
+            text-transform: uppercase;
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            pointer-events: none;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h1 class="my-4">Edit Income Category: {{ category_name }}</h1>
+<div class="container py-4">
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h1 class="h3 mb-0 text-gray-800 fw-bold">Edit Income Category</h1>
+            <p class="text-muted small mb-0">Updating settings for: <span class="fw-bold text-success">{{ category_name }}</span></p>
+        </div>
+    </div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <div class="card mb-4">
-        <div class="card-body">
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
             <form action="{{ url_for('edit_income_category', old_category_name=category_name) }}" method="POST">
-                <div class="form-group mb-3">
-                    <label for="new_category_name">New Category Name</label>
-                    <input type="text" class="form-control" id="new_category_name" name="new_category_name" value="{{ category_name }}" required>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label for="new_category_name" class="form-label small fw-bold text-muted text-uppercase">New Category Name</label>
+                        <input type="text" class="form-control border-0 bg-light shadow-none p-3" id="new_category_name" name="new_category_name" value="{{ category_name }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="new_category_icon" class="form-label small fw-bold text-muted text-uppercase">Category Icon</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-0 bg-white shadow-none"><i id="icon-preview" class="fa-solid {{ category_icon }} text-success"></i></span>
+                            <input type="text" class="form-control border-0 bg-light shadow-none fw-bold text-success p-3" id="new_category_icon" name="new_category_icon" value="{{ category_icon }}" readonly>
+                            <button type="button" class="btn btn-success px-4" data-bs-toggle="modal" data-bs-target="#iconPickerModal">
+                                <i class="fa-solid fa-magnifying-glass me-1"></i> Change
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-success px-5 shadow-sm">
+                            <i class="fa-solid fa-check-circle me-1"></i> Update Category
+                        </button>
+                        <a href="{{ url_for('manage_income_categories') }}" class="btn btn-light border px-4 ms-2">Cancel</a>
+                    </div>
                 </div>
-                <div class="form-group mb-3">
-                    <label for="new_category_icon">New Category Icon (e.g., fa-car)</label>
-                    <input type="text" class="form-control" id="new_category_icon" name="new_category_icon" value="{{ category_icon }}">
-                    <small class="form-text text-muted">Find icons at <a href="https://icons.getbootstrap.com/" target="_blank">Bootstrap Icons</a>. For Font Awesome, use classes like 'fa-utensils'.</small>
-                </div>
-                <button type="submit" class="btn btn-primary">Update Category</button>
-                <a href="{{ url_for('manage_income_categories') }}" class="btn btn-secondary">Cancel</a>
             </form>
         </div>
     </div>
 </div>
+
+<!-- Icon Picker Modal - BACKDROP REMOVED to fix freeze -->
+<div class="modal fade" id="iconPickerModal" tabindex="-1" data-bs-backdrop="false">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0 bg-success text-white">
+        <h5 class="modal-title fw-bold"><i class="fa-solid fa-icons me-2"></i>Select Income Icon</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4 bg-light">
+        <div class="icon-grid">
+          {% set icons = [
+            'fa-sack-dollar', 'fa-money-bill-trend-up', 'fa-hand-holding-dollar', 'fa-briefcase', 'fa-building-columns', 
+            'fa-piggy-bank', 'fa-chart-line', 'fa-credit-card', 'fa-gift', 'fa-coins', 'fa-vault', 'fa-wallet'
+          ] %}
+          {% for icon in icons %}
+            <div class="icon-item" onclick="handleIconSelection('{{ icon }}')">
+              <div class="icon-wrapper shadow-sm">
+                <i class="fa-solid {{ icon }} fa-lg"></i>
+              </div>
+              <div class="icon-label">{{ icon|replace('fa-', '') }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function handleIconSelection(iconClass) {
+    const iconInput = document.getElementById('new_category_icon');
+    const iconPreview = document.getElementById('icon-preview');
+    const modalEl = document.getElementById('iconPickerModal');
+
+    if (iconInput) iconInput.value = iconClass;
+    if (iconPreview) iconPreview.className = 'fa-solid ' + iconClass + ' text-success';
+
+    try {
+        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+        if (modalInstance) {
+            modalInstance.hide();
+        } else {
+            const closeBtn = modalEl.querySelector('.btn-close');
+            if (closeBtn) closeBtn.click();
+        }
+    } catch (e) {
+        modalEl.classList.remove('show');
+        modalEl.style.display = 'none';
+        document.body.classList.remove('modal-open');
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) backdrop.remove();
+    }
+}
+</script>
 {% endblock %}
