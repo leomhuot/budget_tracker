@@ -14,12 +14,32 @@
         .transition-up { transition: transform 0.2s; }
         .transition-up:hover { transform: translateY(-5px); }
         .bg-dashboard { background-color: #f8f9fc; }
-        .nav-pills .nav-link { color: #4e73df; padding: 0.5rem 1rem; font-weight: 500; }
-        .nav-pills .nav-link.active { background-color: #4e73df; color: #fff; box-shadow: 0 2px 4px rgba(78, 115, 223, 0.2); }
+        .nav-pills .nav-link { color: #4e73df; padding: 0.5rem 1rem; font-weight: 500; border-radius: 10px; }
+        .nav-pills .nav-link.active { background-color: #4e73df; color: #fff; box-shadow: 0 4px 12px rgba(78, 115, 223, 0.25); }
         .card-header { background-color: #fff; border-bottom: 1px solid #f1f1f1; }
         .badge { font-size: 0.75rem; letter-spacing: 0.02em; padding: 0.5em 0.8em; }
         .table thead th { background-color: #f8f9fc; text-transform: uppercase; font-size: 0.75rem; color: #858796; letter-spacing: 0.05em; border-top: none; }
         .display-stats { font-size: 1.8rem; line-height: 1.2; }
+        
+        /* Advanced Pagination Styling */
+        .pagination .page-link { 
+            color: #858796;
+            transition: all 0.2s ease;
+            border: none;
+            background: transparent;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #4e73df;
+            color: #fff !important;
+            box-shadow: 0 4px 8px rgba(78, 115, 223, 0.3);
+            border-radius: 8px;
+        }
+        .pagination .page-item:not(.active):not(.disabled) .page-link:hover {
+            background-color: #eaecf4;
+            color: #4e73df;
+            border-radius: 8px;
+        }
+        .cursor-pointer { cursor: pointer; }
     </style>
 {% endblock %}
 
@@ -86,11 +106,11 @@
                         </div>
                         <div class="col-sm-4 border-start-md border-light">
                             <div class="text-muted small mb-1">Total Expenses</div>
-                            <div class="h3 mb-0 fw-bold text-danger">${{ "%.2f"|format(displayed_total_expense) }}</div>
+                            <div class="h3 mb-0 fw-bold text-danger" style="color: #ff6b6b !important;">${{ "%.2f"|format(displayed_total_expense) }}</div>
                         </div>
                         <div class="col-sm-4 border-start-md border-light">
                             <div class="text-muted small mb-1">Available Funds</div>
-                            <div class="h3 mb-0 fw-bold {{ 'text-success' if report.remaining_spending >= 0 else 'text-danger' }}">
+                            <div class="h3 mb-0 fw-bold {{ 'text-success' if report.remaining_spending >= 0 else '' }}" style="{{ 'color: #ff6b6b !important;' if report.remaining_spending < 0 else '' }}">
                                 ${{ "%.2f"|format(report.remaining_spending) }}
                             </div>
                         </div>
@@ -105,7 +125,7 @@
                         <span class="h4 mb-0 fw-bold {{ 'text-danger' if is_over else 'text-primary' }}">{{ "%.1f"|format(progress) }}%</span>
                     </div>
                     <div class="progress bg-white bg-opacity-50" style="height: 10px; border-radius: 5px;">
-                        <div class="progress-bar {{ 'bg-danger' if is_over else 'bg-primary' }} shadow-none" role="progressbar" style="width: {{ progress if progress <= 100 else 100 }}%"></div>
+                        <div class="progress-bar shadow-none" role="progressbar" style="width: {{ progress if progress <= 100 else 100 }}%; background-color: {{ '#ff6b6b' if is_over else '#4e73df' }};"></div>
                     </div>
                     <div class="mt-2 x-small {{ 'text-danger' if is_over else 'text-primary' }} opacity-75 fw-medium">
                         {% if is_over %}
@@ -268,24 +288,48 @@
                 </table>
             </div>
         </div>
-        <div class="card-footer bg-white border-top-0 py-3">
-            <div class="row align-items-center">
-                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                    <span class="text-muted small">Showing {{ (page - 1) * per_page + 1 }} to {{ (page - 1) * per_page + displayed_transactions|length }} of {{ total_transactions }} entries</span>
+        <div class="card-footer bg-white border-top-0 py-3 px-4">
+            <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
+                <!-- Info Section -->
+                <div class="text-muted small order-2 order-md-1">
+                    Showing <span class="fw-bold text-dark">{{ (page - 1) * per_page + 1 }}</span> to <span class="fw-bold text-dark">{{ (page - 1) * per_page + displayed_transactions|length }}</span> of <span class="fw-bold text-dark">{{ total_transactions }}</span> entries
                 </div>
-                <div class="col-md-6">
-                    <nav aria-label="Table pagination">
-                        <ul class="pagination pagination-sm justify-content-center justify-content-md-end mb-0">
-                            <li class="page-item {{ 'disabled' if page == 1 }}">
-                                <a class="page-link shadow-none" href="{{ url_for('report', page=page-1, per_page=per_page, search_query=search_query, period=current_period, start_date=start_date, end_date=end_date) }}">Previous</a>
-                            </li>
-                            {% for p in range(1, total_pages + 1) %}
-                            <li class="page-item {{ 'active' if p == page }}">
-                                <a class="page-link shadow-none" href="{{ url_for('report', page=p, per_page=per_page, search_query=search_query, period=current_period, start_date=start_date, end_date=end_date) }}">{{ p }}</a>
-                            </li>
+                
+                <!-- Controls Section -->
+                <div class="d-flex align-items-center gap-3 order-1 order-md-2">
+                    <!-- Per Page Select -->
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="x-small text-uppercase fw-bold text-muted mb-0 d-none d-sm-block">Rows:</label>
+                        <select class="form-select form-select-sm border-0 bg-light shadow-none cursor-pointer fw-bold text-primary" style="width: 70px; border-radius: 8px;" onchange="window.location.href = '{{ url_for('report', page=1, search_query=search_query, period=current_period, start_date=start_date, end_date=end_date) }}&per_page=' + this.value">
+                            {% for count in [10, 20, 50, 100] %}
+                            <option value="{{ count }}" {% if per_page == count %}selected{% endif %}>{{ count }}</option>
                             {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Pagination Buttons -->
+                    <nav aria-label="Table navigation">
+                        <ul class="pagination pagination-sm mb-0 gap-1">
+                            <li class="page-item {{ 'disabled' if page == 1 }}">
+                                <a class="page-link shadow-none d-flex align-items-center justify-content-center p-0" style="width: 32px; height: 32px; border-radius: 8px;" href="{{ url_for('report', page=page-1, per_page=per_page, search_query=search_query, period=current_period, start_date=start_date, end_date=end_date) }}" aria-label="Previous">
+                                    <i class="fas fa-chevron-left x-small"></i>
+                                </a>
+                            </li>
+                            
+                            {% for p in range(1, total_pages + 1) %}
+                                {% if p == 1 or p == total_pages or (p >= page - 1 and p <= page + 1) %}
+                                    <li class="page-item {{ 'active' if p == page }}">
+                                        <a class="page-link px-3 shadow-none fw-bold" href="{{ url_for('report', page=p, per_page=per_page, search_query=search_query, period=current_period, start_date=start_date, end_date=end_date) }}">{{ p }}</a>
+                                    </li>
+                                {% elif p == 2 or p == total_pages - 1 %}
+                                    <li class="page-item disabled"><span class="page-link border-0 bg-transparent px-1">...</span></li>
+                                {% endif %}
+                            {% endfor %}
+
                             <li class="page-item {{ 'disabled' if page == total_pages }}">
-                                <a class="page-link shadow-none" href="{{ url_for('report', page=page+1, per_page=per_page, search_query=search_query, period=current_period, start_date=start_date, end_date=end_date) }}">Next</a>
+                                <a class="page-link shadow-none d-flex align-items-center justify-content-center p-0" style="width: 32px; height: 32px; border-radius: 8px;" href="{{ url_for('report', page=page+1, per_page=per_page, search_query=search_query, period=current_period, start_date=start_date, end_date=end_date) }}" aria-label="Next">
+                                    <i class="fas fa-chevron-right x-small"></i>
+                                </a>
                             </li>
                         </ul>
                     </nav>
