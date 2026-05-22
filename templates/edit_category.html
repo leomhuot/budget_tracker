@@ -6,41 +6,47 @@
     <style>
         .x-small { font-size: 0.7rem; }
         .ls-wide { letter-spacing: 0.05em; }
-        .bg-light { background-color: #f8f9fc !important; }
+        .bg-dashboard { background-color: #f8f9fc; }
+        .card-header { background-color: #fff; border-bottom: 1px solid #f1f1f1; }
+        .badge { font-size: 0.75rem; letter-spacing: 0.02em; padding: 0.5em 0.8em; }
+        .table thead th { background-color: #f8f9fc; text-transform: uppercase; font-size: 0.75rem; color: #858796; letter-spacing: 0.05em; border-top: none; }
         
+        /* Fixed Icon Picker Styles */
         .icon-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             gap: 15px;
+            pointer-events: auto !important;
         }
         
         .icon-item {
-            cursor: pointer;
+            cursor: pointer !important;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 10px 5px;
             border-radius: 12px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease;
+            pointer-events: auto !important;
         }
         
         .icon-item:hover {
             background-color: #fff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             transform: translateY(-3px);
         }
         
         .icon-wrapper {
             width: 50px;
             height: 50px;
-            background-color: #fff;
+            background-color: #f8f9fc;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 5px;
             color: #5a5c69;
-            transition: all 0.2s ease;
+            pointer-events: none;
         }
         
         .icon-item:hover .icon-wrapper {
@@ -55,9 +61,11 @@
             max-width: 70px;
             overflow: hidden;
             text-overflow: ellipsis;
+            pointer-events: none;
         }
-        
-        .cursor-pointer { cursor: pointer; }
+
+        .modal { z-index: 1060 !important; }
+        .modal-backdrop { z-index: 1050 !important; }
     </style>
 {% endblock %}
 
@@ -69,17 +77,6 @@
             <p class="text-muted small mb-0">Updating settings for: <span class="fw-bold text-primary">{{ category_name }}</span></p>
         </div>
     </div>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
 
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-4">
@@ -112,11 +109,11 @@
 </div>
 
 <!-- Icon Picker Modal -->
-<div class="modal fade" id="iconPickerModal" tabindex="-1" aria-labelledby="iconPickerModalLabel" aria-hidden="true">
+<div class="modal fade" id="iconPickerModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content border-0 shadow">
+    <div class="modal-content border-0 shadow-lg">
       <div class="modal-header border-0 bg-primary text-white">
-        <h5 class="modal-title fw-bold" id="iconPickerModalLabel"><i class="fa-solid fa-icons me-2"></i>Select Category Icon</h5>
+        <h5 class="modal-title fw-bold"><i class="fa-solid fa-icons me-2"></i>Select Icon</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body p-4 bg-light">
@@ -128,7 +125,7 @@
             'fa-laptop-code', 'fa-magnifying-glass-dollar', 'fa-plus', 'fa-minus', 'fa-credit-card', 'fa-receipt', 
             'fa-chart-pie', 'fa-chart-line', 'fa-wallet', 'fa-landmark', 'fa-book', 'fa-graduation-cap', 
             'fa-briefcase', 'fa-screwdriver-wrench', 'fa-house-medical', 'fa-heart', 'fa-paw', 'fa-wifi', 
-            'fa-leaf', 'fa-cloud', 'fa-sun', 'fa-moon', 'fa-star', 'fa-bell', 'fa-gift', 'fa-trophy', 'fa-umbrella', 
+            'fa-leaf', 'fa-cloud', 'fa-sun', 'fa-moon', 'fa-star', 'fa-bell', 'fa-trophy', 'fa-umbrella', 
             'fa-fire', 'fa-droplet', 'fa-globe', 'fa-lock', 'fa-key', 'fa-tag', 'fa-pen', 'fa-trash-can', 
             'fa-rotate-right', 'fa-rotate-left', 'fa-arrows-rotate', 'fa-gear', 'fa-wrench', 'fa-paintbrush', 
             'fa-palette', 'fa-camera', 'fa-video', 'fa-microphone', 'fa-headphones', 'fa-music', 'fa-calculator', 
@@ -148,11 +145,11 @@
             'fa-spray-can-sparkles', 'fa-wind', 'fa-snowflake', 'fa-temperature-high', 'fa-temperature-low'
           ] %}
           {% for icon in icons %}
-            <div class="icon-item" data-icon-class="{{ icon }}">
+            <div class="icon-item" onclick="selectIcon('{{ icon }}')">
               <div class="icon-wrapper shadow-sm">
                 <i class="fa-solid {{ icon }} fa-lg"></i>
               </div>
-              <div class="icon-label text-nowrap">{{ icon|replace('fa-', '') }}</div>
+              <div class="icon-label">{{ icon|replace('fa-', '') }}</div>
             </div>
           {% endfor %}
         </div>
@@ -162,36 +159,21 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const iconPickerModalEl = document.getElementById('iconPickerModal');
+function selectIcon(iconClass) {
     const iconInput = document.getElementById('new_category_icon');
     const iconPreview = document.getElementById('icon-preview');
+    const modalEl = document.getElementById('iconPickerModal');
 
-    if (iconPickerModalEl) {
-        iconPickerModalEl.addEventListener('click', function(e) {
-            const item = e.target.closest('.icon-item');
-            if (item) {
-                const iconClass = item.getAttribute('data-icon-class');
-                
-                // Update input and preview
-                if (iconInput) {
-                    iconInput.value = iconClass;
-                }
-                if (iconPreview) {
-                    iconPreview.className = 'fa-solid ' + iconClass + ' text-primary';
-                }
-                
-                // Safely close modal in BS5
-                const modalInstance = bootstrap.Modal.getInstance(iconPickerModalEl);
-                if (modalInstance) {
-                    modalInstance.hide();
-                } else {
-                    const newInstance = new bootstrap.Modal(iconPickerModalEl);
-                    newInstance.hide();
-                }
-            }
-        });
+    if (iconInput) iconInput.value = iconClass;
+    if (iconPreview) iconPreview.className = 'fa-solid ' + iconClass + ' text-primary';
+
+    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+    if (modalInstance) {
+        modalInstance.hide();
+    } else {
+        const closeBtn = modalEl.querySelector('.btn-close');
+        if (closeBtn) closeBtn.click();
     }
-});
+}
 </script>
 {% endblock %}
