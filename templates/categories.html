@@ -11,12 +11,20 @@
         .badge { font-size: 0.75rem; letter-spacing: 0.02em; padding: 0.5em 0.8em; }
         .table thead th { background-color: #f8f9fc; text-transform: uppercase; font-size: 0.75rem; color: #858796; letter-spacing: 0.05em; border-top: none; }
         
-        /* Fixed Icon Picker Styles */
+        /* Modal Stacking Context Fix */
+        #iconPickerModal {
+            background-color: rgba(0, 0, 0, 0.5); /* Custom backdrop effect */
+            z-index: 9999 !important;
+        }
+        .modal-dialog {
+            z-index: 10000 !important;
+        }
+        
+        /* Icon Grid Styling */
         .icon-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             gap: 15px;
-            pointer-events: auto !important; /* Ensure grid is interactive */
         }
         
         .icon-item {
@@ -27,7 +35,6 @@
             padding: 10px 5px;
             border-radius: 12px;
             transition: all 0.2s ease;
-            pointer-events: auto !important; /* Force interaction */
         }
         
         .icon-item:hover {
@@ -39,19 +46,21 @@
         .icon-wrapper {
             width: 50px;
             height: 50px;
-            background-color: #f8f9fc;
+            background-color: #fff;
+            border: 1px solid #eaecf4;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 5px;
             color: #5a5c69;
-            pointer-events: none; /* Let the click pass through to icon-item */
+            pointer-events: none;
         }
         
         .icon-item:hover .icon-wrapper {
             background-color: #4e73df;
             color: #fff;
+            border-color: #4e73df;
         }
         
         .icon-label {
@@ -62,14 +71,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
             pointer-events: none;
-        }
-
-        /* Ensure modal is above everything */
-        .modal {
-            z-index: 1060 !important;
-        }
-        .modal-backdrop {
-            z-index: 1050 !important;
         }
     </style>
 {% endblock %}
@@ -97,7 +98,7 @@
                 <div class="col-md-5">
                     <label for="new_category_icon" class="form-label small fw-bold text-muted text-uppercase">Category Icon</label>
                     <div class="input-group">
-                        <span class="input-group-text border-0 bg-white"><i id="icon-preview" class="fa-solid fa-tag text-primary"></i></span>
+                        <span class="input-group-text border-0 bg-white shadow-none"><i id="icon-preview" class="fa-solid fa-tag text-primary"></i></span>
                         <input type="text" class="form-control border-0 bg-light shadow-none fw-bold text-primary" id="new_category_icon" name="new_category_icon" value="fa-tag" readonly>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iconPickerModal">
                             <i class="fa-solid fa-magnifying-glass me-1"></i> Choose
@@ -113,7 +114,7 @@
         </div>
     </div>
 
-    <!-- Existing Categories -->
+    <!-- Active Categories -->
     <div class="card border-0 shadow-sm overflow-hidden">
         <div class="card-header bg-white py-3">
             <h6 class="m-0 fw-bold text-primary"><i class="fa-solid fa-list me-2"></i>Active Categories</h6>
@@ -152,8 +153,8 @@
     </div>
 </div>
 
-<!-- Icon Picker Modal -->
-<div class="modal fade" id="iconPickerModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="true">
+<!-- Icon Picker Modal - BACKDROP REMOVED to fix freeze -->
+<div class="modal fade" id="iconPickerModal" tabindex="-1" data-bs-backdrop="false">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content border-0 shadow-lg">
       <div class="modal-header border-0 bg-primary text-white">
@@ -189,7 +190,7 @@
             'fa-spray-can-sparkles', 'fa-wind', 'fa-snowflake', 'fa-temperature-high', 'fa-temperature-low'
           ] %}
           {% for icon in icons %}
-            <div class="icon-item" onclick="selectIcon('{{ icon }}')">
+            <div class="icon-item" onclick="handleIconSelection('{{ icon }}')">
               <div class="icon-wrapper shadow-sm">
                 <i class="fa-solid {{ icon }} fa-lg"></i>
               </div>
@@ -203,25 +204,32 @@
 </div>
 
 <script>
-function selectIcon(iconClass) {
+function handleIconSelection(iconClass) {
     const iconInput = document.getElementById('new_category_icon');
     const iconPreview = document.getElementById('icon-preview');
     const modalEl = document.getElementById('iconPickerModal');
 
-    // 1. Update Input Value
+    // Update form
     if (iconInput) iconInput.value = iconClass;
-    
-    // 2. Update Preview Icon
     if (iconPreview) iconPreview.className = 'fa-solid ' + iconClass + ' text-primary';
 
-    // 3. Close Modal using Bootstrap native API
-    const modalInstance = bootstrap.Modal.getInstance(modalEl);
-    if (modalInstance) {
-        modalInstance.hide();
-    } else {
-        // Alternative: Click the close button if API fails
-        const closeBtn = modalEl.querySelector('.btn-close');
-        if (closeBtn) closeBtn.click();
+    // Reliability: Use multiple methods to close the modal
+    try {
+        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+        if (modalInstance) {
+            modalInstance.hide();
+        } else {
+            // Force hide if no instance
+            const closeBtn = modalEl.querySelector('.btn-close');
+            if (closeBtn) closeBtn.click();
+        }
+    } catch (e) {
+        // Ultimate fallback: brute force remove modal open states
+        modalEl.classList.remove('show');
+        modalEl.style.display = 'none';
+        document.body.classList.remove('modal-open');
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) backdrop.remove();
     }
 }
 </script>
