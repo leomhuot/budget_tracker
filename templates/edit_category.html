@@ -1,35 +1,111 @@
 {% extends "base.html" %}
 
+{% block title %}Edit Category - Budget Tracker{% endblock %}
+
+{% block head_extra %}
+    <style>
+        .x-small { font-size: 0.7rem; }
+        .ls-wide { letter-spacing: 0.05em; }
+        .bg-light { background-color: #f8f9fc !important; }
+        
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 15px;
+        }
+        
+        .icon-item {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 5px;
+            border-radius: 12px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .icon-item:hover {
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transform: translateY(-3px);
+        }
+        
+        .icon-wrapper {
+            width: 50px;
+            height: 50px;
+            background-color: #fff;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 5px;
+            color: #5a5c69;
+            transition: all 0.2s ease;
+        }
+        
+        .icon-item:hover .icon-wrapper {
+            background-color: #4e73df;
+            color: #fff;
+        }
+        
+        .icon-label {
+            font-size: 0.6rem;
+            color: #858796;
+            text-transform: uppercase;
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .cursor-pointer { cursor: pointer; }
+    </style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h1 class="my-4">Edit Category: {{ category_name }}</h1>
+<div class="container py-4">
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h1 class="h3 mb-0 text-gray-800 fw-bold">Edit Category</h1>
+            <p class="text-muted small mb-0">Updating settings for: <span class="fw-bold text-primary">{{ category_name }}</span></p>
+        </div>
+    </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">{{ message }}</div>
+            <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
             {% endfor %}
         {% endif %}
     {% endwith %}
 
-    <div class="card mb-4">
-        <div class="card-body">
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
             <form action="{{ url_for('edit_category', old_category_name=category_name) }}" method="POST">
-                <div class="form-group mb-3">
-                    <label for="new_category_name">New Category Name</label>
-                    <input type="text" class="form-control" id="new_category_name" name="new_category_name" value="{{ category_name }}" required>
-                </div>
-                <div class="form-group mb-3">
-                    <label for="new_category_icon">New Category Icon</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="new_category_icon" name="new_category_icon" value="{{ category_icon }}">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#iconPickerModal">Choose Icon</button>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label for="new_category_name" class="form-label small fw-bold text-muted text-uppercase">New Category Name</label>
+                        <input type="text" class="form-control border-0 bg-light shadow-none p-3" id="new_category_name" name="new_category_name" value="{{ category_name }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="new_category_icon" class="form-label small fw-bold text-muted text-uppercase">Category Icon</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-0 bg-white"><i id="icon-preview" class="fa-solid {{ category_icon }} text-primary"></i></span>
+                            <input type="text" class="form-control border-0 bg-light shadow-none fw-bold text-primary p-3" id="new_category_icon" name="new_category_icon" value="{{ category_icon }}" readonly>
+                            <button type="button" class="btn btn-primary px-4" data-bs-toggle="modal" data-bs-target="#iconPickerModal">
+                                <i class="fa-solid fa-magnifying-glass me-1"></i> Change
+                            </button>
                         </div>
                     </div>
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-success px-5 shadow-sm">
+                            <i class="fa-solid fa-check-circle me-1"></i> Update Category
+                        </button>
+                        <a href="{{ url_for('manage_categories') }}" class="btn btn-light border px-4 ms-2">Cancel</a>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Update Category</button>
-                <a href="{{ url_for('manage_categories') }}" class="btn btn-secondary">Cancel</a>
             </form>
         </div>
     </div>
@@ -37,18 +113,46 @@
 
 <!-- Icon Picker Modal -->
 <div class="modal fade" id="iconPickerModal" tabindex="-1" aria-labelledby="iconPickerModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="iconPickerModalLabel">Choose an Icon</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0 bg-primary text-white">
+        <h5 class="modal-title fw-bold" id="iconPickerModalLabel"><i class="fa-solid fa-icons me-2"></i>Select Category Icon</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body p-4 bg-light">
         <div class="icon-grid">
-          {% set icons = ['fa-utensils', 'fa-mug-saucer', 'fa-coffee', 'fa-car', 'fa-house', 'fa-lightbulb', 'fa-bag-shopping', 'fa-film', 'fa-dumbbell', 'fa-calendar-check', 'fa-gas-pump', 'fa-people-group', 'fa-piggy-bank', 'fa-vault', 'fa-plane', 'fa-cut', 'fa-ellipsis-h', 'fa-gamepad', 'fa-money-bill-wave', 'fa-gift', 'fa-laptop-code', 'fa-search-dollar', 'fa-plus', 'fa-minus', 'fa-credit-card', 'fa-receipt', 'fa-chart-pie', 'fa-chart-line', 'fa-wallet', 'fa-landmark', 'fa-book', 'fa-graduation-cap', 'fa-briefcase', 'fa-tools', 'fa-medkit', 'fa-heart', 'fa-paw', 'fa-wifi', 'fa-leaf', 'fa-cloud', 'fa-sun', 'fa-moon', 'fa-star', 'fa-bell', 'fa-gift', 'fa-trophy', 'fa-umbrella', 'fa-fire', 'fa-water', 'fa-globe', 'fa-lock', 'fa-key', 'fa-tag', 'fa-pencil-alt', 'fa-trash-alt', 'fa-redo', 'fa-undo', 'fa-sync-alt', 'fa-cog', 'fa-wrench', 'fa-brush', 'fa-paint-brush', 'fa-palette', 'fa-camera', 'fa-video', 'fa-microphone', 'fa-headphones', 'fa-music', 'fa-calculator', 'fa-calendar-alt', 'fa-clock', 'fa-hourglass-half', 'fa-map-marker-alt', 'fa-globe-americas', 'fa-phone', 'fa-envelope', 'fa-comment', 'fa-comments', 'fa-share-alt', 'fa-download', 'fa-upload', 'fa-print', 'fa-question-circle', 'fa-info-circle', 'fa-exclamation-circle', 'fa-check-circle', 'fa-times-circle', 'fa-user', 'fa-users', 'fa-user-tie', 'fa-child', 'fa-baby', 'fa-senior-citizen', 'fa-wheelchair', 'fa-shopping-cart', 'fa-truck', 'fa-box', 'fa-boxes', 'fa-clipboard', 'fa-file-alt', 'fa-folder', 'fa-folder-open', 'fa-database', 'fa-server', 'fa-terminal', 'fa-code', 'fa-bug', 'fa-lightbulb', 'fa-seedling', 'fa-tree', 'fa-mountain', 'fa-campground', 'fa-bicycle', 'fa-walking', 'fa-running', 'fa-swimmer', 'fa-person-booth', 'fa-mask', 'fa-robot', 'fa-ghost', 'fa-skull', 'fa-poo', 'fa-pizza-slice', 'fa-hamburger', 'fa-ice-cream', 'fa-cookie-bite', 'fa-carrot', 'fa-apple-alt', 'fa-lemon', 'fa-pepper-hot', 'fa-bacon', 'fa-egg', 'fa-bread-slice', 'fa-wine-glass-alt', 'fa-beer', 'fa-cocktail', 'fa-birthday-cake', 'fa-calendar'] %}`
+          {% set icons = [
+            'fa-utensils', 'fa-mug-saucer', 'fa-coffee', 'fa-car', 'fa-house', 'fa-lightbulb', 'fa-bag-shopping', 
+            'fa-film', 'fa-dumbbell', 'fa-calendar-check', 'fa-gas-pump', 'fa-people-group', 'fa-piggy-bank', 
+            'fa-vault', 'fa-plane', 'fa-scissors', 'fa-ellipsis', 'fa-gamepad', 'fa-money-bill-wave', 'fa-gift', 
+            'fa-laptop-code', 'fa-magnifying-glass-dollar', 'fa-plus', 'fa-minus', 'fa-credit-card', 'fa-receipt', 
+            'fa-chart-pie', 'fa-chart-line', 'fa-wallet', 'fa-landmark', 'fa-book', 'fa-graduation-cap', 
+            'fa-briefcase', 'fa-screwdriver-wrench', 'fa-house-medical', 'fa-heart', 'fa-paw', 'fa-wifi', 
+            'fa-leaf', 'fa-cloud', 'fa-sun', 'fa-moon', 'fa-star', 'fa-bell', 'fa-gift', 'fa-trophy', 'fa-umbrella', 
+            'fa-fire', 'fa-droplet', 'fa-globe', 'fa-lock', 'fa-key', 'fa-tag', 'fa-pen', 'fa-trash-can', 
+            'fa-rotate-right', 'fa-rotate-left', 'fa-arrows-rotate', 'fa-gear', 'fa-wrench', 'fa-paintbrush', 
+            'fa-palette', 'fa-camera', 'fa-video', 'fa-microphone', 'fa-headphones', 'fa-music', 'fa-calculator', 
+            'fa-calendar-days', 'fa-clock', 'fa-hourglass-half', 'fa-location-dot', 'fa-earth-americas', 'fa-phone', 
+            'fa-envelope', 'fa-comment', 'fa-comments', 'fa-share-nodes', 'fa-download', 'fa-upload', 'fa-print', 
+            'fa-circle-question', 'fa-circle-info', 'fa-circle-exclamation', 'fa-circle-check', 'fa-circle-xmark', 
+            'fa-user', 'fa-users', 'fa-user-tie', 'fa-child', 'fa-baby', 'fa-wheelchair', 'fa-cart-shopping', 
+            'fa-truck', 'fa-box', 'fa-boxes-stacked', 'fa-clipboard', 'fa-file-lines', 'fa-folder', 'fa-folder-open', 
+            'fa-database', 'fa-server', 'fa-terminal', 'fa-code', 'fa-bug', 'fa-seedling', 'fa-tree', 'fa-mountain', 
+            'fa-campground', 'fa-bicycle', 'fa-person-walking', 'fa-person-running', 'fa-person-swimming', 
+            'fa-person-booth', 'fa-mask', 'fa-robot', 'fa-ghost', 'fa-skull', 'fa-poo', 'fa-pizza-slice', 
+            'fa-hamburger', 'fa-ice-cream', 'fa-cookie-bite', 'fa-carrot', 'fa-apple-whole', 'fa-lemon', 
+            'fa-pepper-hot', 'fa-bacon', 'fa-egg', 'fa-bread-slice', 'fa-wine-glass', 'fa-beer-mug-empty', 
+            'fa-martini-glass-citrus', 'fa-cake-candles', 'fa-socks', 'fa-shirt', 'fa-glasses', 'fa-mobile-screen', 
+            'fa-laptop', 'fa-tv', 'fa-plug', 'fa-bolt', 'fa-couch', 'fa-bed', 'fa-bath', 'fa-shower', 
+            'fa-toilet-paper', 'fa-soap', 'fa-sink', 'fa-trash-can', 'fa-brush', 'fa-broom', 'fa-bucket', 
+            'fa-spray-can-sparkles', 'fa-wind', 'fa-snowflake', 'fa-temperature-high', 'fa-temperature-low'
+          ] %}
           {% for icon in icons %}
             <div class="icon-item" data-icon-class="{{ icon }}">
-              <i class="fa {{ icon }} fa-2x"></i>
+              <div class="icon-wrapper shadow-sm">
+                <i class="fa-solid {{ icon }} fa-lg"></i>
+              </div>
+              <div class="icon-label text-nowrap">{{ icon|replace('fa-', '') }}</div>
             </div>
           {% endfor %}
         </div>
@@ -57,38 +161,37 @@
   </div>
 </div>
 
-{% endblock %}
-
-{% block scripts_extra %}
-<style>
-.icon-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-  gap: 10px;
-  text-align: center;
-}
-.icon-item {
-  cursor: pointer;
-  padding: 10px;
-  border-radius: 5px;
-}
-.icon-item:hover {
-  background-color: #f0f0f0;
-}
-</style>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const iconItems = document.querySelectorAll('.icon-item');
-  const iconInput = document.getElementById('new_category_icon');
-  const iconPickerModal = new bootstrap.Modal(document.getElementById('iconPickerModal'));
+    const iconPickerModalEl = document.getElementById('iconPickerModal');
+    const iconInput = document.getElementById('new_category_icon');
+    const iconPreview = document.getElementById('icon-preview');
 
-  iconItems.forEach(item => {
-    item.addEventListener('click', function() {
-      const iconClass = this.dataset.iconClass;
-      iconInput.value = iconClass;
-      iconPickerModal.hide();
-    });
-  });
+    if (iconPickerModalEl) {
+        iconPickerModalEl.addEventListener('click', function(e) {
+            const item = e.target.closest('.icon-item');
+            if (item) {
+                const iconClass = item.getAttribute('data-icon-class');
+                
+                // Update input and preview
+                if (iconInput) {
+                    iconInput.value = iconClass;
+                }
+                if (iconPreview) {
+                    iconPreview.className = 'fa-solid ' + iconClass + ' text-primary';
+                }
+                
+                // Safely close modal in BS5
+                const modalInstance = bootstrap.Modal.getInstance(iconPickerModalEl);
+                if (modalInstance) {
+                    modalInstance.hide();
+                } else {
+                    const newInstance = new bootstrap.Modal(iconPickerModalEl);
+                    newInstance.hide();
+                }
+            }
+        });
+    }
 });
 </script>
 {% endblock %}
