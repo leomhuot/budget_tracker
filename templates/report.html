@@ -99,18 +99,18 @@
                         <div class="badge bg-primary bg-opacity-10 text-primary text-uppercase x-small fw-bold ls-wide px-3">Monthly Performance</div>
                         <span class="ms-2 text-muted small">{{ report.start_date }} to {{ report.end_date }}</span>
                     </div>
-                    <div class="row g-4">
-                        <div class="col-sm-4">
+                    <div class="row g-3">
+                        <div class="col-12">
                             <div class="text-muted small mb-1">Total Budget</div>
-                            <div class="h3 mb-0 fw-bold text-dark">${{ "%.2f"|format(report.total_budget) }}</div>
+                            <div class="h4 mb-0 fw-bold text-dark">${{ "%.2f"|format(report.total_budget) }}</div>
                         </div>
-                        <div class="col-sm-4 border-start-md border-light">
+                        <div class="col-6">
                             <div class="text-muted small mb-1">Total Expenses</div>
-                            <div class="h3 mb-0 fw-bold text-danger" style="color: #ff6b6b !important;">${{ "%.2f"|format(displayed_total_expense) }}</div>
+                            <div class="h4 mb-0 fw-bold text-danger" style="color: #ff6b6b !important;">${{ "%.2f"|format(displayed_total_expense) }}</div>
                         </div>
-                        <div class="col-sm-4 border-start-md border-light">
+                        <div class="col-6">
                             <div class="text-muted small mb-1">Available Funds</div>
-                            <div class="h3 mb-0 fw-bold {{ 'text-success' if report.remaining_spending >= 0 else '' }}" style="{{ 'color: #ff6b6b !important;' if report.remaining_spending < 0 else '' }}">
+                            <div class="h4 mb-0 fw-bold {{ 'text-success' if report.remaining_spending >= 0 else '' }}" style="{{ 'color: #ff6b6b !important;' if report.remaining_spending < 0 else '' }}">
                                 ${{ "%.2f"|format(report.remaining_spending) }}
                             </div>
                         </div>
@@ -245,7 +245,6 @@
                     <thead>
                         <tr>
                             <th class="ps-4">Date</th>
-                            <th>Status</th>
                             <th>Category</th>
                             <th>Description</th>
                             <th class="text-end">Amount</th>
@@ -257,23 +256,16 @@
                         <tr>
                             <td class="ps-4 small text-muted text-nowrap">{{ t.date }}</td>
                             <td>
-                                <span class="badge {{ 'bg-success' if t.type == 'income' else 'bg-danger' }} bg-opacity-10 text-{{ 'success' if t.type == 'income' else 'danger' }} border border-{{ 'success' if t.type == 'income' else 'danger' }} border-opacity-25 rounded-pill" style="font-size: 0.65rem;">
-                                    {{ t.type|capitalize }}
-                                </span>
-                            </td>
-                            <td>
                                 <div class="d-flex align-items-center">
                                     <i class="fa-solid {{ (income_category_icons if t.type == 'income' else category_icons).get(t.category, 'fa-tag') }} text-muted me-2 x-small"></i>
-                                    <span class="small fw-medium text-truncate" style="max-width: 70px;">{{ t.category }}</span>
+                                    <span class="small fw-medium text-truncate" style="max-width: 80px;">{{ t.category }}</span>
                                 </div>
                             </td>
                             <td>
-                                <div class="fw-bold text-dark small text-truncate" style="max-width: 100px;">{{ t.item }}</div>
+                                <div class="fw-bold text-dark small text-truncate" style="max-width: 120px;">{{ t.item }}</div>
                             </td>
-                            <td class="text-end fw-bold text-dark pe-3 text-nowrap">
-                                <span class="{{ 'text-success' if t.type == 'income' else '' }}">
-                                    {{ '+' if t.type == 'income' else '-' }}${{ "%.2f"|format(t.amount) }}
-                                </span>
+                            <td class="text-end fw-bold {{ 'text-success' if t.type == 'income' else 'text-danger' }} pe-3 text-nowrap">
+                                {{ '+' if t.type == 'income' else '-' }}${{ "%.2f"|format(t.amount) }}
                             </td>
                             <td class="text-center pe-4">
                                 <div class="btn-group">
