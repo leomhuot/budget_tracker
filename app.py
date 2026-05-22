@@ -552,6 +552,10 @@ def index():
 
     all_transactions = budget_logic.get_transactions()
     savings_goals_logic.recalculate_saved_amounts(all_transactions) # Recalculate saved amounts for goals
+    
+    # Calculate total general savings for dashboard
+    total_general_savings = savings_goals_logic.get_general_savings_total(all_transactions)
+    
     return render_template('index.html', 
                            categories=current_expense_categories, 
                            transactions=all_transactions, 
@@ -559,6 +563,7 @@ def index():
                            income_categories=current_income_categories,
                            income_category_icons=current_income_category_icons,
                            savings_goals=savings_goals,
+                           total_general_savings=total_general_savings,
                            today_date=datetime.now().strftime('%Y-%m-%d'))
 
 @app.route('/transactions')
