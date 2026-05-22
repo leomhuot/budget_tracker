@@ -400,13 +400,38 @@
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            right: 45 // Increased padding to ensure labels aren't cut off
+                        }
+                    },
                     plugins: {
                         legend: { display: false },
-                        datalabels: { anchor: 'end', align: 'end', color: colors.textColor, font: { size: 10 }, formatter: (v) => '$' + Math.round(v) }
+                        datalabels: { 
+                            anchor: 'end', 
+                            align: 'end', 
+                            color: colors.textColor, 
+                            offset: 4,
+                            font: { size: 10, weight: 'bold' }, 
+                            formatter: (v) => '$' + Math.round(v).toLocaleString() 
+                        }
                     },
                     scales: {
-                        x: { display: false },
-                        y: { ticks: { color: colors.textColor, font: { size: 10 } }, grid: { display: false } }
+                        x: { 
+                            display: false,
+                            suggestedMax: Math.max(...itemData) * 1.15 // Add 15% head room for labels
+                        },
+                        y: { 
+                            ticks: { 
+                                color: colors.textColor, 
+                                font: { size: 10 },
+                                callback: function(value) {
+                                    const label = this.getLabelForValue(value);
+                                    return label.length > 15 ? label.substr(0, 15) + '...' : label;
+                                }
+                            }, 
+                            grid: { display: false } 
+                        }
                     }
                 },
                 plugins: [ChartDataLabels]
