@@ -690,14 +690,21 @@ def report():
             expense_categories_distribution[category] = expense_categories_distribution.get(category, 0) + t['amount']
 
     # Calculate top expenses by item for chart
-    top_expenses_by_item = {}
+    top_expenses_by_item_raw = {}
+    item_display_names = {}
     for t in transactions_to_paginate:
         if t['type'] == 'expense':
-            item = t.get('item', 'Other')
-            top_expenses_by_item[item] = top_expenses_by_item.get(item, 0) + t['amount']
+            item_raw = t.get('item', 'Other')
+            # Normalize: strip whitespace and convert to lowercase
+            item_key = item_raw.strip().lower()
+            top_expenses_by_item_raw[item_key] = top_expenses_by_item_raw.get(item_key, 0) + t['amount']
+            # Store the first encountered display name for this normalized key
+            if item_key not in item_display_names:
+                item_display_names[item_key] = item_raw.strip()
     
     # Sort and take top 10
-    top_expenses_by_item = dict(sorted(top_expenses_by_item.items(), key=lambda x: x[1], reverse=True)[:10])
+    top_expenses_by_item_sorted = sorted(top_expenses_by_item_raw.items(), key=lambda x: x[1], reverse=True)[:10]
+    top_expenses_by_item = {item_display_names[key]: val for key, val in top_expenses_by_item_sorted}
 
     if report_data and report_data['period'] == 'monthly':
         settings = settings_manager.get_settings()
