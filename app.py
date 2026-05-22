@@ -684,6 +684,16 @@ def report():
             category = t['category']
             expense_categories_distribution[category] = expense_categories_distribution.get(category, 0) + t['amount']
 
+    # Calculate top expenses by item for chart
+    top_expenses_by_item = {}
+    for t in transactions_to_paginate:
+        if t['type'] == 'expense':
+            item = t.get('item', 'Other')
+            top_expenses_by_item[item] = top_expenses_by_item.get(item, 0) + t['amount']
+    
+    # Sort and take top 10
+    top_expenses_by_item = dict(sorted(top_expenses_by_item.items(), key=lambda x: x[1], reverse=True)[:10])
+
     if report_data and report_data['period'] == 'monthly':
         settings = settings_manager.get_settings()
         report_data['total_budget'] = original_total_income
@@ -709,7 +719,8 @@ def report():
                            per_page=per_page,
                            total_pages=total_pages_in_period,
                            total_transactions=total_transactions_in_period,
-                           expense_categories_distribution=expense_categories_distribution)
+                           expense_categories_distribution=expense_categories_distribution,
+                           top_expenses_by_item=top_expenses_by_item)
 
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required

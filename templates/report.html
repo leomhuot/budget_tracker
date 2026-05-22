@@ -128,44 +128,52 @@
         {% endif %}
 
         {% if report %}
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-header">Period Income</div>
-                            <div class="card-body"><h2 class="card-title text-success">${{ "%.2f"|format(report.total_income) }}</h2></div>
-                        </div>
+        <div class="row g-3 mb-4">
+            <div class="col-md-4 col-lg-2">
+                <div class="card border-0 border-top border-4 border-success shadow-sm h-100">
+                    <div class="card-body text-center p-3">
+                        <div class="text-uppercase small fw-bold text-success mb-2"><i class="fa-solid fa-hand-holding-dollar me-1"></i> Income</div>
+                        <div class="h4 mb-0 fw-bold">${{ "%.2f"|format(report.total_income) }}</div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-header">Period Expense</div>
-                            <div class="card-body"><h2 class="card-title text-danger">${{ "%.2f"|format(displayed_total_expense) }}</h2></div>
-                        </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="card border-0 border-top border-4 border-danger shadow-sm h-100">
+                    <div class="card-body text-center p-3">
+                        <div class="text-uppercase small fw-bold text-danger mb-2"><i class="fa-solid fa-money-bill-transfer me-1"></i> Expense</div>
+                        <div class="h4 mb-0 fw-bold">${{ "%.2f"|format(displayed_total_expense) }}</div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-header">Period Balance</div>
-                            <div class="card-body"><h2 class="card-title text-info">${{ "%.2f"|format(report.balance) }}</h2></div>
-                        </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="card border-0 border-top border-4 border-info shadow-sm h-100">
+                    <div class="card-body text-center p-3">
+                        <div class="text-uppercase small fw-bold text-info mb-2"><i class="fa-solid fa-scale-balanced me-1"></i> Balance</div>
+                        <div class="h4 mb-0 fw-bold">${{ "%.2f"|format(report.balance) }}</div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-header">Total Savings</div>
-                            <div class="card-body"><h2 class="card-title text-primary">${{ "%.2f"|format(report.total_savings) }}</h2></div>
-                        </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="card border-0 border-top border-4 border-primary shadow-sm h-100">
+                    <div class="card-body text-center p-3">
+                        <div class="text-uppercase small fw-bold text-primary mb-2"><i class="fa-solid fa-piggy-bank me-1"></i> Total Savings</div>
+                        <div class="h4 mb-0 fw-bold">${{ "%.2f"|format(report.total_savings) }}</div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-header">Goal Savings</div>
-                            <div class="card-body"><h2 class="card-title text-success">${{ "%.2f"|format(report.total_goal_savings) }}</h2></div>
-                        </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="card border-0 border-top border-4 border-warning shadow-sm h-100">
+                    <div class="card-body text-center p-3">
+                        <div class="text-uppercase small fw-bold text-warning mb-2"><i class="fa-solid fa-bullseye me-1"></i> Goal Savings</div>
+                        <div class="h4 mb-0 fw-bold">${{ "%.2f"|format(report.total_goal_savings) }}</div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-header">General Savings</div>
-                            <div class="card-body"><h2 class="card-title text-info">${{ "%.2f"|format(report.total_general_savings) }}</h2></div>
-                        </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="card border-0 border-top border-4 border-secondary shadow-sm h-100">
+                    <div class="card-body text-center p-3">
+                        <div class="text-uppercase small fw-bold text-secondary mb-2"><i class="fa-solid fa-vault me-1"></i> Gen. Savings</div>
+                        <div class="h4 mb-0 fw-bold">${{ "%.2f"|format(report.total_general_savings) }}</div>
                     </div>
                 </div>
             </div>
@@ -233,37 +241,59 @@
         </div>
 
 
-        <div class="row">
-            <div class="col-md-6">
-                <!-- Chart Section -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header">Expense Breakdown</div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-center">
-                            <div style="width: 100%; max-width: 400px; height: 400px;">
-                                <canvas id="expensePieChart"></canvas>
+        <div class="row g-4">
+            <!-- Charts Section -->
+            <div class="col-lg-8">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-transparent border-0 py-3">
+                                <h5 class="card-title mb-0"><i class="fa-solid fa-chart-pie me-2 text-primary"></i>Expense Breakdown</h5>
+                            </div>
+                            <div class="card-body">
+                                <div style="height: 300px;">
+                                    <canvas id="expensePieChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-transparent border-0 py-3">
+                                <h5 class="card-title mb-0"><i class="fa-solid fa-ranking-star me-2 text-warning"></i>Top 10 Expenses by Item</h5>
+                            </div>
+                            <div class="card-body">
+                                <div style="height: 300px;">
+                                    <canvas id="topExpensesItemChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-transparent border-0 py-3">
+                                <h5 class="card-title mb-0"><i class="fa-solid fa-chart-column me-2 text-success"></i>Income vs Expense</h5>
+                            </div>
+                            <div class="card-body">
+                                <div style="height: 300px;">
+                                    <canvas id="incomeExpenseBarChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header">Income vs Expense</div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-center">
-                            <div style="width: 100%; max-width: 400px; height: 300px;">
-                                <canvas id="incomeExpenseBarChart"></canvas>
-                            </div>
-                        </div>
+            <!-- Income Breakdown Sidebar -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0 py-3">
+                        <h5 class="card-title mb-0"><i class="fa-solid fa-list-check me-2 text-info"></i>Income by Item</h5>
                     </div>
-                </div>
-
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header">Income Breakdown by Item</div>
-                    <div class="card-body">
+                    <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table">
-                                <thead>
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
                                     <tr>
                                         <th>Item</th>
                                         <th class="text-end">Amount</th>
@@ -273,13 +303,13 @@
                                     {% if report.income_breakdown_by_item %}
                                         {% for item, amount in report.income_breakdown_by_item.items() %}
                                             <tr>
-                                                <td>{{ item }}</td>
-                                                <td class="text-end text-success">${{ "%.2f"|format(amount) }}</td>
+                                                <td class="ps-3">{{ item }}</td>
+                                                <td class="text-end text-success pe-3">${{ "%.2f"|format(amount) }}</td>
                                             </tr>
                                         {% endfor %}
                                     {% else %}
                                         <tr>
-                                            <td colspan="2" class="text-center">No income data for this period.</td>
+                                            <td colspan="2" class="text-center py-4 text-muted">No income data for this period.</td>
                                         </tr>
                                     {% endif %}
                                 </tbody>
@@ -288,49 +318,60 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="col-md-6">
+        <!-- Transactions Section -->
+        <div class="row mt-4">
+            <div class="col-12">
                 {% if report and report.transactions %}
-                <h2 class="h4">Transactions in this Period</h2>
-                <div class="card shadow-sm mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h4 mb-0"><i class="fa-solid fa-receipt me-2"></i>Transactions in this Period</h2>
+                </div>
+                <div class="card shadow-sm border-0">
                     {% if displayed_transactions %}
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover mb-0 align-middle">
-                            <thead>
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-light">
                                 <tr>
-                                    <th scope="col">Date</th>
-                                    <th scope="col">Type</th>
-                                    <th scope="col">Category</th>
-                                    <th scope="col">Item</th>
-                                    <th scope="col">Description</th>
-                                    <th scope="col" class="text-end">Amount</th>
-                                    <th scope="col" class="text-center">Actions</th>
+                                    <th class="ps-3">Date</th>
+                                    <th>Type</th>
+                                    <th>Category</th>
+                                    <th>Item</th>
+                                    <th>Description</th>
+                                    <th class="text-end">Amount</th>
+                                    <th class="text-center pe-3">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for t in displayed_transactions %}
                                 <tr>
-                                    <td>{{ t.date }}</td>
-                                    <td>{{ t.type|capitalize }}</td>
+                                    <td class="ps-3">{{ t.date }}</td>
+                                    <td>
+                                        <span class="badge {{ 'bg-success-subtle text-success' if t.type == 'income' else 'bg-danger-subtle text-danger' }} rounded-pill px-3">
+                                            {{ t.type|capitalize }}
+                                        </span>
+                                    </td>
                                     <td>
                                         {% if t.type == 'income' %}
-                                            <i class="fa-solid {{ income_category_icons.get(t.category, income_category_icons._default) }} me-2"></i>{{ t.category|capitalize }}
+                                            <i class="fa-solid {{ income_category_icons.get(t.category, income_category_icons._default) }} me-2 text-muted"></i>{{ t.category|capitalize }}
                                         {% else %}
-                                            <i class="fa-solid {{ category_icons.get(t.category, category_icons._default) }} me-2"></i>{{ t.category|capitalize }}
+                                            <i class="fa-solid {{ category_icons.get(t.category, category_icons._default) }} me-2 text-muted"></i>{{ t.category|capitalize }}
                                         {% endif %}
                                     </td>
-                                    <td>{{ t.item }}</td>
-                                    <td>{{ t.description }}</td>
-                                    <td class="text-end {{ 'text-success' if t.type == 'income' else 'text-danger' }}">
+                                    <td class="fw-medium">{{ t.item }}</td>
+                                    <td class="text-muted small">{{ t.description }}</td>
+                                    <td class="text-end fw-bold {{ 'text-success' if t.type == 'income' else 'text-danger' }}">
                                         ${{ "%.2f"|format(t.amount) }}
                                     </td>
-                                    <td class="text-center action-buttons">
-                                        <a href="{{ url_for('edit', transaction_id=t.id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
-                                            <i class="fa-solid fa-pencil"></i>
-                                        </a>
-                                        <a href="{{ url_for('delete', transaction_id=t.id) }}" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this item?');">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </a>
+                                    <td class="text-center pe-3">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('edit', transaction_id=t.id) }}" class="btn btn-outline-primary" title="Edit">
+                                                <i class="fa-solid fa-pencil"></i>
+                                            </a>
+                                            <a href="{{ url_for('delete', transaction_id=t.id) }}" class="btn btn-outline-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this item?');">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -338,8 +379,9 @@
                         </table>
                     </div>
                     {% else %}
-                    <div class="card-body text-center">
-                        <p class="lead">No transactions found for this period.</p>
+                    <div class="card-body text-center py-5">
+                        <i class="fa-solid fa-magnifying-glass fa-3x text-muted mb-3"></i>
+                        <p class="lead text-muted">No transactions found for this period.</p>
                     </div>
                     {% endif %}
                 </div>
@@ -379,8 +421,9 @@
                 </div>
                 {% elif not report.transactions and not report.total_income and not report.total_expense %}
                 <div class="card shadow-sm mb-4">
-                    <div class="card-body text-center">
-                        <p class="lead">No transactions found for this period.</p>
+                    <div class="card-body text-center py-5">
+                        <i class="fa-solid fa-calendar-xmark fa-3x text-muted mb-3"></i>
+                        <p class="lead text-muted">No transactions found for this period.</p>
                     </div>
                 </div>
                 {% endif %}
@@ -390,87 +433,32 @@
     </div>
 
 </div>
-
-<!-- New Hidden div for structured PDF content -->
-<div id="structured-pdf-content" style="display: none; position: absolute; left: -9999px;">
-    <div id="pdf-summary-page" style="width: 190mm;">
-        <div style="padding: 10mm;">
-            <h1 style="text-align: center; margin-bottom: 5mm; font-size: 20px;">Budget Report</h1>
-            <h3 style="text-align: center; margin-bottom: 5mm; font-size: 16px;">Report for: {{ report.period|capitalize }} ({{ report.start_date }} to {{ report.end_date }})</h3>
-
-            <div style="display: flex; justify-content: space-around; margin-bottom: 10mm;">
-                <div style="text-align: center; width: 30%;">
-                    <h4 style="margin-bottom: 5px;">Period Income</h4>
-                    <p style="color: green; font-size: 1.2em; font-weight: bold;">$<span id="pdf-period-income"></span></p>
-                </div>
-                <div style="text-align: center; width: 30%;">
-                    <h4 style="margin-bottom: 5px;">Period Expense</h4>
-                    <p style="color: red; font-size: 1.2em; font-weight: bold;">$<span id="pdf-period-expense"></span></p>
-                </div>
-                <div style="text-align: center; width: 30%;">
-                    <h4 style="margin-bottom: 5px;">Period Balance</h4>
-                    <p style="color: blue; font-size: 1.2em; font-weight: bold;">$<span id="pdf-period-balance"></span></p>
-                </div>
-            </div>
-            <div style="display: flex; justify-content: space-around; margin-bottom: 10mm;">
-                <div style="text-align: center; width: 30%;">
-                    <h4 style="margin-bottom: 5px;">Goal Savings</h4>
-                    <p style="color: purple; font-size: 1.2em; font-weight: bold;">$<span id="pdf-goal-savings"></span></p>
-                </div>
-                <div style="text-align: center; width: 30%;">
-                    <h4 style="margin-bottom: 5px;">General Savings</h4>
-                    <p style="color: orange; font-size: 1.2em; font-weight: bold;">$<span id="pdf-general-savings"></span></p>
-                </div>
-            </div>
-
-            {% if report and report.period == 'monthly' %}
-            <div style="margin-top: 10mm; text-align: center; border-top: 1px solid #eee; padding-top: 5mm;">
-                <h3 style="margin-bottom: 10mm;">Monthly Budget Goals</h3>
-                <p style="margin-bottom: 5px;">Total Budget: <span style="font-weight: bold;">$<span id="pdf-total-budget"></span></span></p>
-                <p style="margin-bottom: 5px;">Savings Goal: <span style="font-weight: bold;">$<span id="pdf-savings-goal"></span></span></p>
-                <p>Remaining to Spend: <span id="pdf-remaining-spending" style="font-weight: bold;"></span></p>
-            </div>
-            {% endif %}
-
-            <div id="pdf-pie-chart-placeholder" style="text-align: center; margin-top: 5mm;">
-                <!-- Pie chart image will be injected here by JS -->
-            </div>
-            <div id="pdf-bar-chart-placeholder" style="text-align: center; margin-top: 5mm;">
-                <!-- Bar chart image will be injected here by JS -->
-            </div>
-        </div>
-    </div>
-
-    <div id="pdf-transactions-page" style="width: 190mm; page-break-before: always;">
-        <h2>All Transactions Details</h2>
-        <!-- Transactions table will be generated here by jspdf.autoTable -->
-    </div>
-</div>
 {% endblock %}
 
 {% block scripts_extra %}
 <script>
-    let expensePieChart; // To hold the pie chart instance
-    let incomeExpenseBarChart; // To hold the bar chart instance
+    let expensePieChart;
+    let topExpensesItemChart;
+    let incomeExpenseBarChart;
     let pieChartLabels = [];
     let pieChartData = [];
-    let remainingSpending; // Declare globally
+    let itemLabels = [];
+    let itemData = [];
+    let remainingSpending;
 
     document.addEventListener('DOMContentLoaded', function() {
         // Data for Pie Chart
         const expenseCategories = JSON.parse('{{ expense_categories_distribution | tojson | safe }}');
-        const sortedExpenseCategories = Object.entries(expenseCategories)
-            .sort(([, amountA], [, amountB]) => amountB - amountA)
-            .slice(0, 10); // Get top 10
-
-        pieChartLabels = sortedExpenseCategories.map(([category, amount]) => `${category}: $${amount.toFixed(2)}`);
-        pieChartData = sortedExpenseCategories.map(([, amount]) => amount);
+        const sortedCategories = Object.entries(expenseCategories)
+            .sort(([, a], [, b]) => b - a);
         
-        const pieChartColors = [
-            '#0d6efd', '#6610f2', '#6f42c1', '#d63384', '#dc3545',
-            '#fd7e14', '#ffc107', '#198754', '#20c997', '#0dcaf0',
-            '#6c757d', '#adb5bd', '#6f42c1'
-        ];
+        pieChartLabels = sortedCategories.map(([cat, amt]) => cat);
+        pieChartData = sortedCategories.map(([, amt]) => amt);
+
+        // Data for Top Items Chart
+        const topExpensesByItem = JSON.parse('{{ top_expenses_by_item | tojson | safe }}');
+        itemLabels = Object.keys(topExpensesByItem);
+        itemData = Object.values(topExpensesByItem);
 
         // Data for Bar Chart
         const totalIncome = {{ report.total_income | default(0) | tojson }};
@@ -481,303 +469,236 @@
             const currentTheme = localStorage.getItem('theme') || 'light';
             return {
                 textColor: currentTheme === 'dark' ? '#CCCCCC' : '#333333',
-                dataLabelsColor: currentTheme === 'dark' ? '#FFFFFF' : '#FFFFFF'
+                gridColor: currentTheme === 'dark' ? '#444444' : '#EEEEEE',
+                dataLabelsColor: '#FFFFFF'
             };
         }
 
+        const chartColors = [
+            '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+            '#fd7e14', '#6610f2', '#6f42c1', '#d63384', '#20c997'
+        ];
+
         function createOrUpdatePieChart() {
-            if (expensePieChart) {
-                expensePieChart.destroy();
-            }
-
-            const pieCtx = document.getElementById('expensePieChart');
-            if (!pieCtx) return;
-
-            if (pieChartLabels.length > 0) {
-                const colors = getChartThemeColors();
-                const legendPosition = window.innerWidth < 768 ? 'bottom' : 'right';
-
-                expensePieChart = new Chart(pieCtx.getContext('2d'), {
-                    type: 'pie',
-                    data: {
-                        labels: pieChartLabels,
-                        datasets: [{
-                            data: pieChartData,
-                            backgroundColor: pieChartColors,
-                            hoverOffset: 4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: legendPosition, labels: { color: colors.textColor } },
-                            title: { display: true, text: 'Expense Breakdown by Category', color: colors.textColor },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const label = context.label || '';
-                                        const value = context.raw || 0;
-                                        const total = context.chart.getDatasetMeta(0).total;
-                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : 0;
-                                        return `${label}: $${value.toFixed(2)} (${percentage}%)`;
-                                    }
-                                }
-                            },
-                            datalabels: {
-                                formatter: (value, ctx) => {
-                                    const total = ctx.chart.getDatasetMeta(0).total;
-                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(2) + '%' : '0%';
-                                    return percentage;
-                                },
-                                color: colors.dataLabelsColor,
-                                display: function(context) {
-                                    const value = context.dataset.data[context.dataIndex];
-                                    const total = context.chart.getDatasetMeta(0).total;
-                                    return total > 0 && (value / total) * 100 > 5;
-                                }
-                            }
-                        }
-                    },
-                    plugins: [ChartDataLabels]
-                });
-            } else {
-                pieCtx.style.display = 'none';
-                const chartDiv = pieCtx.closest('.card-body');
-                if (!chartDiv.querySelector('.no-data-message')) {
-                    const noDataMessage = document.createElement('p');
-                    noDataMessage.className = 'text-center text-muted no-data-message';
-                    noDataMessage.textContent = 'No expense data to display for this period.';
-                    chartDiv.appendChild(noDataMessage);
-                }
-            }
-        }
-
-        function createOrUpdateBarChart() {
-            if (incomeExpenseBarChart) {
-                incomeExpenseBarChart.destroy();
-            }
-
-            const barCtx = document.getElementById('incomeExpenseBarChart');
-            if (!barCtx) return;
+            if (expensePieChart) expensePieChart.destroy();
+            const ctx = document.getElementById('expensePieChart');
+            if (!ctx || pieChartLabels.length === 0) return;
 
             const colors = getChartThemeColors();
-            incomeExpenseBarChart = new Chart(barCtx.getContext('2d'), {
-                type: 'bar',
+            expensePieChart = new Chart(ctx.getContext('2d'), {
+                type: 'doughnut',
                 data: {
-                    labels: ['Income', 'Expense'],
+                    labels: pieChartLabels,
                     datasets: [{
-                        label: 'Amount ($)',
-                        data: [totalIncome, displayedTotalExpense],
-                        backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 99, 132, 0.6)'],
-                        borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
-                        borderWidth: 1
+                        data: pieChartData,
+                        backgroundColor: chartColors,
+                        hoverOffset: 10,
+                        borderWidth: 2,
+                        borderColor: 'transparent'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                                            plugins: {
-                                                legend: { display: false },
-                                                title: { display: false, text: 'Income vs Expense', color: colors.textColor },                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `${context.dataset.label || ''}: $${context.raw.toFixed(2)}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            ticks: { color: colors.textColor },
-                            title: {
-                                display: true,
-                                text: 'Amount ($)',
-                                color: colors.textColor // Use theme color for axis title
-                            }
-                        },
-                        x: { 
-                            ticks: { color: colors.textColor },
-                            title: {
-                                display: true,
-                                text: 'Type', // Updated X-axis title
-                                color: colors.textColor // Use theme color for axis title
-                            }
+                    cutout: '60%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: colors.textColor, usePointStyle: true, padding: 20 } },
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                const sum = ctx.chart.getDatasetMeta(0).total;
+                                return (value * 100 / sum).toFixed(0) + "%";
+                            },
+                            color: '#fff',
+                            font: { weight: 'bold' },
+                            display: (ctx) => (ctx.dataset.data[ctx.dataIndex] * 100 / ctx.chart.getDatasetMeta(0).total) > 5
                         }
                     }
-                }
+                },
+                plugins: [ChartDataLabels]
             });
         }
 
-        // Initial chart creation
+        function createOrUpdateTopItemChart() {
+            if (topExpensesItemChart) topExpensesItemChart.destroy();
+            const ctx = document.getElementById('topExpensesItemChart');
+            if (!ctx || itemLabels.length === 0) return;
+
+            const colors = getChartThemeColors();
+            topExpensesItemChart = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: itemLabels,
+                    datasets: [{
+                        label: 'Amount ($)',
+                        data: itemData,
+                        backgroundColor: 'rgba(78, 115, 223, 0.8)',
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'end',
+                            color: colors.textColor,
+                            formatter: (val) => '$' + val.toFixed(0)
+                        }
+                    },
+                    scales: {
+                        x: { display: false },
+                        y: { ticks: { color: colors.textColor, font: { size: 11 } }, grid: { display: false } }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        function createOrUpdateBarChart() {
+            if (incomeExpenseBarChart) incomeExpenseBarChart.destroy();
+            const ctx = document.getElementById('incomeExpenseBarChart');
+            if (!ctx) return;
+
+            const colors = getChartThemeColors();
+            incomeExpenseBarChart = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Income', 'Expense'],
+                    datasets: [{
+                        data: [totalIncome, displayedTotalExpense],
+                        backgroundColor: ['#1cc88a', '#e74a3b'],
+                        borderRadius: 8,
+                        barThickness: 50
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: colors.textColor,
+                            formatter: (val) => '$' + val.toFixed(2)
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } },
+                        x: { grid: { display: false }, ticks: { color: colors.textColor, font: { weight: 'bold' } } }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
         createOrUpdatePieChart();
+        createOrUpdateTopItemChart();
         createOrUpdateBarChart();
 
-        // --- Event Listeners ---
-        let resizeTimeout;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                createOrUpdatePieChart();
-                createOrUpdateBarChart();
-            }, 250);
+        window.addEventListener('resize', () => {
+            createOrUpdatePieChart();
+            createOrUpdateTopItemChart();
+            createOrUpdateBarChart();
         });
 
         const themeToggle = document.getElementById('theme-toggle');
         if (themeToggle) {
-            themeToggle.addEventListener('click', function() {
+            themeToggle.addEventListener('click', () => {
                 setTimeout(() => {
                     createOrUpdatePieChart();
+                    createOrUpdateTopItemChart();
                     createOrUpdateBarChart();
-                }, 100);
+                }, 150);
             });
         }
     });
 
-    // --- PDF Export Functionality ---
     window.exportReportToPdf = async function() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('p', 'mm', 'a4');
-        const margin = 10;
-        const pdfWidth = doc.internal.pageSize.getWidth(); // Declare pdfWidth here
+        const pdfWidth = doc.internal.pageSize.getWidth();
+        const margin = 15;
         const contentWidth = pdfWidth - 2 * margin;
 
-        // Populate hidden PDF fields
-        document.getElementById('pdf-period-income').innerText = ({{ report.total_income | default(0) | tojson }}).toFixed(2);
-        document.getElementById('pdf-period-expense').innerText = ({{ displayed_total_expense | default(0) | tojson }}).toFixed(2);
-        document.getElementById('pdf-period-balance').innerText = ({{ report.balance | default(0) | tojson }}).toFixed(2);
-        document.getElementById('pdf-goal-savings').innerText = ({{ report.total_goal_savings | default(0) | tojson }}).toFixed(2);
-        document.getElementById('pdf-general-savings').innerText = ({{ report.total_general_savings | default(0) | tojson }}).toFixed(2);
-        {% if report and report.period == 'monthly' %}
-        document.getElementById('pdf-total-budget').innerText = ({{ report.total_budget | default(0) | tojson }}).toFixed(2);
-        document.getElementById('pdf-savings-goal').innerText = ({{ report.savings_goal | default(0) | tojson }}).toFixed(2);
-        const remainingSpendingEl = document.getElementById('pdf-remaining-spending');
-        remainingSpendingEl.innerText = `$${remainingSpending.toFixed(2)}`;
-        remainingSpendingEl.style.color = remainingSpending >= 0 ? 'green' : 'red';
-        {% endif %}
+        // Title
+        doc.setFontSize(22);
+        doc.setTextColor(40, 40, 40);
+        doc.text("Financial Report", pdfWidth / 2, 20, { align: 'center' });
         
-        
-        const structuredPdfContent = document.getElementById('structured-pdf-content');
-        const mainReportContent = document.getElementById('report-content');
-        mainReportContent.style.display = 'none';
-        structuredPdfContent.style.display = 'block';
-
-        // Capture pie chart image
-        const pieChartCanvas = document.getElementById('expensePieChart');
-        let pieChartImgData = '';
-        if (pieChartCanvas && pieChartLabels.length > 0) {
-            pieChartImgData = pieChartCanvas.toDataURL('image/png', 1.0); // Quality 1.0
-            // No longer inject into hidden HTML, use directly for PDF
-        }
-
-        // Capture bar chart image
-        const barChartCanvas = document.getElementById('incomeExpenseBarChart');
-        let barChartImgData = '';
-        if (barChartCanvas) {
-            barChartImgData = barChartCanvas.toDataURL('image/png', 1.0); // Quality 1.0
-            // No longer inject into hidden HTML, use directly for PDF
-        }
-
-        // Add main title and date range
-        doc.setFontSize(20);
-        doc.text("Budget Report", pdfWidth / 2, margin + 10, { align: 'center' });
-        doc.setFontSize(16);
-        doc.text(`Report for: {{ report.period|capitalize }} ({{ report.start_date }} to {{ report.end_date }})`, pdfWidth / 2, margin + 20, { align: 'center' });
-        let yPos = margin + 30; // Starting Y position after title and subtitle
-        
-        // Add Period Income, Expense, Balance
         doc.setFontSize(12);
-        doc.text("Period Income", pdfWidth * 0.25, yPos, { align: 'center' });
-        doc.setTextColor(0, 128, 0); // Green
-        doc.text(`$${({{ report.total_income | default(0) | tojson }}).toFixed(2)}`, pdfWidth * 0.25, yPos + 7, { align: 'center' });
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Period: {{ report.period|capitalize }} ({{ report.start_date }} to {{ report.end_date }})`, pdfWidth / 2, 28, { align: 'center' });
+
+        // Stats Box
+        let y = 40;
+        doc.setDrawColor(230, 230, 230);
+        doc.setFillColor(248, 249, 250);
+        doc.roundedRect(margin, y, contentWidth, 35, 3, 3, 'FD');
         
-        doc.setTextColor(0, 0, 0); // Black
-        doc.text("Period Expense", pdfWidth * 0.5, yPos, { align: 'center' });
-        doc.setTextColor(255, 0, 0); // Red
-        doc.text(`$${({{ report.total_expense | default(0) | tojson }}).toFixed(2)}`, pdfWidth * 0.5, yPos + 7, { align: 'center' });
+        doc.setFontSize(10);
+        doc.setTextColor(80, 80, 80);
+        doc.text("Total Income", margin + 10, y + 10);
+        doc.text("Total Expense", margin + contentWidth/3 + 5, y + 10);
+        doc.text("Net Balance", margin + 2*contentWidth/3, y + 10);
 
-        doc.setTextColor(0, 0, 0); // Black
-        doc.text("Period Balance", pdfWidth * 0.75, yPos, { align: 'center' });
-        doc.setTextColor(0, 0, 255); // Blue
-        doc.text(`$${({{ report.balance | default(0) | tojson }}).toFixed(2)}`, pdfWidth * 0.75, yPos + 7, { align: 'center' });
-        
-        yPos += 15; // Reduced space for next section
+        doc.setFontSize(14);
+        doc.setTextColor(28, 200, 138); // Green
+        doc.text(`$${({{ report.total_income }}).toFixed(2)}`, margin + 10, y + 20);
+        doc.setTextColor(231, 74, 59); // Red
+        doc.text(`$${({{ displayed_total_expense }}).toFixed(2)}`, margin + contentWidth/3 + 5, y + 20);
+        doc.setTextColor(78, 115, 223); // Blue
+        doc.text(`$${({{ report.balance }}).toFixed(2)}`, margin + 2*contentWidth/3, y + 20);
 
-        // Add Goal Savings and General Savings
-        doc.setTextColor(0, 0, 0); // Black
-        doc.text("Goal Savings", pdfWidth * 0.25, yPos, { align: 'center' });
-        doc.setTextColor(128, 0, 128); // Purple
-        doc.text(`$${({{ report.total_goal_savings | default(0) | tojson }}).toFixed(2)}`, pdfWidth * 0.25, yPos + 7, { align: 'center' });
+        // Charts
+        y += 50;
+        const pieCanvas = document.getElementById('expensePieChart');
+        const topCanvas = document.getElementById('topExpensesItemChart');
+        const barCanvas = document.getElementById('incomeExpenseBarChart');
 
-        doc.setTextColor(0, 0, 0); // Black
-        doc.text("General Savings", pdfWidth * 0.5, yPos, { align: 'center' });
-        doc.setTextColor(255, 165, 0); // Orange
-        doc.text(`$${({{ report.total_general_savings | default(0) | tojson }}).toFixed(2)}`, pdfWidth * 0.5, yPos + 7, { align: 'center' });
-
-        yPos += 15; // Reduced space for next section
-
-        {% if report and report.period == 'monthly' %}
-        yPos += 5; // Reduced space
-        doc.setTextColor(0, 0, 0);
-        doc.text("Monthly Budget Goals", pdfWidth / 2, yPos, { align: 'center' });
-        yPos += 7;
-        doc.text(`Total Budget: $${({{ report.total_budget | default(0) | tojson }}).toFixed(2)}`, pdfWidth / 2, yPos, { align: 'center' });
-        yPos += 7;
-        doc.text(`Savings Goal: $${({{ report.savings_goal | default(0) | tojson }}).toFixed(2)}`, pdfWidth / 2, yPos, { align: 'center' });
-        yPos += 7;
-        doc.setTextColor(remainingSpending >= 0 ? 0 : 255, remainingSpending >= 0 ? 128 : 0, 0);
-        doc.text(`Remaining to Spend: $${remainingSpending.toFixed(2)}`, pdfWidth / 2, yPos, { align: 'center' });
-        doc.setTextColor(0, 0, 0); // Reset color
-        yPos += 7; // Reduced space
-        {% endif %}
-
-        // Add Bar Chart
-        if (barChartImgData) {
-            const barChartWidth = contentWidth * 0.65; // 65% of content width
-            const barChartHeight = barChartWidth * (300 / 400); // Maintain aspect ratio (original was 400x300)
-            doc.text("Income vs Expense", pdfWidth / 2, yPos, { align: 'center' });
-            yPos += 5;
-            doc.addImage(barChartImgData, 'PNG', pdfWidth / 2 - barChartWidth / 2, yPos, barChartWidth, barChartHeight);
-            yPos += barChartHeight + 5; // Reduced space after bar chart
+        if (pieCanvas) {
+            doc.setFontSize(12);
+            doc.setTextColor(40, 40, 40);
+            doc.text("Expense by Category", margin, y - 5);
+            doc.addImage(pieCanvas.toDataURL('image/png'), 'PNG', margin, y, contentWidth/2 - 5, 60);
         }
 
-        // Add Pie Chart
-        if (pieChartImgData) {
-            const pieChartWidth = contentWidth * 0.65; // 65% of content width
-            const pieChartHeight = pieChartWidth; // Assuming square aspect ratio for pie chart
-
-            yPos += 5;
-            doc.addImage(pieChartImgData, 'PNG', pdfWidth / 2 - pieChartWidth / 2, yPos, pieChartWidth, pieChartHeight);
-            yPos += pieChartHeight + 5; // Reduced space after pie chart
+        if (topCanvas) {
+            doc.text("Top 10 Expenses", margin + contentWidth/2 + 5, y - 5);
+            doc.addImage(topCanvas.toDataURL('image/png'), 'PNG', margin + contentWidth/2 + 5, y, contentWidth/2 - 5, 60);
         }
 
-        // Add Transactions Table
+        y += 80;
+        if (barCanvas) {
+            doc.text("Income vs Expense Comparison", margin, y - 5);
+            doc.addImage(barCanvas.toDataURL('image/png'), 'PNG', margin, y, contentWidth, 50);
+        }
+
+        // Transactions Table
         doc.addPage();
-        doc.text("All Transactions Details", margin, margin);
-        const transactionsData = [
+        doc.setFontSize(14);
+        doc.text("Transaction Details", margin, 20);
+        
+        const rows = [
             {% for t in report.transactions %}
-            ["{{ t.date }}", "{{ t.type|capitalize }}", "{{ t.category|capitalize }}", "{{ t.item | replace('"', '""') }}", "{{ t.description | replace('"', '""') }}", "$ {{ "%.2f"|format(t.amount) }}"],
+            ["{{ t.date }}", "{{ t.type|capitalize }}", "{{ t.category|capitalize }}", "{{ t.item }}", "$ {{ '%.2f'|format(t.amount) }}"],
             {% endfor %}
         ];
-        
-        if (transactionsData.length > 0) {
-            doc.autoTable({
-                startY: margin + 10,
-                head: [['Date', 'Type', 'Category', 'Item', 'Description', 'Amount']],
-                body: transactionsData,
-                theme: 'striped',
-                headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0] },
-                styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
-                columnStyles: { 5: { halign: 'right' } }
-            });
-        } else {
-            doc.text("No transactions found for this period.", pdfWidth / 2, margin + 20, { align: 'center' });
-        }
 
-        structuredPdfContent.style.display = 'none';
-        mainReportContent.style.display = 'block';
-        doc.save('budget_report.pdf');
+        doc.autoTable({
+            startY: 25,
+            head: [['Date', 'Type', 'Category', 'Item', 'Amount']],
+            body: rows,
+            theme: 'striped',
+            headStyles: { fillColor: [78, 115, 223] },
+            styles: { fontSize: 8 },
+            columnStyles: { 4: { halign: 'right' } }
+        });
+
+        doc.save(`Budget_Report_{{ report.period }}.pdf`);
     };
 </script>
 {% endblock %}
