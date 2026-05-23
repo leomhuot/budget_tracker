@@ -261,7 +261,7 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="fw-bold text-dark x-small text-truncate" style="min-width: 150px;">{{ t.item }}</div>
+                                <div class="fw-bold text-dark x-small text-truncate">{{ t.item }}</div>
                             </td>
                             <td class="text-end fw-bold {{ 'text-success' if t.type == 'income' else 'text-danger' }} pe-3 text-nowrap x-small">
                                 {{ '+' if t.type == 'income' else '-' }}${{ "%.2f"|format(t.amount) }}
