@@ -253,17 +253,17 @@
                     <tbody>
                         {% for t in displayed_transactions %}
                         <tr>
-                            <td class="ps-4 small text-muted text-nowrap">{{ t.date }}</td>
+                            <td class="ps-4 x-small text-muted text-nowrap">{{ t.date }}</td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <i class="fa-solid {{ (income_category_icons if t.type == 'income' else category_icons).get(t.category, 'fa-tag') }} text-muted me-2 x-small"></i>
-                                    <span class="small fw-medium text-truncate" style="max-width: 80px;">{{ t.category }}</span>
+                                    <span class="x-small fw-medium text-truncate">{{ t.category }}</span>
                                 </div>
                             </td>
                             <td>
-                                <div class="fw-bold text-dark small text-truncate" style="max-width: 120px;">{{ t.item }}</div>
+                                <div class="fw-bold text-dark x-small text-truncate">{{ t.item }}</div>
                             </td>
-                            <td class="text-end fw-bold {{ 'text-success' if t.type == 'income' else 'text-danger' }} pe-3 text-nowrap">
+                            <td class="text-end fw-bold {{ 'text-success' if t.type == 'income' else 'text-danger' }} pe-3 text-nowrap x-small">
                                 {{ '+' if t.type == 'income' else '-' }}${{ "%.2f"|format(t.amount) }}
                             </td>
                             <td class="text-center pe-4">
