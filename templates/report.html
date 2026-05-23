@@ -243,7 +243,7 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead>
                         <tr>
-                            <th class="ps-4">Date</th>
+                            <th class="ps-4" style="width: 80px;">Date</th>
                             <th>Category</th>
                             <th>Description</th>
                             <th class="text-end">Amount</th>
@@ -253,7 +253,7 @@
                     <tbody>
                         {% for t in displayed_transactions %}
                         <tr>
-                            <td class="ps-4 x-small text-muted text-nowrap">{{ t.date }}</td>
+                            <td class="ps-4 x-small text-muted text-nowrap" style="width: 80px;">{{ t.date }}</td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <i class="fa-solid {{ (income_category_icons if t.type == 'income' else category_icons).get(t.category, 'fa-tag') }} text-muted me-2 x-small"></i>
