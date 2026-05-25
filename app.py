@@ -72,6 +72,10 @@ def send_sendgrid_email(recipient_email, subject, body_text):
             else:
                 print(f"ERROR: SendGrid API returned status {response.status}")
                 return False
+    except urllib.error.HTTPError as e:
+        error_content = e.read().decode('utf-8')
+        print(f"ERROR: SendGrid API HTTP Error {e.code}: {error_content}")
+        return False
     except Exception as e:
         print(f"ERROR: Failed to send email via SendGrid API: {e}")
         return False
@@ -397,20 +401,13 @@ def forgot_password():
             body = f'To reset your password, visit the following link: {reset_url}\n\n' \
                    f'If you did not request a password reset, please ignore this email.'
             
-            # Try sending via Web API first (more reliable on Render)
+            # Try sending via Web API (Standard for Render)
             success = send_sendgrid_email(user.email, subject, body)
             
             if success:
                 flash('A password reset link has been sent to your email address.', 'info')
             else:
-                # Fallback to SMTP if API fails
-                try:
-                    msg = Message(subject, sender=app.config['MAIL_DEFAULT_SENDER'], recipients=[user.email])
-                    msg.body = body
-                    mail.send(msg)
-                    flash('A password reset link has been sent to your email address (via SMTP).', 'info')
-                except Exception as e:
-                    flash(f'Error sending email: {e}. Please check your mail server configuration.', 'danger')
+                flash('Unable to send reset email at this time. Please contact support.', 'danger')
             return redirect(url_for('login'))
         else:
             flash('Username or email not found, or no email associated with this account.', 'danger')
