@@ -6,9 +6,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
 import os # Added os import
-import json
-import urllib.request
-import urllib.error
 from functools import wraps # Added wraps import
 import pyotp # Added pyotp import
 import budget as budget_logic
@@ -43,42 +40,6 @@ with app.app_context():
 
 mail = Mail(app)
 s = URLSafeTimedSerializer(app.secret_key)
-
-def send_sendgrid_email(recipient_email, subject, body_text):
-    """Sends an email using SendGrid's Web API (v3) as an alternative to SMTP."""
-    api_key = os.environ.get('MAIL_PASSWORD')
-    sender_email = os.environ.get('MAIL_DEFAULT_SENDER')
-    
-    if not api_key or not sender_email:
-        print("ERROR: SendGrid API Key or Sender Email is missing.")
-        return False
-
-    url = "https://api.sendgrid.com/v3/mail/send"
-    payload = {
-        "personalizations": [{"to": [{"email": recipient_email}]}],
-        "from": {"email": sender_email},
-        "subject": subject,
-        "content": [{"type": "text/plain", "value": body_text}]
-    }
-
-    req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), method='POST')
-    req.add_header('Authorization', f'Bearer {api_key}')
-    req.add_header('Content-Type', 'application/json')
-
-    try:
-        with urllib.request.urlopen(req, timeout=10) as response:
-            if response.status in [200, 202]:
-                return True
-            else:
-                print(f"ERROR: SendGrid API returned status {response.status}")
-                return False
-    except urllib.error.HTTPError as e:
-        error_content = e.read().decode('utf-8')
-        print(f"ERROR: SendGrid API HTTP Error {e.code}: {error_content}")
-        return False
-    except Exception as e:
-        print(f"ERROR: Failed to send email via SendGrid API: {e}")
-        return False
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -397,17 +358,14 @@ def forgot_password():
         if user and user.email:
             token = s.dumps(user.id, salt='password-reset-salt')
             reset_url = url_for('reset_password', token=token, _external=True)
-            subject = 'Password Reset Request'
-            body = f'To reset your password, visit the following link: {reset_url}\n\n' \
-                   f'If you did not request a password reset, please ignore this email.'
-            
-            # Try sending via Web API (Standard for Render)
-            success = send_sendgrid_email(user.email, subject, body)
-            
-            if success:
+            msg = Message('Password Reset Request', sender=app.config['MAIL_DEFAULT_SENDER'], recipients=[user.email])
+            msg.body = f'To reset your password, visit the following link: {reset_url}\n\n' \
+                       f'If you did not request a password reset, please ignore this email.'
+            try:
+                mail.send(msg)
                 flash('A password reset link has been sent to your email address.', 'info')
-            else:
-                flash('Unable to send reset email at this time. Please contact support.', 'danger')
+            except Exception as e:
+                flash(f'Error sending email: {e}. Please check your mail server configuration.', 'danger')
             return redirect(url_for('login'))
         else:
             flash('Username or email not found, or no email associated with this account.', 'danger')
