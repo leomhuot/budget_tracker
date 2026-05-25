@@ -521,17 +521,16 @@ def register():
                         admin_emails = [row[0] for row in admin_cur.fetchall()]
                     
                     if admin_emails:
-                        msg = Message(
-                            'New User Registration - Awaiting Approval',
-                            sender=app.config['MAIL_DEFAULT_SENDER'],
-                            recipients=admin_emails
-                        )
-                        msg.body = (f"A new user, '{username}', has registered for Budget Tracker.\n"
-                                    f"Please log in to the admin panel to approve or reject their account.\n\n"
-                                    f"User Details:\n"
-                                    f"Username: {username}\n"
-                                    f"Email: {email}\n")
-                        mail.send(msg)
+                        subject = 'New User Registration - Awaiting Approval'
+                        body = (f"A new user, '{username}', has registered for Budget Tracker.\n"
+                                f"Please log in to the admin panel to approve or reject their account.\n\n"
+                                f"User Details:\n"
+                                f"Username: {username}\n"
+                                f"Email: {email}\n")
+                        
+                        # Use Brevo Web API for registration notifications
+                        for admin_email in admin_emails:
+                            send_brevo_email(admin_email, subject, body)
                 except Exception as e:
                     # Log the error but don't block the user's registration
                     print(f"Error sending admin notification email: {e}")
@@ -1117,6 +1116,7 @@ def edit(transaction_id):
     app_settings = settings_manager.get_settings()
     current_categories = app_settings['expense_categories']
     current_category_icons = app_settings['category_icons']
+    current_income_categories = app_settings['income_categories']
     savings_goals = savings_goals_logic.get_savings_goals()
 
     transaction = budget_logic.get_transaction(transaction_id)
@@ -1165,7 +1165,9 @@ def edit(transaction_id):
         return redirect(url_for('transactions'))
         
     return render_template('edit.html', transaction=transaction, categories=current_categories, 
-                           category_icons=current_category_icons, savings_goals=savings_goals)
+                           category_icons=current_category_icons, 
+                           income_categories=current_income_categories,
+                           savings_goals=savings_goals)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

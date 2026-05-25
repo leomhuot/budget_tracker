@@ -39,7 +39,6 @@
                     <label for="category" class="form-label">Category:</label>
                     <select id="category" name="category" class="form-select" onchange="toggleSavingsGoal()">
                         {% if transaction.type == 'income' %}
-                            <option value="payroll" {% if transaction.category == 'payroll' %}selected{% endif %}>Payroll</option>
                             {% for category in income_categories %}
                                 <option value="{{ category }}" {% if transaction.category == category %}selected{% endif %}>{{ category }}</option>
                             {% endfor %}
