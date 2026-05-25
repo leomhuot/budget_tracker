@@ -96,7 +96,7 @@ def init_db():
     try:
         with conn.cursor() as cur:
             print("DEBUG: Cursor obtained. Creating tables...")
-            # User Table
+            # Execute all table creations in one go to minimize round-trips to Singapore
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS users (
                     id SERIAL PRIMARY KEY,
@@ -107,23 +107,17 @@ def init_db():
                     totp_secret TEXT,
                     approved BOOLEAN DEFAULT FALSE NOT NULL
                 );
-            """)
-            print("DEBUG: Table 'users' creation statement executed.")
-            # Savings Goals Table
-            cur.execute("""
+                
                 CREATE TABLE IF NOT EXISTS savings_goals (
                     id SERIAL PRIMARY KEY,
                     name TEXT NOT NULL,
                     target_amount NUMERIC NOT NULL,
                     saved_amount NUMERIC DEFAULT 0.0
                 );
-            """)
-            print("DEBUG: Table 'savings_goals' creation statement executed.")
-            # Transactions Table
-            cur.execute("""
+                
                 CREATE TABLE IF NOT EXISTS transactions (
                     id SERIAL PRIMARY KEY,
-                    transaction_id TEXT NOT NULL, -- Keeping this as a unique identifier for existing data if needed
+                    transaction_id TEXT NOT NULL,
                     type TEXT NOT NULL,
                     category TEXT NOT NULL,
                     item TEXT NOT NULL,
@@ -132,39 +126,29 @@ def init_db():
                     description TEXT,
                     savings_goal_id INTEGER REFERENCES savings_goals(id) ON DELETE SET NULL
                 );
-            """)
-            print("DEBUG: Table 'transactions' creation statement executed.")
-            # Expense Categories Table
-            cur.execute("""
+                
                 CREATE TABLE IF NOT EXISTS expense_categories (
                     id SERIAL PRIMARY KEY,
                     name TEXT UNIQUE NOT NULL,
                     icon TEXT
                 );
-            """)
-            print("DEBUG: Table 'expense_categories' creation statement executed.")
-            # Income Categories Table
-            cur.execute("""
+                
                 CREATE TABLE IF NOT EXISTS income_categories (
                     id SERIAL PRIMARY KEY,
                     name TEXT UNIQUE NOT NULL,
                     icon TEXT
                 );
-            """)
-            print("DEBUG: Table 'income_categories' creation statement executed.")
-            # Settings Table (Key-Value Store)
-            cur.execute("""
+                
                 CREATE TABLE IF NOT EXISTS settings (
                     key TEXT PRIMARY KEY,
                     value TEXT
                 );
             """)
-            print("DEBUG: Table 'settings' creation statement executed.")
-
+            print("DEBUG: Tables created successfully.")
             conn.commit()
             print("DEBUG: All table creation committed. Initializing default settings...")
             # Initialize default settings after tables are created
-            settings_manager.initialize_default_settings() # Added call
+            settings_manager.initialize_default_settings()
             print("DEBUG: Default settings initialization called.")
     except Exception as e:
         print(f"DEBUG: An error occurred during init_db: {e}")
