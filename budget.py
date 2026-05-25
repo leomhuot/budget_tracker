@@ -144,21 +144,15 @@ def generate_report_data(period=None, start_date_str=None, end_date_str=None):
         start_date = datetime(last_year, 1, 1, 0, 0, 0, 0)
         end_date = today.replace(hour=23, minute=59, second=59, microsecond=999999)
     elif not (start_date_str and end_date_str):
-        period = 'monthly'
-        start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        if today.month == 12:
-            end_date = start_date.replace(year=today.year + 1, month=1)
-        else:
-            end_date = start_date.replace(month=today.month + 1)
+        period = 'daily'
+        start_date = today.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = start_date + timedelta(days=1)
     
     if 'start_date' not in locals() or 'end_date' not in locals():
-        # Default to monthly if no period and no custom dates or if custom dates were invalid
-        period = 'monthly'
-        start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        if today.month == 12:
-            end_date = start_date.replace(year=today.year + 1, month=1)
-        else:
-            end_date = start_date.replace(month=today.month + 1)
+        # Default to daily if no period and no custom dates or if custom dates were invalid
+        period = 'daily'
+        start_date = today.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = start_date + timedelta(days=1)
 
 
     filtered_transactions = [

@@ -656,7 +656,13 @@ def transactions():
 @app.route('/report')
 @login_required
 def report():
+    # Try to get period from URL, then from session, defaulting to 'daily'
     period = request.args.get('period')
+    if period:
+        session['report_period'] = period
+    else:
+        period = session.get('report_period', 'daily')
+
     start_date_str = request.args.get('start_date')
     end_date_str = request.args.get('end_date')
     search_query = request.args.get('search_query', '').strip()
@@ -670,9 +676,7 @@ def report():
             session['custom_report_range'] = (start_date_str, end_date_str)
         elif 'custom_report_range' in session:
             start_date_str, end_date_str = session['custom_report_range']
-    elif period is None and 'custom_report_range' in session:
-        period = 'custom'
-        start_date_str, end_date_str = session['custom_report_range']
+    # If it was custom but we don't have range, it will fall back to default in budget_logic
 
     if period == 'last_year_to_date':
         today = datetime.now()
