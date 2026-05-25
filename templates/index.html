@@ -93,6 +93,17 @@
                                 <label for="category">Category</label>
                             </div>
                         </div>
+                        <div class="col-md-6" id="savings-goal-div" style="display: none;">
+                            <div class="form-floating mb-3">
+                                <select class="form-select border-0 bg-light" id="savings-goal" name="savings_goal_id">
+                                    <option value="">-- Select a Goal --</option>
+                                    {% for goal in savings_goals %}
+                                        <option value="{{ goal.id }}">{{ goal.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label for="savings-goal">Savings Goal</label>
+                            </div>
+                        </div>
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
                                 <input type="text" class="form-control border-0 bg-light" id="item" name="item" placeholder="Item Name" required>
@@ -176,11 +187,24 @@
     document.addEventListener('DOMContentLoaded', function() {
         const typeSelect = document.getElementById('type');
         const categorySelect = document.getElementById('category');
+        const savingsGoalDiv = document.getElementById('savings-goal-div');
+        const savingsGoalSelect = document.getElementById('savings-goal');
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('date').value = today;
 
         const expenseCategories = JSON.parse('{{ categories | tojson | safe }}');
         const incomeCategories = JSON.parse('{{ income_categories | tojson | safe }}');
+
+        function toggleSavingsGoal() {
+            if (typeSelect.value === 'expense' && categorySelect.value === 'Goal Savings') {
+                savingsGoalDiv.style.display = 'block';
+                savingsGoalSelect.setAttribute('required', 'required');
+            } else {
+                savingsGoalDiv.style.display = 'none';
+                savingsGoalSelect.removeAttribute('required');
+                savingsGoalSelect.value = '';
+            }
+        }
 
         typeSelect.addEventListener('change', function() {
             categorySelect.innerHTML = '';
@@ -191,7 +215,13 @@
                 opt.textContent = cat;
                 categorySelect.appendChild(opt);
             });
+            toggleSavingsGoal();
         });
+
+        categorySelect.addEventListener('change', toggleSavingsGoal);
+
+        // Initial check
+        toggleSavingsGoal();
     });
 </script>
 {% endblock %}
