@@ -8,25 +8,22 @@
         background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
         border-radius: 20px;
         color: white;
-        padding: 2.5rem;
-        margin-bottom: 2rem;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
         box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
     .stat-card {
         border-radius: 15px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .stat-card:hover {
-        transform: translateY(-5px);
+        transition: transform 0.3s ease;
     }
     .stat-icon {
-        width: 45px;
-        height: 45px;
+        width: 40px;
+        height: 40px;
         border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.25rem;
+        font-size: 1.1rem;
     }
     .bg-soft-primary { background-color: rgba(78, 115, 223, 0.15); color: #4e73df; }
     .bg-soft-success { background-color: rgba(28, 200, 138, 0.15); color: #1cc88a; }
@@ -34,110 +31,136 @@
     .bg-soft-warning { background-color: rgba(246, 194, 62, 0.15); color: #f6c23e; }
     .bg-soft-info { background-color: rgba(54, 185, 204, 0.15); color: #36b9cc; }
     
-    .transaction-form-card {
-        border-radius: 20px;
-        border: none;
+    .transaction-form-card { border-radius: 20px; border: none; }
+
+    /* Privacy Toggle Styles */
+    .privacy-toggle { cursor: pointer; transition: all 0.2s; }
+    .privacy-toggle:hover { opacity: 0.8; }
+    .amount-masked { font-family: 'monospace'; letter-spacing: 1px; }
+
+    /* Mobile Optimizations */
+    @media (max-width: 768px) {
+        .welcome-banner { padding: 1.5rem; margin-bottom: 1rem; }
+        .welcome-banner h1 { font-size: 1.5rem; }
+        .welcome-banner p { font-size: 0.9rem; }
+        
+        /* Make summary cards very compact on mobile */
+        .stat-card .card-body { padding: 0.75rem !important; }
+        .stat-icon { width: 30px; height: 30px; font-size: 0.9rem; margin-right: 0.5rem !important; }
+        .stat-card h3 { font-size: 1.1rem !important; }
+        .stat-card h6 { font-size: 0.6rem !important; }
+        
+        /* Reduce grid spacing on mobile to save vertical space */
+        .row.g-3 { --bs-gutter-y: 0.5rem; --bs-gutter-x: 0.5rem; }
+        .mb-5 { margin-bottom: 1rem !important; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
+<div class="container-fluid py-2 py-md-4">
     <!-- Welcome Header -->
     <div class="welcome-banner animate__animated animate__fadeIn">
         <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="display-6 fw-bold mb-2">Welcome, {{ current_user.username }}</h1>
-                <p class="lead opacity-75 mb-0">Financial Overview for {{ monthly_summary.period_name }}</p>
+            <div class="col-md-7">
+                <h1 class="display-6 fw-bold mb-1">Welcome, {{ current_user.username }}</h1>
+                <p class="opacity-75 mb-0 d-none d-md-block">Financial Overview for {{ monthly_summary.period_name }}</p>
             </div>
-            <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                <a href="{{ url_for('report') }}" class="btn btn-light px-4 fw-bold text-primary shadow-sm rounded-pill">
-                    <i class="fa-solid fa-chart-line me-2"></i>View Reports
+            <div class="col-md-5 text-md-end mt-2 mt-md-0 d-flex gap-2 justify-content-md-end">
+                <div id="toggle-privacy" class="privacy-toggle bg-light bg-opacity-25 text-white px-3 py-2 rounded-pill d-flex align-items-center border border-white border-opacity-25">
+                    <i class="fa-solid fa-eye me-2" id="eye-icon"></i>
+                    <span class="small fw-bold d-none d-sm-inline" id="eye-text">Hide Balance</span>
+                </div>
+                <a href="{{ url_for('report') }}" class="btn btn-light px-3 fw-bold text-primary shadow-sm rounded-pill btn-sm">
+                    <i class="fa-solid fa-chart-line me-1"></i>Reports
                 </a>
             </div>
         </div>
     </div>
 
     <!-- Summary Cards Grid -->
-    <div class="row g-3 mb-5">
-        <!-- Monthly Stats -->
-        <div class="col-md-4">
+    <div class="row g-2 g-md-3 mb-4 mb-md-5">
+        <!-- Income -->
+        <div class="col-6 col-md-4">
             <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="stat-icon bg-soft-success me-3">
-                            <i class="fa-solid fa-arrow-trend-up"></i>
-                        </div>
-                        <h6 class="mb-0 fw-semibold uppercase small">Monthly Income</h6>
+                <div class="card-body d-flex align-items-center">
+                    <div class="stat-icon bg-soft-success me-3">
+                        <i class="fa-solid fa-arrow-trend-up"></i>
                     </div>
-                    <h3 class="fw-bold mb-0">${{ "%.2f"|format(monthly_summary.total_income) }}</h3>
+                    <div>
+                        <h6 class="mb-0 fw-semibold uppercase small opacity-50">Income</h6>
+                        <h3 class="fw-bold mb-0 amount-value" data-value='${{ "%.2f"|format(monthly_summary.total_income) }}'>${{ "%.2f"|format(monthly_summary.total_income) }}</h3>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <!-- Expense -->
+        <div class="col-6 col-md-4">
             <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="stat-icon bg-soft-danger me-3">
-                            <i class="fa-solid fa-arrow-trend-down"></i>
-                        </div>
-                        <h6 class="mb-0 fw-semibold uppercase small">Monthly Expense</h6>
+                <div class="card-body d-flex align-items-center">
+                    <div class="stat-icon bg-soft-danger me-3">
+                        <i class="fa-solid fa-arrow-trend-down"></i>
                     </div>
-                    <h3 class="fw-bold mb-0">${{ "%.2f"|format(monthly_summary.total_expense) }}</h3>
+                    <div>
+                        <h6 class="mb-0 fw-semibold uppercase small opacity-50">Expense</h6>
+                        <h3 class="fw-bold mb-0 amount-value" data-value='${{ "%.2f"|format(monthly_summary.total_expense) }}'>${{ "%.2f"|format(monthly_summary.total_expense) }}</h3>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <!-- Balance -->
+        <div class="col-6 col-md-4">
             <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="stat-icon bg-soft-primary me-3">
-                            <i class="fa-solid fa-scale-balanced"></i>
-                        </div>
-                        <h6 class="mb-0 fw-semibold uppercase small">Monthly Balance</h6>
+                <div class="card-body d-flex align-items-center">
+                    <div class="stat-icon bg-soft-primary me-3">
+                        <i class="fa-solid fa-scale-balanced"></i>
                     </div>
-                    <h3 class="fw-bold mb-0">${{ "%.2f"|format(monthly_summary.balance) }}</h3>
+                    <div>
+                        <h6 class="mb-0 fw-semibold uppercase small opacity-50">Balance</h6>
+                        <h3 class="fw-bold mb-0 amount-value" data-value='${{ "%.2f"|format(monthly_summary.balance) }}'>${{ "%.2f"|format(monthly_summary.balance) }}</h3>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Savings Stats -->
-        <div class="col-md-4">
+        <!-- General Saving -->
+        <div class="col-6 col-md-4">
             <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="stat-icon bg-soft-info me-3">
-                            <i class="fa-solid fa-vault"></i>
-                        </div>
-                        <h6 class="mb-0 fw-semibold uppercase small">General Saving</h6>
+                <div class="card-body d-flex align-items-center">
+                    <div class="stat-icon bg-soft-info me-3">
+                        <i class="fa-solid fa-vault"></i>
                     </div>
-                    <h3 class="fw-bold mb-0">${{ "%.2f"|format(monthly_summary.total_general_savings) }}</h3>
+                    <div>
+                        <h6 class="mb-0 fw-semibold uppercase small opacity-50 text-truncate" style="max-width: 80px;">Gen. Saving</h6>
+                        <h3 class="fw-bold mb-0 amount-value" data-value='${{ "%.2f"|format(monthly_summary.total_general_savings) }}'>${{ "%.2f"|format(monthly_summary.total_general_savings) }}</h3>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <!-- Goal Saving -->
+        <div class="col-6 col-md-4">
             <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="stat-icon bg-soft-warning me-3">
-                            <i class="fa-solid fa-bullseye"></i>
-                        </div>
-                        <h6 class="mb-0 fw-semibold uppercase small">Goal Saving</h6>
+                <div class="card-body d-flex align-items-center">
+                    <div class="stat-icon bg-soft-warning me-3">
+                        <i class="fa-solid fa-bullseye"></i>
                     </div>
-                    <h3 class="fw-bold mb-0">${{ "%.2f"|format(monthly_summary.total_goal_savings) }}</h3>
+                    <div>
+                        <h6 class="mb-0 fw-semibold uppercase small opacity-50 text-truncate" style="max-width: 80px;">Goal Saving</h6>
+                        <h3 class="fw-bold mb-0 amount-value" data-value='${{ "%.2f"|format(monthly_summary.total_goal_savings) }}'>${{ "%.2f"|format(monthly_summary.total_goal_savings) }}</h3>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <!-- Total Saving -->
+        <div class="col-6 col-md-4">
             <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="stat-icon bg-soft-primary me-3">
-                            <i class="fa-solid fa-piggy-bank"></i>
-                        </div>
-                        <h6 class="mb-0 fw-semibold uppercase small">Total Saving</h6>
+                <div class="card-body d-flex align-items-center">
+                    <div class="stat-icon bg-soft-primary me-3">
+                        <i class="fa-solid fa-piggy-bank"></i>
                     </div>
-                    <h3 class="fw-bold mb-0 text-primary">${{ "%.2f"|format(monthly_summary.total_savings) }}</h3>
+                    <div>
+                        <h6 class="mb-0 fw-semibold uppercase small opacity-50">Total Saving</h6>
+                        <h3 class="fw-bold mb-0 text-primary amount-value" data-value='${{ "%.2f"|format(monthly_summary.total_savings) }}'>${{ "%.2f"|format(monthly_summary.total_savings) }}</h3>
+                    </div>
                 </div>
             </div>
         </div>
@@ -249,8 +272,8 @@
     document.addEventListener('DOMContentLoaded', function() {
         const typeSelect = document.getElementById('type');
         const categorySelect = document.getElementById('category');
-        const savingsGoalDiv = document.getElementById('savings-goal-div');
-        const savingsGoalSelect = document.getElementById('savings-goal');
+        const savings_goalDiv = document.getElementById('savings-goal-div');
+        const savings_goalSelect = document.getElementById('savings-goal');
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('date').value = today;
 
@@ -259,12 +282,12 @@
 
         function toggleSavingsGoal() {
             if (typeSelect.value === 'expense' && categorySelect.value === 'Goal Savings') {
-                savingsGoalDiv.style.display = 'block';
-                savingsGoalSelect.setAttribute('required', 'required');
+                savings_goalDiv.style.display = 'block';
+                savings_goalSelect.setAttribute('required', 'required');
             } else {
-                savingsGoalDiv.style.display = 'none';
-                savingsGoalSelect.removeAttribute('required');
-                savingsGoalSelect.value = '';
+                savings_goalDiv.style.display = 'none';
+                savings_goalSelect.removeAttribute('required');
+                savings_goalSelect.value = '';
             }
         }
 
@@ -282,8 +305,39 @@
 
         categorySelect.addEventListener('change', toggleSavingsGoal);
 
+        // Privacy Toggle Logic
+        const toggleBtn = document.getElementById('toggle-privacy');
+        const eyeIcon = document.getElementById('eye-icon');
+        const eyeText = document.getElementById('eye-text');
+        const amountValues = document.querySelectorAll('.amount-value');
+        let isPrivate = localStorage.getItem('privacy_mode') === 'true';
+
+        function updatePrivacyUI() {
+            amountValues.forEach(el => {
+                const realValue = el.getAttribute('data-value');
+                if (isPrivate) {
+                    el.textContent = '$ ••••.••';
+                    el.classList.add('amount-masked');
+                    eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
+                    eyeText.textContent = 'Show Balance';
+                } else {
+                    el.textContent = realValue;
+                    el.classList.remove('amount-masked');
+                    eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+                    eyeText.textContent = 'Hide Balance';
+                }
+            });
+            localStorage.setItem('privacy_mode', isPrivate);
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            isPrivate = !isPrivate;
+            updatePrivacyUI();
+        });
+
         // Initial check
         toggleSavingsGoal();
+        updatePrivacyUI();
     });
 </script>
 {% endblock %}
