@@ -16,9 +16,9 @@
         .bg-dashboard { background-color: #f8f9fc; }
         .nav-pills .nav-link { color: #4e73df; padding: 0.5rem 1rem; font-weight: 500; border-radius: 10px; }
         .nav-pills .nav-link.active { background-color: #4e73df; color: #fff; box-shadow: 0 4px 12px rgba(78, 115, 223, 0.25); }
-        .card-header { background-color: #fff; border-bottom: 1px solid #f1f1f1; }
+        .card-header { border-bottom: 1px solid rgba(0,0,0,0.05); }
         .badge { font-size: 0.75rem; letter-spacing: 0.02em; padding: 0.5em 0.8em; }
-        .table thead th { background-color: #f8f9fc; text-transform: uppercase; font-size: 0.75rem; color: #858796; letter-spacing: 0.05em; border-top: none; }
+        .table thead th { text-transform: uppercase; font-size: 0.75rem; color: #858796; letter-spacing: 0.05em; border-top: none; }
         .display-stats { font-size: 1.8rem; line-height: 1.2; }
         
         /* Advanced Pagination Styling */
@@ -94,22 +94,22 @@
         <div class="card-body p-0">
             <div class="row g-0">
                 <!-- Left: Status Summary -->
-                <div class="col-lg-8 p-4 bg-white">
+                <div class="col-lg-8 p-4">
                     <div class="d-flex align-items-center mb-3">
                         <div class="badge bg-primary bg-opacity-10 text-primary text-uppercase x-small fw-bold ls-wide px-3">Monthly Performance</div>
                     </div>
                     <div class="row g-3">
                         <div class="col-12">
-                            <div class="text-muted small mb-1">Total Budget</div>
-                            <div class="h4 mb-0 fw-bold text-dark">${{ "%.2f"|format(report.total_budget) }}</div>
+                            <div class="opacity-75 small mb-1">Total Budget</div>
+                            <div class="h4 mb-0 fw-bold">${{ "%.2f"|format(report.total_budget) }}</div>
                         </div>
                         <div class="col-6">
-                            <div class="text-muted small mb-1">Total Expenses</div>
-                            <div class="h4 mb-0 fw-bold text-danger" style="color: #ff6b6b !important;">${{ "%.2f"|format(displayed_total_expense) }}</div>
+                            <div class="opacity-75 small mb-1">Total Expenses</div>
+                            <div class="h4 mb-0 fw-bold text-danger">${{ "%.2f"|format(displayed_total_expense) }}</div>
                         </div>
                         <div class="col-6">
-                            <div class="text-muted small mb-1">Available Funds</div>
-                            <div class="h4 mb-0 fw-bold {{ 'text-success' if report.remaining_spending >= 0 else '' }}" style="{{ 'color: #ff6b6b !important;' if report.remaining_spending < 0 else '' }}">
+                            <div class="opacity-75 small mb-1">Available Funds</div>
+                            <div class="h4 mb-0 fw-bold {{ 'text-success' if report.remaining_spending >= 0 else 'text-danger' }}">
                                 ${{ "%.2f"|format(report.remaining_spending) }}
                             </div>
                         </div>
@@ -153,9 +153,9 @@
         <div class="col-6 col-md-4 col-lg-2">
             <div class="card border-0 shadow-sm h-100 transition-up animate__animated {{ anim }}">
                 <div class="card-body p-3">
-                    <div class="text-uppercase x-small fw-bold text-muted mb-2">{{ title }}</div>
+                    <div class="text-uppercase x-small fw-bold opacity-50 mb-2">{{ title }}</div>
                     <div class="d-flex align-items-center justify-content-between">
-                        <div class="h5 mb-0 fw-bold text-dark">${{ "%.2f"|format(val) }}</div>
+                        <div class="h5 mb-0 fw-bold">${{ "%.2f"|format(val) }}</div>
                         <div class="rounded bg-{{ color }} bg-opacity-10 p-2">
                             <i class="fa-solid {{ icon }} text-{{ color }} x-small"></i>
                         </div>
@@ -210,8 +210,8 @@
                         {% for goal in savings_goals[:3] %}
                         <div class="mb-3 animate__animated animate__fadeInUp delay-5">
                             <div class="d-flex justify-content-between x-small mb-1">
-                                <span class="fw-bold text-dark">{{ goal.name }}</span>
-                                <span class="text-muted">${{ "%.0f"|format(goal.saved_amount) }} / ${{ "%.0f"|format(goal.target_amount) }}</span>
+                                <span class="fw-bold">{{ goal.name }}</span>
+                                <span class="opacity-75">${{ "%.0f"|format(goal.saved_amount) }} / ${{ "%.0f"|format(goal.target_amount) }}</span>
                             </div>
                             <div class="progress" style="height: 5px;">
                                 <div class="progress-bar bg-primary" style="width: {{ (goal.saved_amount/goal.target_amount*100)|round }}%"></div>
@@ -228,7 +228,7 @@
 
     <!-- Data Table Section -->
     <div class="card border-0 shadow-sm mb-4 overflow-hidden animate__animated animate__fadeInUp delay-4">
-        <div class="card-header py-3 d-flex align-items-center justify-content-between bg-white">
+        <div class="card-header py-3 d-flex align-items-center justify-content-between bg-transparent">
             <h6 class="m-0 fw-bold text-primary">Detailed Transactions</h6>
             <form action="{{ url_for('report') }}" method="get" class="d-flex gap-2">
                 <input type="hidden" name="period" value="{{ current_period }}">
@@ -253,15 +253,15 @@
                     <tbody>
                         {% for t in displayed_transactions %}
                         <tr>
-                            <td class="ps-4 x-small text-muted text-nowrap" style="width: 80px;">{{ t.date }}</td>
+                            <td class="ps-4 x-small opacity-50 text-nowrap" style="width: 80px;">{{ t.date }}</td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <i class="fa-solid {{ (income_category_icons if t.type == 'income' else category_icons).get(t.category, 'fa-tag') }} text-muted me-2 x-small"></i>
+                                    <i class="fa-solid {{ (income_category_icons if t.type == 'income' else category_icons).get(t.category, 'fa-tag') }} opacity-50 me-2 x-small"></i>
                                     <span class="x-small fw-medium text-truncate">{{ t.category }}</span>
                                 </div>
                             </td>
                             <td>
-                                <div class="fw-bold text-dark x-small text-truncate">{{ t.item }}</div>
+                                <div class="fw-bold x-small text-truncate">{{ t.item }}</div>
                             </td>
                             <td class="text-end fw-bold {{ 'text-success' if t.type == 'income' else 'text-danger' }} pe-3 text-nowrap x-small">
                                 {{ '+' if t.type == 'income' else '-' }}${{ "%.2f"|format(t.amount) }}
@@ -278,11 +278,11 @@
                 </table>
             </div>
         </div>
-        <div class="card-footer bg-white border-top-0 py-3 px-4">
+        <div class="card-footer bg-transparent border-top-0 py-3 px-4">
             <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
                 <!-- Info Section -->
-                <div class="text-muted small order-2 order-md-1">
-                    Showing <span class="fw-bold text-dark">{{ (page - 1) * per_page + 1 }}</span> to <span class="fw-bold text-dark">{{ (page - 1) * per_page + displayed_transactions|length }}</span> of <span class="fw-bold text-dark">{{ total_transactions }}</span> entries
+                <div class="opacity-75 small order-2 order-md-1">
+                    Showing <span class="fw-bold">{{ (page - 1) * per_page + 1 }}</span> to <span class="fw-bold">{{ (page - 1) * per_page + displayed_transactions|length }}</span> of <span class="fw-bold">{{ total_transactions }}</span> entries
                 </div>
                 
                 <!-- Controls Section -->

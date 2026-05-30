@@ -83,6 +83,7 @@ def send_brevo_email(recipient_email, subject, body_text):
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+login_manager.login_message_category = 'info'
 
 def admin_required(f):
     @wraps(f)
@@ -560,6 +561,9 @@ def index():
     savings_goals = savings_goals_logic.get_savings_goals()
 
     if request.method == 'POST':
+        # ... (POST logic remains same)
+        # But after adding transaction, we SHOULD recalculate if it's goal related
+        # For simplicity, we can keep the logic here but only run it on POST
         transaction_type = request.form.get('type')
         item = request.form.get('item')
         amount = float(request.form.get('amount', 0))
@@ -573,7 +577,6 @@ def index():
                 budget_logic.add_transaction('income', category, item, amount, date, description)
         elif transaction_type == 'expense' and item and amount > 0:
             category = request.form.get('category')
-            # Ensure savings_goal_id is only processed if category is "Goal Savings"
             transaction_savings_goal_id = request.form.get('savings_goal_id') if category == 'Goal Savings' else ''
 
             if category in current_expense_categories:
@@ -584,28 +587,23 @@ def index():
                     budget_logic.add_transaction('expense', category, item, amount, date, description, transaction_savings_goal_id)
                     savings_goals_logic.update_saved_amount(transaction_savings_goal_id, amount)
                 elif category == 'General Savings':
-                    # General Savings should not be linked to a specific goal
                     budget_logic.add_transaction('expense', category, item, amount, date, description, '')
                 else:
-                    # Other categories (non-saving related)
                     budget_logic.add_transaction('expense', category, item, amount, date, description, '')
         
         return redirect(url_for('index'))
 
-    all_transactions = budget_logic.get_transactions()
-    savings_goals_logic.recalculate_saved_amounts(all_transactions) # Recalculate saved amounts for goals
-    
-    # Calculate total general savings for dashboard
-    total_general_savings = savings_goals_logic.get_general_savings_total(all_transactions)
+    # Optimized GET logic:
+    # Only fetch what's absolutely necessary for the view
+    monthly_summary = budget_logic.get_monthly_summary()
     
     return render_template('index.html', 
                            categories=current_expense_categories, 
-                           transactions=all_transactions, 
                            category_icons=current_category_icons, 
                            income_categories=current_income_categories,
                            income_category_icons=current_income_category_icons,
                            savings_goals=savings_goals,
-                           total_general_savings=total_general_savings,
+                           monthly_summary=monthly_summary,
                            today_date=datetime.now().strftime('%Y-%m-%d'))
 
 @app.route('/transactions')
@@ -696,8 +694,6 @@ def report():
     current_category_icons = app_settings['category_icons']
     income_category_icons = app_settings['income_category_icons']
     
-    all_transactions = budget_logic.get_transactions()
-    savings_goals_logic.recalculate_saved_amounts(all_transactions)
     savings_goals = savings_goals_logic.get_savings_goals()
     # total_general_savings = savings_goals_logic.get_general_savings_total(all_transactions) # Get total general savings
     total_general_savings = report_data.get('total_general_savings', 0) # Get total general savings
@@ -1102,11 +1098,11 @@ def disable_2fa():
 @app.route('/delete/<int:transaction_id>')
 @login_required
 def delete(transaction_id):
-    # Before deleting the transaction, if it's a Saving expense,
+    # Before deleting the transaction, if it's a Goal Savings expense,
     # we need to deduct the amount from the corresponding savings goal.
     transaction = budget_logic.get_transaction(transaction_id)
     if transaction and transaction.get('type') == 'expense' and \
-       transaction.get('category') == 'Saving' and transaction.get('savings_goal_id'):
+       transaction.get('category') == 'Goal Savings' and transaction.get('savings_goal_id'):
         savings_goals_logic.update_saved_amount(transaction['savings_goal_id'], -transaction['amount'])
 
     budget_logic.delete_transaction(transaction_id)

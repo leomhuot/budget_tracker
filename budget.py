@@ -5,6 +5,59 @@ import uuid # Import uuid for generating unique transaction IDs
 
 
 
+def get_monthly_summary():
+    """Calculates monthly summary data efficiently using SQL."""
+    today = datetime.now()
+    start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    if today.month == 12:
+        end_date = start_date.replace(year=today.year + 1, month=1)
+    else:
+        end_date = start_date.replace(month=today.month + 1)
+    
+    start_date_str = start_date.strftime('%Y-%m-%d')
+    end_date_str = end_date.strftime('%Y-%m-%d')
+
+    try:
+        with db.get_db_cursor(commit=False) as cur:
+            # Get Total Income
+            cur.execute(
+                "SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'income' AND date >= %s AND date < %s;",
+                (start_date_str, end_date_str)
+            )
+            total_income = float(cur.fetchone()[0])
+
+            # Get Total Expense
+            cur.execute(
+                "SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'expense' AND date >= %s AND date < %s;",
+                (start_date_str, end_date_str)
+            )
+            total_expense = float(cur.fetchone()[0])
+
+            # Get Total General Savings (all time or monthly? usually all time for total balance)
+            cur.execute(
+                "SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'expense' AND category = 'General Savings';"
+            )
+            total_general_savings = float(cur.fetchone()[0])
+            
+            # Get Total Goal Savings (all time)
+            cur.execute(
+                "SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'expense' AND category = 'Goal Savings';"
+            )
+            total_goal_savings = float(cur.fetchone()[0])
+
+            return {
+                "total_income": total_income,
+                "total_expense": total_expense,
+                "balance": total_income - total_expense,
+                "total_savings": total_general_savings + total_goal_savings,
+                "total_general_savings": total_general_savings,
+                "total_goal_savings": total_goal_savings,
+                "period_name": today.strftime('%B %Y')
+            }
+    except psycopg2.pool.PoolError:
+        print("ERROR: Database is temporarily unavailable.")
+        raise
+
 def add_transaction(type, category, item, amount, date, description, savings_goal_id=None):
     """Adds a single transaction to the database."""
     try:

@@ -5,132 +5,199 @@
 {% block head_extra %}
 <style>
     .welcome-banner {
-        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-        border-radius: 15px;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        border-radius: 20px;
         color: white;
         padding: 2.5rem;
-        position: relative;
-        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
-    .welcome-banner::after {
-        content: '\f155';
-        font-family: 'Font Awesome 6 Free';
-        font-weight: 900;
-        position: absolute;
-        right: -20px;
-        bottom: -30px;
-        font-size: 10rem;
-        opacity: 0.1;
-        transform: rotate(-15deg);
-    }
-    .quick-action-card {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: none;
+    .stat-card {
         border-radius: 15px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    .quick-action-card:hover {
+    .stat-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
     }
-    .icon-box {
-        width: 60px;
-        height: 60px;
-        border-radius: 12px;
+    .stat-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 1rem;
+        font-size: 1.25rem;
     }
-    .form-floating > .form-control:focus {
-        border-color: #4e73df;
-        box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.1);
+    .bg-soft-primary { background-color: rgba(78, 115, 223, 0.15); color: #4e73df; }
+    .bg-soft-success { background-color: rgba(28, 200, 138, 0.15); color: #1cc88a; }
+    .bg-soft-danger { background-color: rgba(231, 74, 59, 0.15); color: #e74a3b; }
+    .bg-soft-warning { background-color: rgba(246, 194, 62, 0.15); color: #f6c23e; }
+    .bg-soft-info { background-color: rgba(54, 185, 204, 0.15); color: #36b9cc; }
+    
+    .transaction-form-card {
+        border-radius: 20px;
+        border: none;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-2">
+<div class="container-fluid py-4">
     <!-- Welcome Header -->
-    <div class="welcome-banner shadow-lg mb-5 animate__animated animate__fadeInDown">
+    <div class="welcome-banner animate__animated animate__fadeIn">
         <div class="row align-items-center">
-            <div class="col-md-7">
-                <h1 class="display-5 fw-bold mb-2">Hello, {{ current_user.username }}!</h1>
-                <p class="lead opacity-75">Ready to manage your finances today? Track your expenses and reach your savings goals.</p>
-                <div class="d-flex gap-3 mt-4">
-                    <a href="{{ url_for('report') }}" class="btn btn-light btn-lg px-4 fw-bold text-primary shadow-sm">
-                        <i class="fa-solid fa-chart-simple me-2"></i>View Reports
-                    </a>
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2">Welcome, {{ current_user.username }}</h1>
+                <p class="lead opacity-75 mb-0">Financial Overview for {{ monthly_summary.period_name }}</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="{{ url_for('report') }}" class="btn btn-light px-4 fw-bold text-primary shadow-sm rounded-pill">
+                    <i class="fa-solid fa-chart-line me-2"></i>View Reports
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards Grid -->
+    <div class="row g-3 mb-5">
+        <!-- Monthly Stats -->
+        <div class="col-md-4">
+            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="stat-icon bg-soft-success me-3">
+                            <i class="fa-solid fa-arrow-trend-up"></i>
+                        </div>
+                        <h6 class="mb-0 fw-semibold uppercase small">Monthly Income</h6>
+                    </div>
+                    <h3 class="fw-bold mb-0">${{ "%.2f"|format(monthly_summary.total_income) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="stat-icon bg-soft-danger me-3">
+                            <i class="fa-solid fa-arrow-trend-down"></i>
+                        </div>
+                        <h6 class="mb-0 fw-semibold uppercase small">Monthly Expense</h6>
+                    </div>
+                    <h3 class="fw-bold mb-0">${{ "%.2f"|format(monthly_summary.total_expense) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="stat-icon bg-soft-primary me-3">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </div>
+                        <h6 class="mb-0 fw-semibold uppercase small">Monthly Balance</h6>
+                    </div>
+                    <h3 class="fw-bold mb-0">${{ "%.2f"|format(monthly_summary.balance) }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Savings Stats -->
+        <div class="col-md-4">
+            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="stat-icon bg-soft-info me-3">
+                            <i class="fa-solid fa-vault"></i>
+                        </div>
+                        <h6 class="mb-0 fw-semibold uppercase small">General Saving</h6>
+                    </div>
+                    <h3 class="fw-bold mb-0">${{ "%.2f"|format(monthly_summary.total_general_savings) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="stat-icon bg-soft-warning me-3">
+                            <i class="fa-solid fa-bullseye"></i>
+                        </div>
+                        <h6 class="mb-0 fw-semibold uppercase small">Goal Saving</h6>
+                    </div>
+                    <h3 class="fw-bold mb-0">${{ "%.2f"|format(monthly_summary.total_goal_savings) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="stat-icon bg-soft-primary me-3">
+                            <i class="fa-solid fa-piggy-bank"></i>
+                        </div>
+                        <h6 class="mb-0 fw-semibold uppercase small">Total Saving</h6>
+                    </div>
+                    <h3 class="fw-bold mb-0 text-primary">${{ "%.2f"|format(monthly_summary.total_savings) }}</h3>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4 mb-5">
+    <div class="row g-4">
         <!-- Add Transaction Card -->
         <div class="col-lg-8">
-            <div class="card border-0 shadow-sm h-100 animate__animated animate__fadeInUp delay-1">
-                <div class="card-header bg-white py-3 border-0">
-                    <h5 class="mb-0 fw-bold text-primary"><i class="fa-solid fa-plus-circle me-2"></i>New Transaction</h5>
+            <div class="card transaction-form-card shadow-sm border-0 animate__animated animate__fadeInLeft">
+                <div class="card-header bg-transparent py-4 border-0">
+                    <h4 class="mb-0 fw-bold"><i class="fa-solid fa-plus-circle text-primary me-2"></i>Record New Transaction</h4>
                 </div>
-                <div class="card-body p-4">
+                <div class="card-body px-4 pb-4">
                     <form action="{{ url_for('index') }}" method="POST" class="row g-3">
                         <div class="col-md-6">
-                            <div class="form-floating mb-3">
-                                <select class="form-select border-0 bg-light" id="type" name="type" required>
-                                    <option value="expense">Expense</option>
-                                    <option value="income">Income</option>
-                                </select>
-                                <label for="type">Transaction Type</label>
-                            </div>
+                            <label class="form-label fw-bold small opacity-75 text-uppercase">Type</label>
+                            <select class="form-select bg-opacity-10 py-2" id="type" name="type" required>
+                                <option value="expense">Expense</option>
+                                <option value="income">Income</option>
+                            </select>
                         </div>
                         <div class="col-md-6">
-                            <div class="form-floating mb-3">
-                                <select class="form-select border-0 bg-light" id="category" name="category" required>
-                                    {% for category in categories %}
-                                        <option value="{{ category }}">{{ category }}</option>
-                                    {% endfor %}
-                                </select>
-                                <label for="category">Category</label>
-                            </div>
+                            <label class="form-label fw-bold small opacity-75 text-uppercase">Category</label>
+                            <select class="form-select bg-opacity-10 py-2" id="category" name="category" required>
+                                {% for category in categories %}
+                                    <option value="{{ category }}">{{ category }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <div class="col-md-6" id="savings-goal-div" style="display: none;">
-                            <div class="form-floating mb-3">
-                                <select class="form-select border-0 bg-light" id="savings-goal" name="savings_goal_id">
-                                    <option value="">-- Select a Goal --</option>
-                                    {% for goal in savings_goals %}
-                                        <option value="{{ goal.id }}">{{ goal.name }}</option>
-                                    {% endfor %}
-                                </select>
-                                <label for="savings-goal">Savings Goal</label>
+                            <label class="form-label fw-bold small opacity-75 text-uppercase">Savings Goal</label>
+                            <select class="form-select bg-opacity-10 py-2" id="savings-goal" name="savings_goal_id">
+                                <option value="">-- Select a Goal --</option>
+                                {% for goal in savings_goals %}
+                                    <option value="{{ goal.id }}">{{ goal.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small opacity-75 text-uppercase">Item Name</label>
+                            <input type="text" class="form-control bg-opacity-10 py-2" id="item" name="item" placeholder="What did you spend on?" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small opacity-75 text-uppercase">Amount ($)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-opacity-10 border-0">$</span>
+                                <input type="number" step="0.01" class="form-control bg-opacity-10 py-2" id="amount" name="amount" placeholder="0.00" required>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control border-0 bg-light" id="item" name="item" placeholder="Item Name" required>
-                                <label for="item">Item Name</label>
-                            </div>
+                            <label class="form-label fw-bold small opacity-75 text-uppercase">Date</label>
+                            <input type="date" class="form-control bg-opacity-10 py-2" id="date" name="date" required>
                         </div>
                         <div class="col-md-6">
-                            <div class="form-floating mb-3">
-                                <input type="number" step="0.01" class="form-control border-0 bg-light" id="amount" name="amount" placeholder="0.00" required>
-                                <label for="amount">Amount ($)</label>
-                            </div>
+                            <label class="form-label fw-bold small opacity-75 text-uppercase">Notes</label>
+                            <input type="text" class="form-control bg-opacity-10 py-2" id="description" name="description" placeholder="Optional description">
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-floating mb-3">
-                                <input type="date" class="form-control border-0 bg-light" id="date" name="date" required>
-                                <label for="date">Transaction Date</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control border-0 bg-light" id="description" name="description" placeholder="Description">
-                                <label for="description">Note / Description</label>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm fw-bold mt-2">
-                                <i class="fa-solid fa-cloud-arrow-up me-2"></i>Record Transaction
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm fw-bold rounded-3">
+                                <i class="fa-solid fa-paper-plane me-2"></i>Submit Transaction
                             </button>
                         </div>
                     </form>
@@ -138,45 +205,40 @@
             </div>
         </div>
 
-        <!-- Quick Summary Side -->
+        <!-- Quick Actions & Recent Info -->
         <div class="col-lg-4">
-            <div class="card border-0 shadow-sm mb-4 animate__animated animate__fadeInRight delay-2">
+            <div class="card shadow-sm border-0 mb-4 animate__animated animate__fadeInRight" style="border-radius: 20px;">
                 <div class="card-body p-4 text-center">
-                    <div class="icon-box bg-success bg-opacity-10 text-success mx-auto">
-                        <i class="fa-solid fa-piggy-bank fa-2x"></i>
+                    <div class="mb-3">
+                        <i class="fa-solid fa-circle-user fa-4x text-primary opacity-25"></i>
                     </div>
-                    <h6 class="text-muted text-uppercase small fw-bold">Current Savings</h6>
-                    <h2 class="fw-bold text-dark">${{ "%.2f"|format(total_general_savings) }}</h2>
-                    <hr>
-                    <div class="d-grid">
-                        <a href="{{ url_for('manage_savings_goals') }}" class="btn btn-outline-primary btn-sm rounded-pill">Manage Goals</a>
+                    <h5 class="fw-bold mb-1">{{ current_user.username }}</h5>
+                    <p class="text-muted small mb-3">{{ current_user.email }}</p>
+                    <hr class="my-4 opacity-10">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('transactions') }}" class="btn btn-outline-primary rounded-pill fw-bold py-2">
+                            <i class="fa-solid fa-list me-2"></i>All Transactions
+                        </a>
+                        <a href="{{ url_for('settings') }}" class="btn btn-outline-secondary rounded-pill fw-bold py-2">
+                            <i class="fa-solid fa-cog me-2"></i>Account Settings
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm overflow-hidden animate__animated animate__fadeInRight delay-3">
-                <div class="card-header bg-white py-3 border-0">
-                    <h6 class="mb-0 fw-bold text-primary">Quick Navigation</h6>
+            <div class="card shadow-sm border-0 animate__animated animate__fadeInRight" style="border-radius: 20px;">
+                <div class="card-header bg-transparent py-3 border-0 mt-2">
+                    <h6 class="mb-0 fw-bold px-2">Quick Tips</h6>
                 </div>
-                <div class="list-group list-group-flush border-0">
-                    <a href="{{ url_for('transactions') }}" class="list-group-item list-group-item-action py-3 border-0">
-                        <div class="d-flex align-items-center">
-                            <i class="fa-solid fa-list-check text-primary me-3"></i>
-                            <div>
-                                <div class="fw-bold small">Transaction History</div>
-                                <div class="x-small text-muted">Review all past records</div>
-                            </div>
-                        </div>
-                    </a>
-                    <a href="{{ url_for('settings') }}" class="list-group-item list-group-item-action py-3 border-0">
-                        <div class="d-flex align-items-center">
-                            <i class="fa-solid fa-sliders text-info me-3"></i>
-                            <div>
-                                <div class="fw-bold small">App Settings</div>
-                                <div class="x-small text-muted">Categories, Goals, Security</div>
-                            </div>
-                        </div>
-                    </a>
+                <div class="card-body px-4 pb-4">
+                    <div class="d-flex mb-3">
+                        <i class="fa-solid fa-lightbulb text-warning me-3 mt-1"></i>
+                        <p class="small opacity-75 mb-0">Track your daily expenses to stay within your monthly budget!</p>
+                    </div>
+                    <div class="d-flex">
+                        <i class="fa-solid fa-shield-halved text-success me-3 mt-1"></i>
+                        <p class="small opacity-75 mb-0">Set up 2FA in settings to keep your financial data secure.</p>
+                    </div>
                 </div>
             </div>
         </div>

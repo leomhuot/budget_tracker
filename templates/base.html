@@ -76,7 +76,8 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show animate__animated animate__fadeInDown" role="alert">
+                {% set alert_class = 'info' if category == 'message' else category %}
+                <div class="alert alert-{{ alert_class }} alert-dismissible fade show shadow-sm animate__animated animate__fadeInDown border-0" role="alert" style="border-radius: 12px;">
                     <i class="fa-solid fa-circle-info me-2"></i> {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -107,12 +108,13 @@
         // Theme toggle logic
         const themeToggle = document.getElementById('theme-toggle');
         const themeLink = document.getElementById('theme-link');
-        const lightTheme = "https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/flatly/bootstrap.min.css"; // New light theme
-        const darkTheme = "https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/vapor/bootstrap.min.css"; // New dark theme
+        const lightTheme = "https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/flatly/bootstrap.min.css"; 
+        const darkTheme = "https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/darkly/bootstrap.min.css"; // Changed from vapor to darkly
 
         let currentTheme = localStorage.getItem('theme') || 'light';
 
         function applyTheme(theme) {
+            document.documentElement.setAttribute('data-bs-theme', theme);
             if (theme === 'dark') {
                 themeLink.href = darkTheme;
                 themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>'; 
@@ -127,12 +129,12 @@
 
         function updateNavbarTheme(theme) {
             const navbar = document.querySelector('.navbar');
-            navbar.classList.remove('navbar-dark', 'bg-dark', 'navbar-light', 'bg-primary');
+            navbar.classList.remove('navbar-dark', 'bg-dark', 'navbar-light', 'bg-light', 'shadow-sm');
             
             if (theme === 'dark') {
-                navbar.classList.add('navbar-dark', 'bg-dark');
+                navbar.classList.add('navbar-dark', 'bg-dark', 'shadow-sm');
             } else {
-                navbar.classList.add('navbar-light', 'bg-light'); // Changed from bg-primary to bg-light
+                navbar.classList.add('navbar-light', 'bg-light', 'shadow-sm');
             }
         }
 
