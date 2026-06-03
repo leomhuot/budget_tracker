@@ -75,11 +75,11 @@
                 <form action="{{ url_for('report') }}" method="get" class="d-flex align-items-center gap-2">
                     <input type="hidden" name="period" value="custom">
                     <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-white border-end-0"><i class="far fa-calendar-alt text-muted"></i></span>
+                        <span class="input-group-text border-end-0"><i class="far fa-calendar-alt text-muted"></i></span>
                         <input type="date" class="form-control border-start-0" name="start_date" value="{{ start_date if start_date else '' }}">
                     </div>
                     <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-white border-end-0"><i class="far fa-calendar-alt text-muted"></i></span>
+                        <span class="input-group-text border-end-0"><i class="far fa-calendar-alt text-muted"></i></span>
                         <input type="date" class="form-control border-start-0" name="end_date" value="{{ end_date if end_date else '' }}">
                     </div>
                     <button type="submit" class="btn btn-sm btn-primary px-3">Apply</button>

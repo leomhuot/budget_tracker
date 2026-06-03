@@ -71,7 +71,7 @@
                     <i class="fa-solid fa-eye me-2" id="eye-icon"></i>
                     <span class="small fw-bold d-none d-sm-inline" id="eye-text">Hide Balance</span>
                 </div>
-                <a href="{{ url_for('report') }}" class="btn btn-light px-3 fw-bold text-primary shadow-sm rounded-pill btn-sm">
+                <a href="{{ url_for('report') }}" class="btn bg-light bg-opacity-25 text-white px-3 fw-bold shadow-sm rounded-pill btn-sm border border-white border-opacity-25">
                     <i class="fa-solid fa-chart-line me-1"></i>Reports
                 </a>
             </div>
@@ -176,23 +176,23 @@
                 <div class="card-body px-4 pb-4">
                     <form action="{{ url_for('index') }}" method="POST" class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold small opacity-75 text-uppercase">Type</label>
-                            <select class="form-select bg-opacity-10 py-2" id="type" name="type" required>
+                            <label class="form-label fw-bold small text-uppercase">Type</label>
+                            <select class="form-select py-2" id="type" name="type" required>
                                 <option value="expense">Expense</option>
                                 <option value="income">Income</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold small opacity-75 text-uppercase">Category</label>
-                            <select class="form-select bg-opacity-10 py-2" id="category" name="category" required>
+                            <label class="form-label fw-bold small text-uppercase">Category</label>
+                            <select class="form-select py-2" id="category" name="category" required>
                                 {% for category in categories %}
                                     <option value="{{ category }}">{{ category }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-md-6" id="savings-goal-div" style="display: none;">
-                            <label class="form-label fw-bold small opacity-75 text-uppercase">Savings Goal</label>
-                            <select class="form-select bg-opacity-10 py-2" id="savings-goal" name="savings_goal_id">
+                            <label class="form-label fw-bold small text-uppercase">Savings Goal</label>
+                            <select class="form-select py-2" id="savings-goal" name="savings_goal_id">
                                 <option value="">-- Select a Goal --</option>
                                 {% for goal in savings_goals %}
                                     <option value="{{ goal.id }}">{{ goal.name }}</option>
@@ -200,23 +200,23 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold small opacity-75 text-uppercase">Item Name</label>
-                            <input type="text" class="form-control bg-opacity-10 py-2" id="item" name="item" placeholder="What did you spend on?" required>
+                            <label class="form-label fw-bold small text-uppercase">Item Name</label>
+                            <input type="text" class="form-control py-2" id="item" name="item" placeholder="What did you spend on?" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold small opacity-75 text-uppercase">Amount ($)</label>
+                            <label class="form-label fw-bold small text-uppercase">Amount ($)</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-opacity-10 border-0">$</span>
-                                <input type="number" step="0.01" class="form-control bg-opacity-10 py-2" id="amount" name="amount" placeholder="0.00" required>
+                                <span class="input-group-text border-0">$</span>
+                                <input type="number" step="0.01" class="form-control py-2" id="amount" name="amount" placeholder="0.00" required>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold small opacity-75 text-uppercase">Date</label>
-                            <input type="date" class="form-control bg-opacity-10 py-2" id="date" name="date" required>
+                            <label class="form-label fw-bold small text-uppercase">Date</label>
+                            <input type="date" class="form-control py-2" id="date" name="date" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold small opacity-75 text-uppercase">Notes</label>
-                            <input type="text" class="form-control bg-opacity-10 py-2" id="description" name="description" placeholder="Optional description">
+                            <label class="form-label fw-bold small text-uppercase">Notes</label>
+                            <input type="text" class="form-control py-2" id="description" name="description" placeholder="Optional description">
                         </div>
                         <div class="col-12 mt-4">
                             <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm fw-bold rounded-3">
