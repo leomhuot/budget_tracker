@@ -2,7 +2,6 @@ import os
 import psycopg2
 from psycopg2 import pool
 import urllib.parse as urlparse
-import settings_manager # Added import
 import contextlib # Added for context manager
 
 # Create a connection pool
@@ -89,15 +88,16 @@ def get_db_cursor(commit=True):
             release_db_connection(conn)
 
 def init_db():
-    """Initializes the database and creates tables if they don't exist."""
+    """Initializes the database and creates tables if they don't exist, using a single consolidated SQL script."""
     print("DEBUG: init_db() started.")
     conn = get_db_connection()
     print("DEBUG: Connection obtained in init_db().")
     try:
         with conn.cursor() as cur:
-            print("DEBUG: Cursor obtained. Creating tables...")
-            # Execute all table creations in one go to minimize round-trips to Singapore
+            print("DEBUG: Executing consolidated schema and default data script...")
+            # Execute everything in one transaction to minimize round-trips to Singapore
             cur.execute("""
+                -- Tables
                 CREATE TABLE IF NOT EXISTS users (
                     id SERIAL PRIMARY KEY,
                     username TEXT UNIQUE NOT NULL,
@@ -143,13 +143,30 @@ def init_db():
                     key TEXT PRIMARY KEY,
                     value TEXT
                 );
+
+                -- Default Settings (Safe: only inserts if missing)
+                INSERT INTO settings (key, value) 
+                VALUES ('monthly_savings_goal', '100.0') 
+                ON CONFLICT (key) DO NOTHING;
+
+                -- Default Expense Categories (Safe: only inserts if missing)
+                INSERT INTO expense_categories (name, icon) VALUES 
+                ('Food', 'fa-utensils'), ('Drink', 'fa-mug-saucer'), ('Coffee', 'fa-coffee'),
+                ('Transportation', 'fa-car'), ('Rent', 'fa-house'), ('Utilities', 'fa-lightbulb'),
+                ('Shopping', 'fa-bag-shopping'), ('Entertainment', 'fa-film'), ('Gym', 'fa-dumbbell'),
+                ('Event', 'fa-calendar-check'), ('Petroleum', 'fa-gas-pump'), ('Family', 'fa-people-group'),
+                ('Saving', 'fa-piggy-bank'), ('Annual Trip', 'fa-plane'), ('Haircut', 'fa-cut'),
+                ('Other', 'fa-ellipsis-h')
+                ON CONFLICT (name) DO NOTHING;
+
+                -- Default Income Categories (Safe: only inserts if missing)
+                INSERT INTO income_categories (name, icon) VALUES 
+                ('Salary', 'fa-money-bill-wave'), ('Bonus', 'fa-gift'), 
+                ('Freelance', 'fa-laptop-code'), ('Other', 'fa-search-dollar')
+                ON CONFLICT (name) DO NOTHING;
             """)
-            print("DEBUG: Tables created successfully.")
             conn.commit()
-            print("DEBUG: All table creation committed. Initializing default settings...")
-            # Initialize default settings after tables are created
-            settings_manager.initialize_default_settings()
-            print("DEBUG: Default settings initialization called.")
+            print("DEBUG: Consolidated initialization committed.")
     except Exception as e:
         print(f"DEBUG: An error occurred during init_db: {e}")
         if conn:
