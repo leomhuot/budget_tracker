@@ -419,14 +419,22 @@
             if (!ctx || itemLabels.length === 0) return;
 
             const colors = getChartThemeColors();
+            
+            // Define colors: Top 1 Red, Top 2 Orange, Top 3 Yellow, Others Green
+            const backgroundColors = itemData.map((_, index) => {
+                if (index === 0) return '#e74a3b'; // Red
+                if (index === 1) return '#fd7e14'; // Orange
+                if (index === 2) return '#f6c23e'; // Yellow
+                return '#1cc88a'; // Green
+            });
+
             topExpensesItemChart = new Chart(ctx.getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: itemLabels,
                     datasets: [{
                         data: itemData,
-                        backgroundColor: 'rgba(78, 115, 223, 0.85)',
-                        hoverBackgroundColor: '#2e59d9',
+                        backgroundColor: backgroundColors,
                         borderRadius: 4
                     }]
                 },
@@ -494,7 +502,7 @@
                     maintainAspectRatio: false,
                     layout: {
                         padding: {
-                            top: 20
+                            top: 30
                         }
                     },
                     plugins: {

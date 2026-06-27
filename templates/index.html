@@ -89,7 +89,7 @@
                     </div>
                     <div>
                         <h6 class="mb-0 fw-semibold uppercase small opacity-50">Income</h6>
-                        <h3 class="fw-bold mb-0 amount-value" data-value='${{ "%.2f"|format(monthly_summary.total_income) }}'>${{ "%.2f"|format(monthly_summary.total_income) }}</h3>
+                        <h3 class="fw-bold mb-0 amount-value" data-value='${{ "%.2f"|format(monthly_summary.total_income) }}' data-target="{{ monthly_summary.total_income }}">${{ "%.2f"|format(monthly_summary.total_income) }}</h3>
                     </div>
                 </div>
             </div>
@@ -103,7 +103,7 @@
                     </div>
                     <div>
                         <h6 class="mb-0 fw-semibold uppercase small opacity-50">Expense</h6>
-                        <h3 class="fw-bold mb-0 amount-value" data-value='${{ "%.2f"|format(monthly_summary.total_expense) }}'>${{ "%.2f"|format(monthly_summary.total_expense) }}</h3>
+                        <h3 class="fw-bold mb-0 amount-value" data-value='${{ "%.2f"|format(monthly_summary.total_expense) }}' data-target="{{ monthly_summary.total_expense }}">${{ "%.2f"|format(monthly_summary.total_expense) }}</h3>
                     </div>
                 </div>
             </div>
@@ -117,7 +117,7 @@
                     </div>
                     <div>
                         <h6 class="mb-0 fw-semibold uppercase small opacity-50">Balance</h6>
-                        <h3 class="fw-bold mb-0 amount-value" data-value='${{ "%.2f"|format(monthly_summary.balance) }}'>${{ "%.2f"|format(monthly_summary.balance) }}</h3>
+                        <h3 class="fw-bold mb-0 amount-value" data-value='${{ "%.2f"|format(monthly_summary.balance) }}' data-target="{{ monthly_summary.balance }}">${{ "%.2f"|format(monthly_summary.balance) }}</h3>
                     </div>
                 </div>
             </div>
@@ -130,8 +130,8 @@
                         <i class="fa-solid fa-vault"></i>
                     </div>
                     <div>
-                        <h6 class="mb-0 fw-semibold uppercase small opacity-50 text-truncate" style="max-width: 80px;">Gen. Saving</h6>
-                        <h3 class="fw-bold mb-0 amount-value" data-value='${{ "%.2f"|format(monthly_summary.total_general_savings) }}'>${{ "%.2f"|format(monthly_summary.total_general_savings) }}</h3>
+                        <h6 class="mb-0 fw-semibold uppercase small opacity-50">Gen. Saving</h6>
+                        <h3 class="fw-bold mb-0 amount-value" data-value='${{ "%.2f"|format(monthly_summary.total_general_savings) }}' data-target="{{ monthly_summary.total_general_savings }}">${{ "%.2f"|format(monthly_summary.total_general_savings) }}</h3>
                     </div>
                 </div>
             </div>
@@ -144,8 +144,8 @@
                         <i class="fa-solid fa-bullseye"></i>
                     </div>
                     <div>
-                        <h6 class="mb-0 fw-semibold uppercase small opacity-50 text-truncate" style="max-width: 80px;">Goal Saving</h6>
-                        <h3 class="fw-bold mb-0 amount-value" data-value='${{ "%.2f"|format(monthly_summary.total_goal_savings) }}'>${{ "%.2f"|format(monthly_summary.total_goal_savings) }}</h3>
+                        <h6 class="mb-0 fw-semibold uppercase small opacity-50">Goal Saving</h6>
+                        <h3 class="fw-bold mb-0 amount-value" data-value='${{ "%.2f"|format(monthly_summary.total_goal_savings) }}' data-target="{{ monthly_summary.total_goal_savings }}">${{ "%.2f"|format(monthly_summary.total_goal_savings) }}</h3>
                     </div>
                 </div>
             </div>
@@ -159,7 +159,7 @@
                     </div>
                     <div>
                         <h6 class="mb-0 fw-semibold uppercase small opacity-50">Total Saving</h6>
-                        <h3 class="fw-bold mb-0 text-primary amount-value" data-value='${{ "%.2f"|format(monthly_summary.total_savings) }}'>${{ "%.2f"|format(monthly_summary.total_savings) }}</h3>
+                        <h3 class="fw-bold mb-0 text-primary amount-value" data-value='${{ "%.2f"|format(monthly_summary.total_savings) }}' data-target="{{ monthly_summary.total_savings }}">${{ "%.2f"|format(monthly_summary.total_savings) }}</h3>
                     </div>
                 </div>
             </div>
@@ -289,6 +289,26 @@
                 savings_goalSelect.removeAttribute('required');
                 savings_goalSelect.value = '';
             }
+        }
+
+        function animateNumbers() {
+            const counters = document.querySelectorAll('.amount-value[data-target]');
+            counters.forEach(counter => {
+                const target = parseFloat(counter.getAttribute('data-target'));
+                const duration = 2000; // Increased duration for better visibility
+                const startTime = performance.now();
+
+                function update(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const current = progress * target;
+                    counter.textContent = '$' + current.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    if (progress < 1) {
+                        requestAnimationFrame(update);
+                    }
+                }
+                requestAnimationFrame(update);
+            });
         }
 
         typeSelect.addEventListener('change', function() {
