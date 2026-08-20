@@ -567,6 +567,7 @@ def index():
         transaction_type = request.form.get('type')
         item = request.form.get('item')
         amount = float(request.form.get('amount', 0))
+        currency = request.form.get('currency', 'USD')
         date = request.form.get('date', datetime.now().strftime('%Y-%m-%d'))
         description = request.form.get('description', '')
         savings_goal_id = request.form.get('savings_goal_id')
@@ -574,7 +575,7 @@ def index():
         if transaction_type == 'income' and item and amount > 0:
             category = request.form.get('category')
             if category in current_income_categories:
-                budget_logic.add_transaction('income', category, item, amount, date, description)
+                budget_logic.add_transaction('income', category, item, amount, date, description, currency=currency)
         elif transaction_type == 'expense' and item and amount > 0:
             category = request.form.get('category')
             transaction_savings_goal_id = request.form.get('savings_goal_id') if category == 'Goal Savings' else ''
@@ -584,12 +585,12 @@ def index():
                     if not transaction_savings_goal_id:
                         flash('Please select a savings goal for "Goal Savings" category.', 'danger')
                         return redirect(url_for('index'))
-                    budget_logic.add_transaction('expense', category, item, amount, date, description, transaction_savings_goal_id)
+                    budget_logic.add_transaction('expense', category, item, amount, date, description, transaction_savings_goal_id, currency=currency)
                     savings_goals_logic.update_saved_amount(transaction_savings_goal_id, amount)
                 elif category == 'General Savings':
-                    budget_logic.add_transaction('expense', category, item, amount, date, description, '')
+                    budget_logic.add_transaction('expense', category, item, amount, date, description, '', currency=currency)
                 else:
-                    budget_logic.add_transaction('expense', category, item, amount, date, description, '')
+                    budget_logic.add_transaction('expense', category, item, amount, date, description, '', currency=currency)
         
         return redirect(url_for('index'))
 
@@ -685,6 +686,7 @@ def report():
         end_date_str = end_date_obj.strftime('%Y-%m-%d')
 
     report_data = budget_logic.generate_report_data(period=period, start_date_str=start_date_str, end_date_str=end_date_str)
+    print(f"DEBUG: Report data: {report_data}")
 
     if report_data is None:
         flash('Invalid custom date range. Please provide valid start and end dates.', 'danger')
@@ -713,8 +715,16 @@ def report():
                search_query.lower() in str(t.get('transaction_id', '')).lower()
         ]
     
+    app_settings = settings_manager.get_settings()
+    exchange_rate = float(app_settings.get('exchange_rate', 4000.0))
+
+    def convert_to_usd(amt, curr):
+        if str(curr).strip().upper() == 'KHR':
+            return amt / exchange_rate
+        return amt
+
     # Calculate totals AFTER search filter
-    displayed_total_expense = sum(t['amount'] for t in transactions_to_paginate if t['type'] == 'expense')
+    displayed_total_expense = sum(convert_to_usd(t['amount'], t.get('currency', 'USD')) for t in transactions_to_paginate if t['type'] == 'expense')
     
     # Pagination logic
     total_transactions_in_period = len(transactions_to_paginate)
@@ -729,7 +739,8 @@ def report():
     for t in transactions_to_paginate:
         if t['type'] == 'expense':
             category = t['category']
-            expense_categories_distribution[category] = expense_categories_distribution.get(category, 0) + t['amount']
+            amt_usd = convert_to_usd(t['amount'], t.get('currency', 'USD'))
+            expense_categories_distribution[category] = expense_categories_distribution.get(category, 0) + amt_usd
 
     # Calculate top expenses by item for chart
     top_expenses_by_item_raw = {}
@@ -739,7 +750,8 @@ def report():
             item_raw = t.get('item', 'Other')
             # Normalize: strip whitespace and convert to lowercase
             item_key = item_raw.strip().lower()
-            top_expenses_by_item_raw[item_key] = top_expenses_by_item_raw.get(item_key, 0) + t['amount']
+            amt_usd = convert_to_usd(t['amount'], t.get('currency', 'USD'))
+            top_expenses_by_item_raw[item_key] = top_expenses_by_item_raw.get(item_key, 0) + amt_usd
             # Store the first encountered display name for this normalized key
             if item_key not in item_display_names:
                 item_display_names[item_key] = item_raw.strip()
@@ -781,8 +793,10 @@ def report():
 def settings():
     if request.method == 'POST':
         monthly_savings_goal = float(request.form.get('monthly_savings_goal'))
+        exchange_rate = float(request.form.get('exchange_rate', 4000.0))
         settings_data = settings_manager.get_settings()
         settings_data['monthly_savings_goal'] = monthly_savings_goal
+        settings_data['exchange_rate'] = exchange_rate
         settings_manager.save_settings(settings_data)
         flash('Settings saved successfully!', 'success')
         return redirect(url_for('settings'))
@@ -1135,6 +1149,7 @@ def edit(transaction_id):
             'category': request.form.get('category'),
             'item': request.form.get('item'),
             'amount': float(request.form.get('amount', 0)),
+            'currency': request.form.get('currency', 'USD'),
             'description': request.form.get('description', '')
         }
         

@@ -124,7 +124,8 @@ def init_db():
                     amount NUMERIC NOT NULL,
                     date DATE NOT NULL,
                     description TEXT,
-                    savings_goal_id INTEGER REFERENCES savings_goals(id) ON DELETE SET NULL
+                    savings_goal_id INTEGER REFERENCES savings_goals(id) ON DELETE SET NULL,
+                    currency TEXT DEFAULT 'USD'
                 );
                 
                 CREATE TABLE IF NOT EXISTS expense_categories (
@@ -144,9 +145,19 @@ def init_db():
                     value TEXT
                 );
 
+                -- Migration: Add currency column if it doesn't exist
+                DO $$ 
+                BEGIN 
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='transactions' AND column_name='currency') THEN
+                        ALTER TABLE transactions ADD COLUMN currency TEXT DEFAULT 'USD';
+                        -- Ensure existing rows are set to USD
+                        UPDATE transactions SET currency = 'USD' WHERE currency IS NULL;
+                    END IF;
+                END $$;
+
                 -- Default Settings (Safe: only inserts if missing)
                 INSERT INTO settings (key, value) 
-                VALUES ('monthly_savings_goal', '100.0') 
+                VALUES ('monthly_savings_goal', '100.0'), ('exchange_rate', '4000')
                 ON CONFLICT (key) DO NOTHING;
 
                 -- Default Expense Categories (Safe: only inserts if missing)

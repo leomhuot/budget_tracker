@@ -50,6 +50,11 @@ def get_settings():
             cur.execute("SELECT value FROM settings WHERE key = 'monthly_savings_goal';")
             result = cur.fetchone()
             settings['monthly_savings_goal'] = float(result[0]) if result else DEFAULT_MONTHLY_SAVINGS_GOAL
+
+            # Get exchange_rate
+            cur.execute("SELECT value FROM settings WHERE key = 'exchange_rate';")
+            result = cur.fetchone()
+            settings['exchange_rate'] = float(result[0]) if result else 4000.0
     finally:
         db.release_db_connection(conn)
 
@@ -77,6 +82,12 @@ def save_settings(data):
             cur.execute(
                 "INSERT INTO settings (key, value) VALUES (%s, %s) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;",
                 ('monthly_savings_goal', str(monthly_goal))
+            )
+            # Save exchange_rate
+            exchange_rate = data.get('exchange_rate', 4000.0)
+            cur.execute(
+                "INSERT INTO settings (key, value) VALUES (%s, %s) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;",
+                ('exchange_rate', str(exchange_rate))
             )
             conn.commit()
     finally:
@@ -124,13 +135,13 @@ def initialize_default_settings():
                     "Entertainment": "fa-film", 
                     "Gym": "fa-dumbbell", 
                     "Event": "fa-calendar-check", 
-                    "Petroleum": "fa-gas-pump", 
-                    "Family": "fa-people-group", 
+                    "Petroleum": "fa-gas-pump",
+                    "Family": "fa-people-group",
                     "Saving": "fa-piggy-bank",
-                    "Annual Trip": "fa-plane",
+                    "Food": "fa-utensils",
                     "Haircut": "fa-cut",
                     "Other": "fa-ellipsis-h"
-                }
+                    }
                 for name, icon in default_expense_categories_data.items():
                     cur.execute(
                         "INSERT INTO expense_categories (name, icon) VALUES (%s, %s);",

@@ -1,12 +1,18 @@
 from datetime import datetime, timedelta
 import db # Import the db module for database interaction
 import uuid # Import uuid for generating unique transaction IDs
+import settings_manager
+import psycopg2
 
 
 
 
 def get_monthly_summary():
-    """Calculates monthly summary data efficiently using SQL."""
+    """Calculates monthly summary data efficiently using SQL and USD-only conversion."""
+    app_settings = settings_manager.get_settings()
+    exchange_rate = float(app_settings.get('exchange_rate', 4000.0))
+    print(f"DEBUG: Using exchange_rate={exchange_rate}")
+    
     today = datetime.now()
     start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     if today.month == 12:
@@ -19,46 +25,66 @@ def get_monthly_summary():
 
     try:
         with db.get_db_cursor(commit=False) as cur:
-            # Get Total Income
-            cur.execute(
-                "SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'income' AND date >= %s AND date < %s;",
+            # Helper to calculate USD total
+            def get_usd_total(query, params=None):
+                cur.execute(query, params)
+                rows = cur.fetchall()
+                total_usd = 0.0
+                for amount, currency in rows:
+                    amount = float(amount)
+                    # Force string and strip
+                    curr = str(currency).strip() if currency else 'USD'
+                    print(f"DEBUG: Processing amount={amount}, raw_currency='{currency}', normalized_curr='{curr}'")
+                    if curr.upper() == 'USD':
+                        print(f"DEBUG: Currency is USD")
+                        total_usd += amount
+                    elif curr.upper() == 'KHR':
+                        print(f"DEBUG: Currency is KHR, converting {amount} to {amount / exchange_rate}")
+                        total_usd += (amount / exchange_rate)
+                    else:
+                        print(f"DEBUG: Unknown currency '{curr}', defaulting to USD")
+                        total_usd += amount
+                return total_usd
+
+            # Get Total Income (Monthly)
+            total_income = get_usd_total(
+                "SELECT COALESCE(amount, 0), currency FROM transactions WHERE type = 'income' AND date >= %s AND date < %s;",
                 (start_date_str, end_date_str)
             )
-            total_income = float(cur.fetchone()[0])
 
-            # Get Total Expense
-            cur.execute(
-                "SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'expense' AND date >= %s AND date < %s;",
+            # Get Total Expense (Monthly)
+            total_expense = get_usd_total(
+                "SELECT COALESCE(amount, 0), currency FROM transactions WHERE type = 'expense' AND date >= %s AND date < %s;",
                 (start_date_str, end_date_str)
             )
-            total_expense = float(cur.fetchone()[0])
 
-            # Get Total General Savings (all time or monthly? usually all time for total balance)
-            cur.execute(
-                "SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'expense' AND category = 'General Savings';"
+            # Get Total General Savings (All time)
+            total_general_savings = get_usd_total(
+                "SELECT COALESCE(amount, 0), currency FROM transactions WHERE type = 'expense' AND category = 'General Savings';"
             )
-            total_general_savings = float(cur.fetchone()[0])
             
-            # Get Total Goal Savings (all time)
-            cur.execute(
-                "SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'expense' AND category = 'Goal Savings';"
+            # Get Total Goal Savings (All time)
+            total_goal_savings = get_usd_total(
+                "SELECT COALESCE(amount, 0), currency FROM transactions WHERE type = 'expense' AND category = 'Goal Savings';"
             )
-            total_goal_savings = float(cur.fetchone()[0])
+
+            total_savings = total_general_savings + total_goal_savings
 
             return {
                 "total_income": total_income,
                 "total_expense": total_expense,
                 "balance": total_income - total_expense,
-                "total_savings": total_general_savings + total_goal_savings,
+                "total_savings": total_savings,
                 "total_general_savings": total_general_savings,
                 "total_goal_savings": total_goal_savings,
-                "period_name": today.strftime('%B %Y')
+                "period_name": today.strftime('%B %Y'),
+                "exchange_rate": exchange_rate
             }
     except psycopg2.pool.PoolError:
         print("ERROR: Database is temporarily unavailable.")
         raise
 
-def add_transaction(type, category, item, amount, date, description, savings_goal_id=None):
+def add_transaction(type, category, item, amount, date, description, savings_goal_id=None, currency='USD'):
     """Adds a single transaction to the database."""
     try:
         with db.get_db_cursor() as cur: # commit=True by default for INSERT operation
@@ -66,10 +92,10 @@ def add_transaction(type, category, item, amount, date, description, savings_goa
             transaction_id = str(uuid.uuid4())
             cur.execute(
                 """
-                INSERT INTO transactions (transaction_id, type, category, item, amount, date, description, savings_goal_id)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
+                INSERT INTO transactions (transaction_id, type, category, item, amount, date, description, savings_goal_id, currency)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
                 """,
-                (transaction_id, type, category, item, amount, date, description, savings_goal_id if savings_goal_id else None)
+                (transaction_id, type, category, item, amount, date, description, savings_goal_id if savings_goal_id else None, currency)
             )
     except psycopg2.pool.PoolError:
         print("ERROR: Database is temporarily unavailable. Unable to add transaction.")
@@ -79,7 +105,7 @@ def get_transactions(sort_by_date=True):
     transactions = []
     try:
         with db.get_db_cursor(commit=False) as cur: # commit=False for SELECT operation
-            cur.execute("SELECT id, transaction_id, date, type, category, item, amount, description, savings_goal_id FROM transactions ORDER BY date DESC;")
+            cur.execute("SELECT id, transaction_id, date, type, category, item, amount, description, savings_goal_id, currency FROM transactions ORDER BY date DESC;")
             # Convert rows to a list of dictionaries for consistency with original CSV output
             # Also convert Decimal to float for JSON serialization later
             for row in cur.fetchall():
@@ -92,7 +118,8 @@ def get_transactions(sort_by_date=True):
                     'item': row[5],
                     'amount': float(row[6]), # Convert Decimal to float
                     'description': row[7],
-                    'savings_goal_id': str(row[8]) if row[8] else '' # Ensure ID is string
+                    'savings_goal_id': str(row[8]) if row[8] else '', # Ensure ID is string
+                    'currency': row[9] if row[9] else 'USD'
                 }
                 transactions.append(transaction_dict)
     except psycopg2.pool.PoolError:
@@ -105,7 +132,7 @@ def get_transaction(transaction_id):
     try:
         with db.get_db_cursor(commit=False) as cur: # commit=False for SELECT operation
             cur.execute(
-                "SELECT id, transaction_id, date, type, category, item, amount, description, savings_goal_id FROM transactions WHERE id = %s;",
+                "SELECT id, transaction_id, date, type, category, item, amount, description, savings_goal_id, currency FROM transactions WHERE id = %s;",
                 (transaction_id,)
             )
             row = cur.fetchone()
@@ -119,7 +146,8 @@ def get_transaction(transaction_id):
                     'item': row[5],
                     'amount': float(row[6]),
                     'description': row[7],
-                    'savings_goal_id': str(row[8]) if row[8] else ''
+                    'savings_goal_id': str(row[8]) if row[8] else '',
+                    'currency': row[9] if row[9] else 'USD'
                 }
                 return transaction_dict
     except psycopg2.pool.PoolError:
@@ -148,6 +176,8 @@ def update_transaction(transaction_id, data):
                     set_clauses.append(f"{key} = %s")
                     values.append(value)
             
+            # If currency is not in data, we don't update it (it stays as is)
+            
             values.append(transaction_id) # Add transaction_id (which is now the 'id') for WHERE clause
 
             cur.execute(
@@ -163,19 +193,23 @@ def update_transaction(transaction_id, data):
         raise # Re-raise to be handled by calling function/Flask
 
 def generate_report_data(period=None, start_date_str=None, end_date_str=None):
-    """Generates budget report data for a given period or custom date range."""
+    """Generates budget report data for a given period or custom date range with USD-only summaries."""
+    app_settings = settings_manager.get_settings()
+    exchange_rate = app_settings.get('exchange_rate', 4000.0)
+    
     transactions = get_transactions(sort_by_date=False)
     today = datetime.now()
-
+    # ... (date handling logic)
+    
     if start_date_str and end_date_str:
         try:
             start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
             end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
             end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
-            # period is already correctly set by app.py, so no need to overwrite to "custom" here
         except ValueError:
             period = 'monthly'
     
+    # ... (date period setting logic)
     if period == 'daily':
         start_date = today.replace(hour=0, minute=0, second=0, microsecond=0)
         end_date = start_date + timedelta(days=1)
@@ -207,7 +241,6 @@ def generate_report_data(period=None, start_date_str=None, end_date_str=None):
         start_date = today.replace(hour=0, minute=0, second=0, microsecond=0)
         end_date = start_date + timedelta(days=1)
 
-
     filtered_transactions = [
         t for t in transactions 
         if 'date' in t and t['date'] and start_date <= datetime.strptime(t['date'], '%Y-%m-%d') < end_date
@@ -215,10 +248,27 @@ def generate_report_data(period=None, start_date_str=None, end_date_str=None):
     
     filtered_transactions.sort(key=lambda x: datetime.strptime(x['date'], '%Y-%m-%d'), reverse=True)
 
-    total_income = sum(t['amount'] for t in filtered_transactions if t['type'] == 'income')
-    total_expense = sum(t['amount'] for t in filtered_transactions if t['type'] == 'expense')
-    total_goal_savings = sum(t['amount'] for t in filtered_transactions if t['type'] == 'expense' and t['category'] == 'Goal Savings')
-    total_general_savings = sum(t['amount'] for t in filtered_transactions if t['type'] == 'expense' and t['category'] == 'General Savings')
+    def calc_usd_total(txs):
+        usd_sum = 0.0
+        for t in txs:
+            amt = float(t['amount'])
+            # Force string and strip
+            curr = str(t.get('currency', 'USD')).strip()
+            print(f"DEBUG: Processing transaction item='{t.get('item')}', amount={amt}, currency='{curr}'")
+            if curr.upper() == 'USD':
+                usd_sum += amt
+            elif curr.upper() == 'KHR':
+                usd_sum += (amt / exchange_rate)
+            else:
+                print(f"DEBUG: Unknown currency '{curr}', defaulting to USD")
+                usd_sum += amt
+        return usd_sum
+
+    total_income = calc_usd_total([t for t in filtered_transactions if t['type'] == 'income'])
+    total_expense = calc_usd_total([t for t in filtered_transactions if t['type'] == 'expense'])
+    total_goal_savings = calc_usd_total([t for t in filtered_transactions if t['type'] == 'expense' and t['category'] == 'Goal Savings'])
+    total_general_savings = calc_usd_total([t for t in filtered_transactions if t['type'] == 'expense' and t['category'] == 'General Savings'])
+    
     total_savings = total_goal_savings + total_general_savings
     balance = total_income - total_expense
 
@@ -226,7 +276,11 @@ def generate_report_data(period=None, start_date_str=None, end_date_str=None):
     for t in filtered_transactions:
         if t['type'] == 'income':
             item = t.get('item', 'Other')
-            income_breakdown_by_item[item] = income_breakdown_by_item.get(item, 0) + t['amount']
+            amt = float(t['amount'])
+            curr = t.get('currency', 'USD')
+            if curr == 'KHR':
+                amt = amt / exchange_rate
+            income_breakdown_by_item[item] = income_breakdown_by_item.get(item, 0) + amt
 
     monthly_summaries = []
     if period == 'yearly':
@@ -241,18 +295,18 @@ def generate_report_data(period=None, start_date_str=None, end_date_str=None):
                 if current_month_start <= datetime.strptime(t['date'], '%Y-%m-%d') < next_month_start
             ]
             
-            month_income = sum(t['amount'] for t in month_transactions if t['type'] == 'income')
-            month_expense = sum(t['amount'] for t in month_transactions if t['type'] == 'expense')
-            month_savings = sum(t['amount'] for t in month_transactions if t['type'] == 'expense' and (t['category'] == 'Goal Savings' or t['category'] == 'General Savings'))
-            month_balance = month_income - month_expense
+            m_income = calc_usd_total([t for t in month_transactions if t['type'] == 'income'])
+            m_expense = calc_usd_total([t for t in month_transactions if t['type'] == 'expense'])
+            m_savings = calc_usd_total([t for t in month_transactions if t['type'] == 'expense' and (t['category'] == 'Goal Savings' or t['category'] == 'General Savings')])
+            m_balance = m_income - m_expense
 
-            if month_income > 0 or month_expense > 0 or month_savings > 0: # Only include months with data
+            if m_income > 0 or m_expense > 0 or m_savings > 0: # Only include months with data
                 monthly_summaries.append({
                     'month': current_month_start.strftime('%Y-%m'),
-                    'total_income': month_income,
-                    'total_expense': month_expense,
-                    'total_savings': month_savings,
-                    'balance': month_balance
+                    'total_income': m_income,
+                    'total_expense': m_expense,
+                    'total_savings': m_savings,
+                    'balance': m_balance
                 })
             current_month_start = next_month_start
 
@@ -269,5 +323,6 @@ def generate_report_data(period=None, start_date_str=None, end_date_str=None):
         "balance": balance,
         "transactions": filtered_transactions,
         "income_breakdown_by_item": income_breakdown_by_item,
-        "monthly_summaries": monthly_summaries if period == 'yearly' else []
+        "monthly_summaries": monthly_summaries if period == 'yearly' else [],
+        "exchange_rate": exchange_rate
     }

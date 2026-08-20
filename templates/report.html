@@ -143,7 +143,7 @@
     <div class="row g-3 mb-4">
         {% set metrics = [
             ('Income', report.total_income, 'fa-sack-dollar', 'success', 'animate__fadeInUp delay-1'),
-            ('Expense', displayed_total_expense, 'fa-wallet', 'danger', 'animate__fadeInUp delay-2'),
+            ('Expense', report.total_expense, 'fa-wallet', 'danger', 'animate__fadeInUp delay-2'),
             ('Balance', report.balance, 'fa-scale-balanced', 'info', 'animate__fadeInUp delay-3'),
             ('Total Savings', report.total_savings, 'fa-piggy-bank', 'primary', 'animate__fadeInUp delay-4'),
             ('Goal Savings', report.total_goal_savings, 'fa-bullseye', 'warning', 'animate__fadeInUp delay-5'),
@@ -264,7 +264,7 @@
                                 <div class="fw-bold x-small text-truncate">{{ t.item }}</div>
                             </td>
                             <td class="text-end fw-bold {{ 'text-success' if t.type == 'income' else 'text-danger' }} pe-3 text-nowrap x-small">
-                                {{ '+' if t.type == 'income' else '-' }}${{ "%.2f"|format(t.amount) }}
+                                {{ '+' if t.type == 'income' else '-' }}{{ '$' if t.currency == 'USD' else '៛' }}{{ "%.2f"|format(t.amount) }}
                             </td>
                             <td class="text-center pe-4">
                                 <div class="btn-group">
@@ -603,7 +603,7 @@
         
         const rows = [
             {% for t in report.transactions %}
-            ["{{ t.date }}", "{{ t.type|capitalize }}", "{{ t.category }}", "{{ t.item }}", "$ {{ '%.2f'|format(t.amount) }}"],
+            ["{{ t.date }}", "{{ t.type|capitalize }}", "{{ t.category }}", "{{ t.item }}", "{{ '$' if t.currency == 'USD' else '៛' }}{{ '%.2f'|format(t.amount) }}"],
             {% endfor %}
         ];
 
