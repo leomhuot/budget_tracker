@@ -102,7 +102,7 @@ body {
 
 /* Table Animation Fix */
 .table-responsive {
-    overflow: visible !important;
+    overflow-x: auto !important;
 }
 
 /* Status Badges */
