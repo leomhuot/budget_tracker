@@ -264,7 +264,7 @@
                                 <div class="fw-bold x-small text-truncate">{{ t.item }}</div>
                             </td>
                             <td class="text-end fw-bold {{ 'text-success' if t.type == 'income' else 'text-danger' }} pe-3 text-nowrap x-small">
-                                {{ '+' if t.type == 'income' else '-' }}{{ '$' if t.currency == 'USD' else '៛' }}{{ "%.2f"|format(t.amount) }}
+                                {{ '+' if t.type == 'income' else '-' }}<span class="currency-symbol">{{ '$' if t.currency == 'USD' else '៛' }}</span>{{ "%.2f"|format(t.amount) }}
                             </td>
                             <td class="text-center pe-4">
                                 <div class="btn-group">

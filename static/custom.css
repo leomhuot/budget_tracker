@@ -105,6 +105,12 @@ body {
     overflow-x: auto !important;
 }
 
+.currency-symbol {
+    font-weight: 900 !important;
+    font-size: 1.1em !important;
+    margin-right: 2px;
+}
+
 /* Status Badges */
 .badge {
     padding: 0.5em 1em;
