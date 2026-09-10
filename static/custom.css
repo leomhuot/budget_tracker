@@ -129,60 +129,102 @@ body {
     box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
 }
 
-/* Dark Mode Visibility Fixes */
+/* Dark Luxury Mode Overrides - Enhanced */
+[data-bs-theme="dark"] {
+    --bs-body-bg: #0a0c0c; /* Slightly deeper black */
+    --bs-card-bg: #141719; /* Deeper charcoal */
+    --bs-body-color: #e0e0e0;
+}
+
+[data-bs-theme="dark"] .card {
+    background: linear-gradient(145deg, #191c1f, #141719);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
 [data-bs-theme="dark"] .text-primary {
-    color: #7591ff !important; /* Lighter, more vibrant blue for dark backgrounds */
+    color: #d4af37 !important; /* Metallic Gold */
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
 }
 
 [data-bs-theme="dark"] a {
-    color: #8fa5ff;
+    color: #d4af37;
+    transition: color 0.3s ease;
 }
 
 [data-bs-theme="dark"] a:hover {
-    color: #b3c2ff;
+    color: #f1d37e;
+    text-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
 }
 
 [data-bs-theme="dark"] .btn-primary {
-    background-color: #4e73df;
-    border-color: #4e73df;
-    color: #ffffff !important;
+    background: linear-gradient(135deg, #d4af37, #b8860b);
+    border: none;
+    color: #000 !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+[data-bs-theme="dark"] .btn-primary:hover {
+    background: linear-gradient(135deg, #e5c360, #d4af37);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
 }
 
 [data-bs-theme="dark"] .bg-soft-primary {
-    background-color: rgba(117, 145, 255, 0.2) !important;
-    color: #a8baff !important;
+    background-color: rgba(197, 160, 89, 0.2) !important;
+    color: #e0c58e !important;
+}
+/* Dashboard Amount Gold Accent */
+html[data-bs-theme="dark"] .stat-card .amount-value {
+    color: #d4af37 !important;
 }
 
-/* Specific Legibility Overrides */
-[data-bs-theme="dark"] label, 
-[data-bs-theme="dark"] .form-label {
-    color: rgba(255, 255, 255, 0.85) !important;
+/* Luxury Accent Colors for Dashboard */
+html[data-bs-theme="dark"] .welcome-banner h1,
+html[data-bs-theme="dark"] .welcome-banner p {
+    color: #d4af37 !important; /* Gold accent */
 }
 
-[data-bs-theme="dark"] .card-header h4,
-[data-bs-theme="dark"] .card-header h2,
-[data-bs-theme="dark"] .card-header h6 {
+/* Existing overrides... */
+html[data-bs-theme="dark"] .form-floating > label {
+...
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    opacity: 1 !important;
+}
+
+html[data-bs-theme="dark"] .form-floating > .form-control:focus ~ label,
+html[data-bs-theme="dark"] .form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: #d4af37 !important; /* Gold accent on active/filled state */
+}
+
+html[data-bs-theme="dark"] .form-control,
+html[data-bs-theme="dark"] .form-select {
+    background-color: #0e1111 !important;
+    border: 1px solid #4a4a4a !important;
     color: #ffffff !important;
 }
 
-[data-bs-theme="dark"] .form-control,
-[data-bs-theme="dark"] .form-select {
-    background-color: #2b3035 !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    color: #ffffff !important;
+/* Fix placeholder visibility */
+html[data-bs-theme="dark"] .form-control::placeholder {
+    color: #a0a0a0 !important;
+    opacity: 1;
 }
 
 /* Ensure options are visible in all browsers */
-[data-bs-theme="dark"] .form-select option {
-    background-color: #212529;
+html[data-bs-theme="dark"] .form-select option {
+    background-color: #141719;
     color: #ffffff;
 }
 
-[data-bs-theme="dark"] .form-control:focus,
-[data-bs-theme="dark"] .form-select:focus {
-    background-color: #32383e !important;
-    border-color: #7591ff !important;
-    box-shadow: 0 0 0 0.25rem rgba(117, 145, 255, 0.25) !important;
+html[data-bs-theme="dark"] .form-control:focus,
+html[data-bs-theme="dark"] .form-select:focus {
+    background-color: #1a1e21 !important;
+    border-color: #d4af37 !important;
+    box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.25) !important;
 }
 
 [data-bs-theme="dark"] .text-gray-800,
