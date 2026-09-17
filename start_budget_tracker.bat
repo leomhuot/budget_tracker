@@ -1,6 +1,6 @@
 
 @echo off
-echo Starting the Budget Tracker web server...
+echo Starting the Budget Management System web server...
 echo You can close this window to stop the server at any time.
 
 :: Navigate to the directory where this script is located

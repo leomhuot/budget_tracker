@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard - Budget Tracker{% endblock %}
+{% block title %}Dashboard - Budget Management System{% endblock %}
 
 {% block head_extra %}
 <style>
@@ -14,7 +14,28 @@
     }
     .stat-card {
         border-radius: 15px;
-        transition: transform 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        cursor: default;
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card:hover {
+        transform: translateY(-10px) scale(1.03);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2) !important;
+    }
+    .stat-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .stat-card:hover::after {
+        opacity: 1;
     }
     .stat-icon {
         width: 40px;
@@ -24,7 +45,19 @@
         align-items: center;
         justify-content: center;
         font-size: 1.1rem;
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
+    .stat-card:hover .stat-icon {
+        transform: rotate(10deg) scale(1.2);
+    }
+    
+    /* Staggered animation classes */
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+    .delay-6 { animation-delay: 0.6s; }
     .bg-soft-primary { background-color: rgba(78, 115, 223, 0.15); color: #4e73df; }
     .bg-soft-success { background-color: rgba(28, 200, 138, 0.15); color: #1cc88a; }
     .bg-soft-danger { background-color: rgba(231, 74, 59, 0.15); color: #e74a3b; }
@@ -37,6 +70,12 @@
     .privacy-toggle { cursor: pointer; transition: all 0.2s; }
     .privacy-toggle:hover { opacity: 0.8; }
     .amount-masked { font-family: 'monospace'; letter-spacing: 1px; }
+    
+    /* Carousel styling */
+    .carousel-item { padding: 1rem; }
+    .carousel-control-prev, .carousel-control-next { width: 5%; }
+    .carousel-indicators { margin-bottom: -0.5rem; }
+    .carousel-indicators [data-bs-target] { background-color: #4e73df; }
 
     /* Mobile Optimizations */
     @media (max-width: 768px) {
@@ -82,7 +121,7 @@
     <div class="row g-2 g-md-3 mb-4 mb-md-5">
         <!-- Income -->
         <div class="col-6 col-md-4">
-            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
+            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp delay-1">
                 <div class="card-body d-flex align-items-center">
                     <div class="stat-icon bg-soft-success me-3">
                         <i class="fa-solid fa-arrow-trend-up"></i>
@@ -96,7 +135,7 @@
         </div>
         <!-- Expense -->
         <div class="col-6 col-md-4">
-            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
+            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp delay-2">
                 <div class="card-body d-flex align-items-center">
                     <div class="stat-icon bg-soft-danger me-3">
                         <i class="fa-solid fa-arrow-trend-down"></i>
@@ -110,7 +149,7 @@
         </div>
         <!-- Balance -->
         <div class="col-6 col-md-4">
-            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
+            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp delay-3">
                 <div class="card-body d-flex align-items-center">
                     <div class="stat-icon bg-soft-primary me-3">
                         <i class="fa-solid fa-scale-balanced"></i>
@@ -124,7 +163,7 @@
         </div>
         <!-- General Saving -->
         <div class="col-6 col-md-4">
-            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
+            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp delay-4">
                 <div class="card-body d-flex align-items-center">
                     <div class="stat-icon bg-soft-info me-3">
                         <i class="fa-solid fa-vault"></i>
@@ -138,7 +177,7 @@
         </div>
         <!-- Goal Saving -->
         <div class="col-6 col-md-4">
-            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
+            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp delay-5">
                 <div class="card-body d-flex align-items-center">
                     <div class="stat-icon bg-soft-warning me-3">
                         <i class="fa-solid fa-bullseye"></i>
@@ -152,7 +191,7 @@
         </div>
         <!-- Total Saving -->
         <div class="col-6 col-md-4">
-            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp">
+            <div class="card stat-card shadow-sm h-100 animate__animated animate__fadeInUp delay-6">
                 <div class="card-body d-flex align-items-center">
                     <div class="stat-icon bg-soft-primary me-3">
                         <i class="fa-solid fa-piggy-bank"></i>
@@ -254,18 +293,31 @@
                 </div>
             </div>
 
-            <div class="card shadow-sm border-0 animate__animated animate__fadeInRight" style="border-radius: 20px;">
-                <div class="card-header bg-transparent py-3 border-0 mt-2">
-                    <h6 class="mb-0 fw-bold px-2">Quick Tips</h6>
+            <!-- Financial Tips Carousel -->
+            <div id="financialTipsCarousel" class="carousel slide shadow-sm border-0 animate__animated animate__fadeInRight" data-bs-ride="carousel" style="border-radius: 20px; background-color: #2a5298; color: white;">
+                <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#financialTipsCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                    <button type="button" data-bs-target="#financialTipsCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                    <button type="button" data-bs-target="#financialTipsCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
                 </div>
-                <div class="card-body px-4 pb-4">
-                    <div class="d-flex mb-3">
-                        <i class="fa-solid fa-lightbulb text-warning me-3 mt-1"></i>
-                        <p class="small opacity-75 mb-0">Track your daily expenses to stay within your monthly budget!</p>
+                <div class="carousel-inner p-3">
+                    <div class="carousel-item active">
+                        <div class="d-flex align-items-center">
+                            <i class="fa-solid fa-lightbulb text-warning fa-2x me-3"></i>
+                            <p class="small mb-0">Track your daily expenses to stay within your monthly budget!</p>
+                        </div>
                     </div>
-                    <div class="d-flex">
-                        <i class="fa-solid fa-shield-halved text-success me-3 mt-1"></i>
-                        <p class="small opacity-75 mb-0">Set up 2FA in settings to keep your financial data secure.</p>
+                    <div class="carousel-item">
+                        <div class="d-flex align-items-center">
+                            <i class="fa-solid fa-piggy-bank text-success fa-2x me-3"></i>
+                            <p class="small mb-0">A small amount saved daily adds up significantly over time.</p>
+                        </div>
+                    </div>
+                    <div class="carousel-item">
+                        <div class="d-flex align-items-center">
+                            <i class="fa-solid fa-shield-halved text-info fa-2x me-3"></i>
+                            <p class="small mb-0">Don't forget to set up 2FA to keep your account secure.</p>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -27,6 +27,12 @@ body {
     letter-spacing: -0.5px;
 }
 
+@media (max-width: 576px) {
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+}
+
 #current-datetime {
     font-size: 0.9rem;
     font-weight: 500;

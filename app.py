@@ -523,7 +523,7 @@ def register():
                     
                     if admin_emails:
                         subject = 'New User Registration - Awaiting Approval'
-                        body = (f"A new user, '{username}', has registered for Budget Tracker.\n"
+                        body = (f"A new user, '{username}', has registered for Budget Management System.\n"
                                 f"Please log in to the admin panel to approve or reject their account.\n\n"
                                 f"User Details:\n"
                                 f"Username: {username}\n"

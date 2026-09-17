@@ -30,7 +30,7 @@ print("------------------------")
 
 with app.app_context():
     recipient = input("Enter a recipient email address to test: ")
-    msg = Message('Test Email from Budget Tracker',
+    msg = Message('Test Email from Budget Management System',
                   sender=app.config['MAIL_DEFAULT_SENDER'],
                   recipients=[recipient])
     msg.body = "This is a test email to verify your SendGrid configuration."
