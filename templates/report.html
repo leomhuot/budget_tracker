@@ -500,20 +500,20 @@
                     labels: chartLabels,
                     datasets: [
                         {
-                            label: 'Income',
-                            data: chartIncome,
-                            borderColor: '#1cc88a',
-                            backgroundColor: '#1cc88a',
+                            label: 'Expense',
+                            data: chartExpense,
+                            borderColor: '#e74a3b',
+                            backgroundColor: '#e74a3b',
                             pointRadius: 5,
                             pointHoverRadius: 7,
                             fill: false,
                             tension: 0.2
                         },
                         {
-                            label: 'Expense',
-                            data: chartExpense,
-                            borderColor: '#e74a3b',
-                            backgroundColor: '#e74a3b',
+                            label: 'Income',
+                            data: chartIncome,
+                            borderColor: '#1cc88a',
+                            backgroundColor: '#1cc88a',
                             pointRadius: 5,
                             pointHoverRadius: 7,
                             fill: false,
@@ -539,28 +539,29 @@
                                 return context.dataset.data[context.dataIndex] > 0;
                             },
                             anchor: function(context) {
-                                return context.datasetIndex === 0 ? 'end' : 'start';
+                                return context.datasetIndex === 0 ? 'start' : 'end';
                             },
                             align: function(context) {
-                                return context.datasetIndex === 0 ? 'top' : 'bottom';
+                                return context.datasetIndex === 0 ? 'bottom' : 'top';
                             },
                             color: function(context) {
-                                return context.datasetIndex === 0 ? '#1cc88a' : '#e74a3b';
+                                return context.datasetIndex === 0 ? '#e74a3b' : '#1cc88a';
                             },
-                            font: { weight: 'bold', size: 9 }, 
+                            font: { weight: 'bold', size: 9 },
                             formatter: (v) => '$' + v.toFixed(2),
                             offset: 6
                         }
                     },
                     scales: {
                         y: { 
+                            stacked: true,
                             beginAtZero: true, 
                             grid: { color: colors.gridColor }, 
                             border: { display: false }, 
-                            ticks: { display: false },
-                            suggestedMax: Math.max(Math.max(...chartIncome, 0), Math.max(...chartExpense, 0), 10) * 1.25
+                            ticks: { display: false }
                         },
                         x: { 
+                            stacked: true,
                             offset: true,
                             grid: { display: false }, 
                             border: { display: false }, 
