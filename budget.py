@@ -226,10 +226,6 @@ def generate_report_data(period=None, start_date_str=None, end_date_str=None):
     elif period == 'yearly':
         start_date = today.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
         end_date = start_date.replace(year=today.year + 1)
-    elif period == 'last_year_to_date': # Added this line for last_year_to_date
-        last_year = today.year - 1
-        start_date = datetime(last_year, 1, 1, 0, 0, 0, 0)
-        end_date = today.replace(hour=23, minute=59, second=59, microsecond=999999)
     elif not (start_date_str and end_date_str):
         period = 'daily'
         start_date = today.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -254,13 +250,11 @@ def generate_report_data(period=None, start_date_str=None, end_date_str=None):
             amt = float(t['amount'])
             # Force string and strip
             curr = str(t.get('currency', 'USD')).strip()
-            print(f"DEBUG: Processing transaction item='{t.get('item')}', amount={amt}, currency='{curr}'")
             if curr.upper() == 'USD':
                 usd_sum += amt
             elif curr.upper() == 'KHR':
                 usd_sum += (amt / exchange_rate)
             else:
-                print(f"DEBUG: Unknown currency '{curr}', defaulting to USD")
                 usd_sum += amt
         return usd_sum
 
@@ -310,6 +304,191 @@ def generate_report_data(period=None, start_date_str=None, end_date_str=None):
                 })
             current_month_start = next_month_start
 
+    # Compute trending chart data (labels, income, expense)
+    chart_labels = []
+    chart_income = []
+    chart_expense = []
+
+    if period == 'daily':
+        chart_labels = ['6:00 AM', '9:00 AM', '12:00 PM', '3:00 PM', '6:00 PM', '9:00 PM']
+        inc_list = [0.0] * len(chart_labels)
+        exp_list = [0.0] * len(chart_labels)
+        slot_idx = 2 # 12:00 PM default slot
+        for t in filtered_transactions:
+            amt = float(t['amount'])
+            curr = str(t.get('currency', 'USD')).strip()
+            if curr.upper() == 'KHR':
+                amt = amt / exchange_rate
+            if t['type'] == 'income':
+                inc_list[slot_idx] += amt
+            elif t['type'] == 'expense':
+                exp_list[slot_idx] += amt
+        chart_income = inc_list
+        chart_expense = exp_list
+
+    elif period == 'weekly':
+        chart_labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        inc_list = [0.0] * 7
+        exp_list = [0.0] * 7
+        for t in filtered_transactions:
+            try:
+                dt = datetime.strptime(t['date'], '%Y-%m-%d')
+                weekday = dt.weekday()
+                amt = float(t['amount'])
+                curr = str(t.get('currency', 'USD')).strip()
+                if curr.upper() == 'KHR':
+                    amt = amt / exchange_rate
+                if t['type'] == 'income':
+                    inc_list[weekday] += amt
+                elif t['type'] == 'expense':
+                    exp_list[weekday] += amt
+            except ValueError:
+                pass
+        chart_income = inc_list
+        chart_expense = exp_list
+
+    elif period == 'monthly':
+        chart_labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4']
+        inc_list = [0.0, 0.0, 0.0, 0.0]
+        exp_list = [0.0, 0.0, 0.0, 0.0]
+        last_day = (end_date - timedelta(days=1)).day
+        if last_day > 28:
+            chart_labels.append('Week 5')
+            inc_list.append(0.0)
+            exp_list.append(0.0)
+        
+        for t in filtered_transactions:
+            try:
+                dt = datetime.strptime(t['date'], '%Y-%m-%d')
+                day = dt.day
+                if day <= 7: w_idx = 0
+                elif day <= 14: w_idx = 1
+                elif day <= 21: w_idx = 2
+                elif day <= 28: w_idx = 3
+                else: w_idx = 4
+                
+                if w_idx >= len(chart_labels):
+                    w_idx = len(chart_labels) - 1
+
+                amt = float(t['amount'])
+                curr = str(t.get('currency', 'USD')).strip()
+                if curr.upper() == 'KHR':
+                    amt = amt / exchange_rate
+                if t['type'] == 'income':
+                    inc_list[w_idx] += amt
+                elif t['type'] == 'expense':
+                    exp_list[w_idx] += amt
+            except ValueError:
+                pass
+        chart_income = inc_list
+        chart_expense = exp_list
+
+    elif period == 'yearly':
+        chart_labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        inc_list = [0.0] * 12
+        exp_list = [0.0] * 12
+        for ms in monthly_summaries:
+            try:
+                m_num = int(ms['month'].split('-')[1])
+                idx = m_num - 1
+                if 0 <= idx < 12:
+                    inc_list[idx] = ms['total_income']
+                    exp_list[idx] = ms['total_expense']
+            except (ValueError, IndexError):
+                pass
+        chart_income = inc_list
+        chart_expense = exp_list
+
+    else: # custom or other
+        duration = (end_date - start_date).days
+        if duration <= 31:
+            curr_d = start_date
+            chart_labels = []
+            date_map = {}
+            while curr_d < end_date:
+                d_str = curr_d.strftime('%m/%d')
+                chart_labels.append(d_str)
+                date_map[curr_d.strftime('%Y-%m-%d')] = len(chart_labels) - 1
+                curr_d += timedelta(days=1)
+            
+            inc_list = [0.0] * len(chart_labels)
+            exp_list = [0.0] * len(chart_labels)
+            for t in filtered_transactions:
+                d = t.get('date')
+                if d in date_map:
+                    idx = date_map[d]
+                    amt = float(t['amount'])
+                    curr = str(t.get('currency', 'USD')).strip()
+                    if curr.upper() == 'KHR':
+                        amt = amt / exchange_rate
+                    if t['type'] == 'income':
+                        inc_list[idx] += amt
+                    elif t['type'] == 'expense':
+                        exp_list[idx] += amt
+            chart_income = inc_list
+            chart_expense = exp_list
+        elif duration <= 365:
+            curr_month_start = start_date.replace(day=1)
+            chart_labels = []
+            month_map = {}
+            while curr_month_start < end_date:
+                m_str = curr_month_start.strftime('%b %Y')
+                chart_labels.append(m_str)
+                month_map[curr_month_start.strftime('%Y-%m')] = len(chart_labels) - 1
+                next_m = (curr_month_start.replace(day=28) + timedelta(days=4)).replace(day=1)
+                curr_month_start = next_m
+            
+            inc_list = [0.0] * len(chart_labels)
+            exp_list = [0.0] * len(chart_labels)
+            for t in filtered_transactions:
+                try:
+                    dt = datetime.strptime(t['date'], '%Y-%m-%d')
+                    m_key = dt.strftime('%Y-%m')
+                    if m_key in month_map:
+                        idx = month_map[m_key]
+                        amt = float(t['amount'])
+                        curr = str(t.get('currency', 'USD')).strip()
+                        if curr.upper() == 'KHR':
+                            amt = amt / exchange_rate
+                        if t['type'] == 'income':
+                            inc_list[idx] += amt
+                        elif t['type'] == 'expense':
+                            exp_list[idx] += amt
+                except ValueError:
+                    pass
+            chart_income = inc_list
+            chart_expense = exp_list
+        else:
+            curr_y = start_date.year
+            end_y = end_date.year
+            chart_labels = []
+            year_map = {}
+            for y in range(curr_y, end_y + 1):
+                y_str = str(y)
+                chart_labels.append(y_str)
+                year_map[y] = len(chart_labels) - 1
+            
+            inc_list = [0.0] * len(chart_labels)
+            exp_list = [0.0] * len(chart_labels)
+            for t in filtered_transactions:
+                try:
+                    dt = datetime.strptime(t['date'], '%Y-%m-%d')
+                    y_key = dt.year
+                    if y_key in year_map:
+                        idx = year_map[y_key]
+                        amt = float(t['amount'])
+                        curr = str(t.get('currency', 'USD')).strip()
+                        if curr.upper() == 'KHR':
+                            amt = amt / exchange_rate
+                        if t['type'] == 'income':
+                            inc_list[idx] += amt
+                        elif t['type'] == 'expense':
+                            exp_list[idx] += amt
+                except ValueError:
+                    pass
+            chart_income = inc_list
+            chart_expense = exp_list
+
 
     return {
         "period": period,
@@ -324,5 +503,8 @@ def generate_report_data(period=None, start_date_str=None, end_date_str=None):
         "transactions": filtered_transactions,
         "income_breakdown_by_item": income_breakdown_by_item,
         "monthly_summaries": monthly_summaries if period == 'yearly' else [],
-        "exchange_rate": exchange_rate
+        "exchange_rate": exchange_rate,
+        "chart_labels": chart_labels,
+        "chart_income": chart_income,
+        "chart_expense": chart_expense
     }

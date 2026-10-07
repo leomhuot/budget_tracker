@@ -668,7 +668,7 @@ def report():
     page = request.args.get('page', 1, type=int) # Define page at the beginning
     per_page = request.args.get('per_page', 10, type=int) # Define per_page at the beginning
 
-    if period in ['daily', 'weekly', 'monthly', 'yearly', 'last_year_to_date']:
+    if period in ['daily', 'weekly', 'monthly', 'yearly']:
         session.pop('custom_report_range', None)
     elif period == 'custom':
         if start_date_str and end_date_str:
@@ -677,16 +677,8 @@ def report():
             start_date_str, end_date_str = session['custom_report_range']
     # If it was custom but we don't have range, it will fall back to default in budget_logic
 
-    if period == 'last_year_to_date':
-        today = datetime.now()
-        last_year = today.year - 1
-        start_date_obj = datetime(last_year, 1, 1, 0, 0, 0, 0)
-        end_date_obj = today
-        start_date_str = start_date_obj.strftime('%Y-%m-%d')
-        end_date_str = end_date_obj.strftime('%Y-%m-%d')
-
     report_data = budget_logic.generate_report_data(period=period, start_date_str=start_date_str, end_date_str=end_date_str)
-    print(f"DEBUG: Report data: {report_data}")
+    # print(f"DEBUG: Report data retrieved successfully")
 
     if report_data is None:
         flash('Invalid custom date range. Please provide valid start and end dates.', 'danger')
