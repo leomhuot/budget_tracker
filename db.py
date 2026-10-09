@@ -125,7 +125,8 @@ def init_db():
                     date DATE NOT NULL,
                     description TEXT,
                     savings_goal_id INTEGER REFERENCES savings_goals(id) ON DELETE SET NULL,
-                    currency TEXT DEFAULT 'USD'
+                    currency TEXT DEFAULT 'USD',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
                 
                 CREATE TABLE IF NOT EXISTS expense_categories (
@@ -152,6 +153,15 @@ def init_db():
                         ALTER TABLE transactions ADD COLUMN currency TEXT DEFAULT 'USD';
                         -- Ensure existing rows are set to USD
                         UPDATE transactions SET currency = 'USD' WHERE currency IS NULL;
+                    END IF;
+                END $$;
+
+                -- Migration: Add created_at column if it doesn't exist
+                DO $$ 
+                BEGIN 
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='transactions' AND column_name='created_at') THEN
+                        ALTER TABLE transactions ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+                        UPDATE transactions SET created_at = CURRENT_TIMESTAMP WHERE created_at IS NULL;
                     END IF;
                 END $$;
 

@@ -571,11 +571,12 @@ def index():
         date = request.form.get('date', datetime.now().strftime('%Y-%m-%d'))
         description = request.form.get('description', '')
         savings_goal_id = request.form.get('savings_goal_id')
+        local_time = request.form.get('local_time')
 
         if transaction_type == 'income' and item and amount > 0:
             category = request.form.get('category')
             if category in current_income_categories:
-                budget_logic.add_transaction('income', category, item, amount, date, description, currency=currency)
+                budget_logic.add_transaction('income', category, item, amount, date, description, currency=currency, local_time=local_time)
         elif transaction_type == 'expense' and item and amount > 0:
             category = request.form.get('category')
             transaction_savings_goal_id = request.form.get('savings_goal_id') if category == 'Goal Savings' else ''
@@ -585,12 +586,12 @@ def index():
                     if not transaction_savings_goal_id:
                         flash('Please select a savings goal for "Goal Savings" category.', 'danger')
                         return redirect(url_for('index'))
-                    budget_logic.add_transaction('expense', category, item, amount, date, description, transaction_savings_goal_id, currency=currency)
+                    budget_logic.add_transaction('expense', category, item, amount, date, description, transaction_savings_goal_id, currency=currency, local_time=local_time)
                     savings_goals_logic.update_saved_amount(transaction_savings_goal_id, amount)
                 elif category == 'General Savings':
-                    budget_logic.add_transaction('expense', category, item, amount, date, description, '', currency=currency)
+                    budget_logic.add_transaction('expense', category, item, amount, date, description, '', currency=currency, local_time=local_time)
                 else:
-                    budget_logic.add_transaction('expense', category, item, amount, date, description, '', currency=currency)
+                    budget_logic.add_transaction('expense', category, item, amount, date, description, '', currency=currency, local_time=local_time)
         
         return redirect(url_for('index'))
 

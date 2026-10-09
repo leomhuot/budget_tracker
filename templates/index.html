@@ -214,6 +214,7 @@
                 </div>
                 <div class="card-body px-4 pb-4">
                     <form action="{{ url_for('index') }}" method="POST" class="row g-3">
+                        <input type="hidden" name="local_time" id="local_time_input">
                         <div class="col-md-6">
                             <label class="form-label fw-bold small text-uppercase">Type</label>
                             <select class="form-select py-2" id="type" name="type" required>
@@ -423,6 +424,20 @@
         // Initial check
         toggleSavingsGoal();
         updatePrivacyUI();
+
+        // Populate local time on form submit
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function() {
+                const now = new Date();
+                const pad = (n) => String(n).padStart(2, '0');
+                const localTimeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+                const localTimeInput = document.getElementById('local_time_input');
+                if (localTimeInput) {
+                    localTimeInput.value = localTimeStr;
+                }
+            });
+        }
     });
 </script>
 {% endblock %}

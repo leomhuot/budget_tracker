@@ -84,18 +84,19 @@ def get_monthly_summary():
         print("ERROR: Database is temporarily unavailable.")
         raise
 
-def add_transaction(type, category, item, amount, date, description, savings_goal_id=None, currency='USD'):
+def add_transaction(type, category, item, amount, date, description, savings_goal_id=None, currency='USD', local_time=None):
     """Adds a single transaction to the database."""
     try:
         with db.get_db_cursor() as cur: # commit=True by default for INSERT operation
             # Generate a unique transaction_id using UUID
             transaction_id = str(uuid.uuid4())
+            created_val = local_time if local_time else datetime.now()
             cur.execute(
                 """
-                INSERT INTO transactions (transaction_id, type, category, item, amount, date, description, savings_goal_id, currency)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+                INSERT INTO transactions (transaction_id, type, category, item, amount, date, description, savings_goal_id, currency, created_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
                 """,
-                (transaction_id, type, category, item, amount, date, description, savings_goal_id if savings_goal_id else None, currency)
+                (transaction_id, type, category, item, amount, date, description, savings_goal_id if savings_goal_id else None, currency, created_val)
             )
     except psycopg2.pool.PoolError:
         print("ERROR: Database is temporarily unavailable. Unable to add transaction.")
@@ -105,7 +106,7 @@ def get_transactions(sort_by_date=True):
     transactions = []
     try:
         with db.get_db_cursor(commit=False) as cur: # commit=False for SELECT operation
-            cur.execute("SELECT id, transaction_id, date, type, category, item, amount, description, savings_goal_id, currency FROM transactions ORDER BY date DESC;")
+            cur.execute("SELECT id, transaction_id, date, type, category, item, amount, description, savings_goal_id, currency, created_at FROM transactions ORDER BY date DESC;")
             # Convert rows to a list of dictionaries for consistency with original CSV output
             # Also convert Decimal to float for JSON serialization later
             for row in cur.fetchall():
@@ -119,7 +120,8 @@ def get_transactions(sort_by_date=True):
                     'amount': float(row[6]), # Convert Decimal to float
                     'description': row[7],
                     'savings_goal_id': str(row[8]) if row[8] else '', # Ensure ID is string
-                    'currency': row[9] if row[9] else 'USD'
+                    'currency': row[9] if row[9] else 'USD',
+                    'created_at': str(row[10]) if row[10] else ''
                 }
                 transactions.append(transaction_dict)
     except psycopg2.pool.PoolError:
@@ -132,7 +134,7 @@ def get_transaction(transaction_id):
     try:
         with db.get_db_cursor(commit=False) as cur: # commit=False for SELECT operation
             cur.execute(
-                "SELECT id, transaction_id, date, type, category, item, amount, description, savings_goal_id, currency FROM transactions WHERE id = %s;",
+                "SELECT id, transaction_id, date, type, category, item, amount, description, savings_goal_id, currency, created_at FROM transactions WHERE id = %s;",
                 (transaction_id,)
             )
             row = cur.fetchone()
@@ -147,7 +149,8 @@ def get_transaction(transaction_id):
                     'amount': float(row[6]),
                     'description': row[7],
                     'savings_goal_id': str(row[8]) if row[8] else '',
-                    'currency': row[9] if row[9] else 'USD'
+                    'currency': row[9] if row[9] else 'USD',
+                    'created_at': str(row[10]) if row[10] else ''
                 }
                 return transaction_dict
     except psycopg2.pool.PoolError:
@@ -310,15 +313,46 @@ def generate_report_data(period=None, start_date_str=None, end_date_str=None):
     chart_expense = []
 
     if period == 'daily':
-        chart_labels = ['6:00 AM', '9:00 AM', '12:00 PM', '3:00 PM', '6:00 PM', '9:00 PM']
-        inc_list = [0.0] * len(chart_labels)
-        exp_list = [0.0] * len(chart_labels)
-        slot_idx = 2 # 12:00 PM default slot
+        chart_labels = [
+            '12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM',
+            '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM',
+            '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM',
+            '6 PM', '7 PM', '8 PM', '9 PM', '10 PM', '11 PM'
+        ]
+        inc_list = [0.0] * 24
+        exp_list = [0.0] * 24
+        
         for t in filtered_transactions:
             amt = float(t['amount'])
             curr = str(t.get('currency', 'USD')).strip()
             if curr.upper() == 'KHR':
                 amt = amt / exchange_rate
+            
+            # Determine hourly slot based on transaction_id timestamp or created_at (0 to 23)
+            slot_idx = 12 # default to 12 PM (noon)
+            created_at_str = t.get('created_at', '')
+            tx_id = str(t.get('transaction_id', ''))
+            
+            if tx_id.isdigit() and len(tx_id) >= 10:
+                try:
+                    hour = int(tx_id[8:10])
+                    if 0 <= hour <= 23:
+                        slot_idx = hour
+                except ValueError:
+                    pass
+            elif created_at_str and not created_at_str.startswith('2026-10-09 02:07:15'):
+                try:
+                    dt_created = datetime.fromisoformat(created_at_str.replace('Z', ''))
+                    slot_idx = max(0, min(23, dt_created.hour))
+                except ValueError:
+                    try:
+                        dt_created = datetime.strptime(created_at_str.split('.')[0], '%Y-%m-%d %H:%M:%S')
+                        slot_idx = max(0, min(23, dt_created.hour))
+                    except Exception:
+                        pass
+            else:
+                slot_idx = 12 # Default migrated/unknown items to noon
+
             if t['type'] == 'income':
                 inc_list[slot_idx] += amt
             elif t['type'] == 'expense':

@@ -539,11 +539,18 @@
                                 return context.dataset.data[context.dataIndex] > 0;
                             },
                             anchor: function(context) {
-                                return context.datasetIndex === 0 ? 'start' : 'end';
+                                return context.datasetIndex === 0 ? 'center' : 'end';
                             },
                             align: function(context) {
-                                return context.datasetIndex === 0 ? 'bottom' : 'top';
+                                return context.datasetIndex === 0 ? 'top' : 'top';
                             },
+                            backgroundColor: '#ffffff',
+                            borderColor: function(context) {
+                                return context.datasetIndex === 0 ? '#e74a3b' : '#1cc88a';
+                            },
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            padding: { top: 2, bottom: 2, left: 4, right: 4 },
                             color: function(context) {
                                 return context.datasetIndex === 0 ? '#e74a3b' : '#1cc88a';
                             },
@@ -570,8 +577,7 @@
                                 font: { weight: 'bold', size: 10 },
                                 maxRotation: 0,
                                 autoSkip: true,
-                                autoSkipPadding: 15,
-                                includeBounds: true,
+                                maxTicksLimit: 8,
                                 padding: 8
                             } 
                         }
