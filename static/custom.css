@@ -169,8 +169,14 @@ body {
     color: #000 !important;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+[data-bs-theme="dark"] .btn-primary.btn-lg {
+    font-size: 1.1rem;
+    letter-spacing: 0.3px;
+    padding: 0.75rem 1rem;
 }
 
 [data-bs-theme="dark"] .btn-primary:hover {
