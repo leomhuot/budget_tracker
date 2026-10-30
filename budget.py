@@ -542,3 +542,73 @@ def generate_report_data(period=None, start_date_str=None, end_date_str=None):
         "chart_income": chart_income,
         "chart_expense": chart_expense
     }
+
+
+def get_category_budget_comparison():
+    app_settings = settings_manager.get_settings()
+    exchange_rate = float(app_settings.get('exchange_rate', 4000.0))
+    expense_categories = app_settings.get('expense_categories', [])
+    category_planned_limits = app_settings.get('category_planned_limits', {})
+    
+    today = datetime.now()
+    start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    if today.month == 12:
+        end_date = start_date.replace(year=today.year + 1, month=1)
+    else:
+        end_date = start_date.replace(month=today.month + 1)
+    
+    start_date_str = start_date.strftime('%Y-%m-%d')
+    end_date_str = end_date.strftime('%Y-%m-%d')
+
+    actuals = {}
+    try:
+        with db.get_db_cursor(commit=False) as cur:
+            cur.execute(
+                "SELECT category, amount, currency FROM transactions WHERE type = 'expense' AND date >= %s AND date < %s;",
+                (start_date_str, end_date_str)
+            )
+            for cat, amount, currency in cur.fetchall():
+                amt = float(amount)
+                curr = str(currency).strip() if currency else 'USD'
+                amt_usd = amt if curr.upper() == 'USD' else (amt / exchange_rate)
+                actuals[cat] = actuals.get(cat, 0.0) + amt_usd
+    except Exception as e:
+        print(f"Error fetching category actuals: {e}")
+
+    comparison = []
+    total_planned = 0.0
+    total_actual = 0.0
+
+    for cat in expense_categories:
+        planned = float(category_planned_limits.get(cat, 0.0))
+        actual = actuals.get(cat, 0.0)
+        variance = planned - actual
+        pct = (actual / planned * 100) if planned > 0 else (100.0 if actual > 0 else 0.0)
+        
+        total_planned += planned
+        total_actual += actual
+
+        if planned == 0:
+            status = 'neutral'
+        elif pct >= 100:
+            status = 'danger'
+        elif pct >= 80:
+            status = 'warning'
+        else:
+            status = 'success'
+
+        comparison.append({
+            'category': cat,
+            'planned': planned,
+            'actual': actual,
+            'variance': variance,
+            'percentage': pct,
+            'status': status
+        })
+
+    return {
+        'comparison_items': comparison,
+        'total_planned': total_planned,
+        'total_actual': total_actual,
+        'total_variance': total_planned - total_actual
+    }

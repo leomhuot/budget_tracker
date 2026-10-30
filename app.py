@@ -598,6 +598,7 @@ def index():
     # Optimized GET logic:
     # Only fetch what's absolutely necessary for the view
     monthly_summary = budget_logic.get_monthly_summary()
+    budget_comparison = budget_logic.get_category_budget_comparison()
     
     return render_template('index.html', 
                            categories=current_expense_categories, 
@@ -606,6 +607,7 @@ def index():
                            income_category_icons=current_income_category_icons,
                            savings_goals=savings_goals,
                            monthly_summary=monthly_summary,
+                           budget_comparison=budget_comparison,
                            today_date=datetime.now().strftime('%Y-%m-%d'))
 
 @app.route('/transactions')
@@ -803,10 +805,16 @@ def manage_categories():
     current_settings = settings_manager.get_settings()
     expense_categories = current_settings.get('expense_categories', [])
     category_icons = current_settings.get('category_icons', {})
+    category_planned_limits = current_settings.get('category_planned_limits', {})
 
     if request.method == 'POST':
         new_category_name = request.form.get('new_category_name', '').strip()
         new_category_icon = request.form.get('new_category_icon', '').strip()
+        new_planned_limit = request.form.get('planned_limit', '0.0').strip()
+        try:
+            planned_limit = float(new_planned_limit)
+        except:
+            planned_limit = 0.0
 
         if new_category_name:
             # Check for duplicate category name (case-insensitive)
@@ -816,9 +824,11 @@ def manage_categories():
 
             expense_categories.append(new_category_name)
             category_icons[new_category_name] = new_category_icon if new_category_icon else category_icons.get('_default')
+            category_planned_limits[new_category_name] = planned_limit
             
             current_settings['expense_categories'] = expense_categories
             current_settings['category_icons'] = category_icons
+            current_settings['category_planned_limits'] = category_planned_limits
             settings_manager.save_settings(current_settings)
             flash(f'Category "{new_category_name}" added successfully!', 'success')
         else:
@@ -829,6 +839,7 @@ def manage_categories():
     return render_template('categories.html', 
                            expense_categories=expense_categories, 
                            category_icons=category_icons,
+                           category_planned_limits=category_planned_limits,
                            current_settings=current_settings)
 
 
@@ -838,14 +849,18 @@ def delete_category(category_name):
     current_settings = settings_manager.get_settings()
     expense_categories = current_settings.get('expense_categories', [])
     category_icons = current_settings.get('category_icons', {})
+    category_planned_limits = current_settings.get('category_planned_limits', {})
 
     if category_name in expense_categories:
         expense_categories.remove(category_name)
         if category_name in category_icons:
             del category_icons[category_name]
+        if category_name in category_planned_limits:
+            del category_planned_limits[category_name]
         
         current_settings['expense_categories'] = expense_categories
         current_settings['category_icons'] = category_icons
+        current_settings['category_planned_limits'] = category_planned_limits
         settings_manager.save_settings(current_settings)
         flash(f'Category "{category_name}" deleted successfully!', 'success')
     else:
@@ -860,10 +875,16 @@ def edit_category(old_category_name):
     current_settings = settings_manager.get_settings()
     expense_categories = current_settings.get('expense_categories', [])
     category_icons = current_settings.get('category_icons', {})
+    category_planned_limits = current_settings.get('category_planned_limits', {})
 
     if request.method == 'POST':
         new_category_name = request.form.get('new_category_name', '').strip()
         new_category_icon = request.form.get('new_category_icon', '').strip()
+        new_planned_limit = request.form.get('planned_limit', '0.0').strip()
+        try:
+            planned_limit = float(new_planned_limit)
+        except:
+            planned_limit = 0.0
 
         if not new_category_name:
             flash('New category name cannot be empty.', 'danger')
@@ -882,8 +903,13 @@ def edit_category(old_category_name):
                 del category_icons[old_category_name]
             category_icons[new_category_name] = new_category_icon if new_category_icon else category_icons.get('_default')
 
+            if old_category_name in category_planned_limits:
+                del category_planned_limits[old_category_name]
+            category_planned_limits[new_category_name] = planned_limit
+
             current_settings['expense_categories'] = expense_categories
             current_settings['category_icons'] = category_icons
+            current_settings['category_planned_limits'] = category_planned_limits
             settings_manager.save_settings(current_settings)
             flash(f'Category "{old_category_name}" updated to "{new_category_name}" successfully!', 'success')
             return redirect(url_for('manage_categories'))
@@ -896,9 +922,11 @@ def edit_category(old_category_name):
         return redirect(url_for('manage_categories'))
         
     current_icon = category_icons.get(old_category_name, category_icons.get('_default'))
+    current_limit = category_planned_limits.get(old_category_name, 0.0)
     return render_template('edit_category.html', 
                            category_name=old_category_name, 
-                           category_icon=current_icon)
+                           category_icon=current_icon,
+                           category_limit=current_limit)
 
 @app.route('/settings/income_categories', methods=['GET', 'POST'])
 @login_required

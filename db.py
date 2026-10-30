@@ -132,7 +132,8 @@ def init_db():
                 CREATE TABLE IF NOT EXISTS expense_categories (
                     id SERIAL PRIMARY KEY,
                     name TEXT UNIQUE NOT NULL,
-                    icon TEXT
+                    icon TEXT,
+                    planned_limit NUMERIC DEFAULT 0.0
                 );
                 
                 CREATE TABLE IF NOT EXISTS income_categories (
@@ -162,6 +163,14 @@ def init_db():
                     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='transactions' AND column_name='created_at') THEN
                         ALTER TABLE transactions ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
                         UPDATE transactions SET created_at = CURRENT_TIMESTAMP WHERE created_at IS NULL;
+                    END IF;
+                END $$;
+
+                -- Migration: Add planned_limit column if it doesn't exist
+                DO $$ 
+                BEGIN 
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='expense_categories' AND column_name='planned_limit') THEN
+                        ALTER TABLE expense_categories ADD COLUMN planned_limit NUMERIC DEFAULT 0.0;
                     END IF;
                 END $$;
 

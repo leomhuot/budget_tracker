@@ -7,30 +7,49 @@ DEFAULT_MONTHLY_SAVINGS_GOAL = 100.0
 def _get_db_categories(table_name):
     categories = []
     category_icons = {}
+    category_planned_limits = {}
     conn = db.get_db_connection()
     try:
         with conn.cursor() as cur:
-            cur.execute(f"SELECT name, icon FROM {table_name} ORDER BY name;")
-            for row in cur.fetchall():
-                categories.append(row[0])
-                category_icons[row[0]] = row[1]
+            if table_name == 'expense_categories':
+                cur.execute(f"SELECT name, icon, planned_limit FROM {table_name} ORDER BY name;")
+                for row in cur.fetchall():
+                    categories.append(row[0])
+                    category_icons[row[0]] = row[1]
+                    category_planned_limits[row[0]] = float(row[2]) if row[2] is not None else 0.0
+                return categories, category_icons, category_planned_limits
+            else:
+                cur.execute(f"SELECT name, icon FROM {table_name} ORDER BY name;")
+                for row in cur.fetchall():
+                    categories.append(row[0])
+                    category_icons[row[0]] = row[1]
+                return categories, category_icons
     finally:
         db.release_db_connection(conn)
-    return categories, category_icons
 
-def _save_db_categories(table_name, categories_data):
+def _save_db_categories(table_name, categories_data, planned_limits_data=None):
     conn = db.get_db_connection()
     try:
         with conn.cursor() as cur:
-            # Clear existing categories for simplicity before re-inserting
-            # In a real app, you might do a diff and update/insert/delete more granularly
             cur.execute(f"DELETE FROM {table_name};")
             
             for name, icon in categories_data.items():
-                cur.execute(
-                    f"INSERT INTO {table_name} (name, icon) VALUES (%s, %s);",
-                    (name, icon)
-                )
+                if table_name == 'expense_categories':
+                    limit = 0.0
+                    if planned_limits_data and name in planned_limits_data:
+                        try:
+                            limit = float(planned_limits_data[name])
+                        except:
+                            limit = 0.0
+                    cur.execute(
+                        f"INSERT INTO {table_name} (name, icon, planned_limit) VALUES (%s, %s, %s);",
+                        (name, icon, limit)
+                    )
+                else:
+                    cur.execute(
+                        f"INSERT INTO {table_name} (name, icon) VALUES (%s, %s);",
+                        (name, icon)
+                    )
             conn.commit()
     finally:
         db.release_db_connection(conn)
@@ -58,10 +77,11 @@ def get_settings():
     finally:
         db.release_db_connection(conn)
 
-    # Get expense categories and icons
-    expense_categories, category_icons = _get_db_categories('expense_categories')
-    settings['expense_categories'] = expense_categories
-    settings['category_icons'] = category_icons
+    # Get expense categories, icons, and planned limits
+    exp_res = _get_db_categories('expense_categories')
+    settings['expense_categories'] = exp_res[0]
+    settings['category_icons'] = exp_res[1]
+    settings['category_planned_limits'] = exp_res[2]
 
     # Get income categories and icons
     income_categories, income_category_icons = _get_db_categories('income_categories')
@@ -97,7 +117,7 @@ def save_settings(data):
     expense_category_map = {}
     for cat_name in data.get('expense_categories', []):
         expense_category_map[cat_name] = data.get('category_icons', {}).get(cat_name, "fa-tags")
-    _save_db_categories('expense_categories', expense_category_map)
+    _save_db_categories('expense_categories', expense_category_map, data.get('category_planned_limits', {}))
 
     income_category_map = {}
     for cat_name in data.get('income_categories', []):

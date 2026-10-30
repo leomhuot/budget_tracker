@@ -66,6 +66,13 @@
     
     .transaction-form-card { border-radius: 20px; border: none; }
 
+    /* Uniform Status Badges */
+    .budget-status-badge {
+        width: 120px;
+        display: inline-block;
+        text-align: center;
+    }
+
     /* Privacy Toggle Styles */
     .privacy-toggle { cursor: pointer; transition: all 0.2s; }
     .privacy-toggle:hover { opacity: 0.8; }
@@ -205,7 +212,7 @@
         </div>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4 mb-4">
         <!-- Add Transaction Card -->
         <div class="col-lg-8">
             <div class="card transaction-form-card shadow-sm border-0 animate__animated animate__fadeInLeft">
@@ -319,6 +326,73 @@
                             <i class="fa-solid fa-shield-halved text-info fa-2x me-3"></i>
                             <p class="small mb-0">Don't forget to set up 2FA to keep your account secure.</p>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Planned vs Actual Budget Tracking Widget -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white py-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                    <div>
+                        <h5 class="m-0 fw-bold text-primary"><i class="fa-solid fa-scale-balanced me-2"></i>Planned vs Actual Budget ({{ monthly_summary.period_name }})</h5>
+                        <p class="text-muted small mb-0">Monitor category spending limits to prevent overload expenses</p>
+                    </div>
+                    <div class="mt-2 mt-md-0 d-flex gap-3">
+                        <span class="badge bg-light text-dark border px-3 py-2 fw-bold">Planned: ${{ "%.2f"|format(budget_comparison.total_planned) }}</span>
+                        <span class="badge bg-light text-dark border px-3 py-2 fw-bold">Actual: ${{ "%.2f"|format(budget_comparison.total_actual) }}</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light text-muted small text-uppercase">
+                                <tr>
+                                    <th class="ps-4" style="cursor: pointer;" onclick="sortTable(0)" title="Click to sort">Category <i class="fa-solid fa-sort text-muted ms-1"></i></th>
+                                    <th style="cursor: pointer;" onclick="sortTable(1, 'number')" title="Click to sort">Planned <i class="fa-solid fa-sort text-muted ms-1"></i></th>
+                                    <th style="cursor: pointer;" onclick="sortTable(2, 'number')" title="Click to sort">Actual <i class="fa-solid fa-sort text-muted ms-1"></i></th>
+                                    <th style="cursor: pointer;" onclick="sortTable(3, 'number')" title="Click to sort">Variance <i class="fa-solid fa-sort text-muted ms-1"></i></th>
+                                    <th style="width: 200px;">Progress</th>
+                                    <th class="text-center pe-4" style="cursor: pointer;" onclick="sortTable(5)" title="Click to sort">Status <i class="fa-solid fa-sort text-muted ms-1"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in budget_comparison.comparison_items %}
+                                <tr>
+                                    <td class="ps-4 fw-bold text-dark">{{ item.category }}</td>
+                                    <td>${{ "%.2f"|format(item.planned) }}</td>
+                                    <td><span class="fw-bold {% if item.status == 'danger' %}text-danger{% elif item.status == 'warning' %}text-warning{% else %}text-success{% endif %}">${{ "%.2f"|format(item.actual) }}</span></td>
+                                    <td>
+                                        {% if item.variance >= 0 %}
+                                        <span class="text-success fw-bold">+${{ "%.2f"|format(item.variance) }} (Safe)</span>
+                                        {% else %}
+                                        <span class="text-danger fw-bold">-${{ "%.2f"|format(-item.variance) }} (Over)</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 10px; border-radius: 5px;">
+                                            <div class="progress-bar {% if item.status == 'danger' %}bg-danger{% elif item.status == 'warning' %}bg-warning{% else %}bg-success{% endif %}" role="progressbar" style="width: {{ [item.percentage, 100]|min }}%;" aria-valuenow="{{ item.percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <div class="x-small text-muted mt-1">{{ "%.1f"|format(item.percentage) }}% used</div>
+                                    </td>
+                                    <td class="text-center pe-4">
+                                        {% if item.status == 'danger' %}
+                                        <span class="badge bg-danger text-white px-3 py-2 fw-bold budget-status-badge">Over Budget</span>
+                                        {% elif item.status == 'warning' %}
+                                        <span class="badge bg-warning text-dark px-3 py-2 fw-bold budget-status-badge">Warning</span>
+                                        {% elif item.status == 'success' %}
+                                        <span class="badge bg-success text-white px-3 py-2 fw-bold budget-status-badge">On Track</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary text-white px-3 py-2 fw-bold budget-status-badge">No Plan</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -439,5 +513,31 @@
             });
         }
     });
+
+    // Table Sorting Function
+    window.sortTable = function(colIndex, type = 'string') {
+        const table = document.querySelector('.table-hover');
+        if (!table) return;
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        
+        const currentDir = table.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc';
+        table.setAttribute('data-sort-dir', currentDir);
+
+        rows.sort((a, b) => {
+            let cellA = a.children[colIndex].textContent.trim();
+            let cellB = b.children[colIndex].textContent.trim();
+
+            if (type === 'number') {
+                cellA = parseFloat(cellA.replace(/[^0-9.-]+/g, "")) || 0;
+                cellB = parseFloat(cellB.replace(/[^0-9.-]+/g, "")) || 0;
+                return currentDir === 'asc' ? cellA - cellB : cellB - cellA;
+            } else {
+                return currentDir === 'asc' ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+            }
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+    };
 </script>
 {% endblock %}
