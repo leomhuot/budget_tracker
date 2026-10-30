@@ -356,13 +356,14 @@
                         <h5 class="m-0 fw-bold text-primary"><i class="fa-solid fa-scale-balanced me-2"></i>Planned vs Actual Budget ({{ monthly_summary.period_name }})</h5>
                         <p class="text-muted small mb-0">Monitor category spending limits to prevent overload expenses</p>
                     </div>
-                    <div class="mt-2 mt-md-0 d-flex gap-3">
+                    <div class="mt-2 mt-md-0 d-flex gap-2">
                         <span class="badge bg-light text-dark border px-3 py-2 fw-bold">Planned: ${{ "%.2f"|format(budget_comparison.total_planned) }}</span>
                         <span class="badge bg-light text-dark border px-3 py-2 fw-bold">Actual: ${{ "%.2f"|format(budget_comparison.total_actual) }}</span>
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
+                    <!-- Desktop Table View -->
+                    <div class="table-responsive d-none d-md-block">
                         <table class="table table-hover align-middle mb-0 budget-comparison-table">
                             <thead class="bg-light text-muted small text-uppercase">
                                 <tr>
@@ -408,6 +409,48 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Mobile Card Stack View -->
+                    <div class="d-md-none p-3">
+                        {% for item in budget_comparison.comparison_items %}
+                        <div class="card mb-3 border shadow-sm rounded-3 p-3 bg-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold text-dark fs-6">{{ item.category }}</span>
+                                {% if item.status == 'danger' %}
+                                <span class="badge bg-danger text-white px-2 py-1 small fw-bold">Over Budget</span>
+                                {% elif item.status == 'warning' %}
+                                <span class="badge bg-warning text-dark px-2 py-1 small fw-bold">Warning</span>
+                                {% elif item.status == 'success' %}
+                                <span class="badge bg-success text-white px-2 py-1 small fw-bold">On Track</span>
+                                {% else %}
+                                <span class="badge bg-secondary text-white px-2 py-1 small fw-bold">No Plan</span>
+                                {% endif %}
+                            </div>
+                            <div class="row g-2 small mb-2">
+                                <div class="col-4">
+                                    <span class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Planned</span>
+                                    <span class="fw-bold">${{ "%.2f"|format(item.planned) }}</span>
+                                </div>
+                                <div class="col-4">
+                                    <span class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Actual</span>
+                                    <span class="fw-bold {% if item.status == 'danger' %}text-danger{% else %}text-success{% endif %}">${{ "%.2f"|format(item.actual) }}</span>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <span class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Variance</span>
+                                    {% if item.variance >= 0 %}
+                                    <span class="text-success fw-bold">+${{ "%.2f"|format(item.variance) }}</span>
+                                    {% else %}
+                                    <span class="text-danger fw-bold">-${{ "%.2f"|format(-item.variance) }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="progress" style="height: 8px; border-radius: 4px;">
+                                <div class="progress-bar {% if item.status == 'danger' %}bg-danger{% elif item.status == 'warning' %}bg-warning{% else %}bg-success{% endif %}" role="progressbar" style="width: {{ [item.percentage, 100]|min }}%;" aria-valuenow="{{ item.percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="x-small text-muted text-end mt-1">{{ "%.1f"|format(item.percentage) }}% used</div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
