@@ -73,6 +73,21 @@
         text-align: center;
     }
 
+    @media (max-width: 768px) {
+        .budget-comparison-table th, .budget-comparison-table td {
+            font-size: 0.75rem !important;
+            padding: 0.5rem 0.3rem !important;
+        }
+        .budget-status-badge {
+            width: 85px !important;
+            font-size: 0.6rem !important;
+            padding: 0.2rem 0.4rem !important;
+        }
+        .budget-comparison-table th.ps-4, .budget-comparison-table td.ps-4 {
+            padding-left: 0.5rem !important;
+        }
+    }
+
     /* Privacy Toggle Styles */
     .privacy-toggle { cursor: pointer; transition: all 0.2s; }
     .privacy-toggle:hover { opacity: 0.8; }
@@ -348,7 +363,7 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
+                        <table class="table table-hover align-middle mb-0 budget-comparison-table">
                             <thead class="bg-light text-muted small text-uppercase">
                                 <tr>
                                     <th class="ps-4" style="cursor: pointer;" onclick="sortTable(0)" title="Click to sort">Category <i class="fa-solid fa-sort text-muted ms-1"></i></th>
