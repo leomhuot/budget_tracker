@@ -7,11 +7,115 @@ import psycopg2
 
 
 
+def adjust_for_weekend(dt):
+    """If a payday falls on Saturday (5) or Sunday (6), shift it backward to the preceding Friday."""
+    if dt.weekday() == 5:
+        return dt - timedelta(days=1)
+    elif dt.weekday() == 6:
+        return dt - timedelta(days=2)
+    return dt
+
+def get_pay_cycle_summary():
+    """Calculates summary data for the current pay cycle with weekend adjustment for 10th/25th paydays."""
+    app_settings = settings_manager.get_settings()
+    exchange_rate = float(app_settings.get('exchange_rate', 4000.0))
+    income_frequency = app_settings.get('income_frequency', 'monthly')
+    
+    if income_frequency != 'semi-monthly':
+        return None
+
+    p1_day = int(app_settings.get('pay_period_1_day', 10))
+    p2_day = int(app_settings.get('pay_period_2_day', 25))
+    
+    today = datetime.now()
+    year = today.year
+    month = today.month
+    
+    def get_safe_dt(y, m, d):
+        try:
+            return datetime(y, m, d)
+        except ValueError:
+            if m == 12:
+                next_m = datetime(y + 1, 1, 1)
+            else:
+                next_m = datetime(y, m + 1, 1)
+            return next_m - timedelta(days=1)
+
+    raw_p1 = get_safe_dt(year, month, p1_day)
+    raw_p2 = get_safe_dt(year, month, p2_day)
+    
+    adj_p1 = adjust_for_weekend(raw_p1)
+    adj_p2 = adjust_for_weekend(raw_p2)
+    
+    prev_month = month - 1 if month > 1 else 12
+    prev_year = year if month > 1 else year - 1
+    raw_prev_p2 = get_safe_dt(prev_year, prev_month, p2_day)
+    adj_prev_p2 = adjust_for_weekend(raw_prev_p2)
+
+    next_month = month + 1 if month < 12 else 1
+    next_year = year if month < 12 else year + 1
+    raw_next_p1 = get_safe_dt(next_year, next_month, p1_day)
+    adj_next_p1 = adjust_for_weekend(raw_next_p1)
+
+    if today >= adj_p2:
+        start_date = adj_p2
+        end_date = adj_next_p1
+        cycle_name = f"Pay Period 2 ({start_date.strftime('%b %d')} - {(end_date - timedelta(days=1)).strftime('%b %d')})"
+    elif today >= adj_p1:
+        start_date = adj_p1
+        end_date = adj_p2
+        cycle_name = f"Pay Period 1 ({start_date.strftime('%b %d')} - {(end_date - timedelta(days=1)).strftime('%b %d')})"
+    else:
+        start_date = adj_prev_p2
+        end_date = adj_p1
+        cycle_name = f"Pay Period 2 ({start_date.strftime('%b %d')} - {(end_date - timedelta(days=1)).strftime('%b %d')})"
+
+    start_date_str = start_date.strftime('%Y-%m-%d')
+    end_date_str = end_date.strftime('%Y-%m-%d')
+
+    try:
+        with db.get_db_cursor(commit=False) as cur:
+            def get_usd_total(query, params=None):
+                cur.execute(query, params)
+                rows = cur.fetchall()
+                total_usd = 0.0
+                for amount, currency in rows:
+                    amount = float(amount)
+                    curr = str(currency).strip() if currency else 'USD'
+                    if curr.upper() == 'USD':
+                        total_usd += amount
+                    elif curr.upper() == 'KHR':
+                        total_usd += (amount / exchange_rate)
+                    else:
+                        total_usd += amount
+                return total_usd
+
+            total_income = get_usd_total(
+                "SELECT COALESCE(amount, 0), currency FROM transactions WHERE type = 'income' AND date >= %s AND date < %s;",
+                (start_date_str, end_date_str)
+            )
+            total_expense = get_usd_total(
+                "SELECT COALESCE(amount, 0), currency FROM transactions WHERE type = 'expense' AND date >= %s AND date < %s;",
+                (start_date_str, end_date_str)
+            )
+            return {
+                "cycle_name": cycle_name,
+                "start_date": start_date_str,
+                "end_date": end_date_str,
+                "total_income": total_income,
+                "total_expense": total_expense,
+                "balance": total_income - total_expense
+            }
+    except Exception as e:
+        print(f"ERROR calculating pay cycle summary: {e}")
+        return None
+
 def get_monthly_summary():
     """Calculates monthly summary data efficiently using SQL and USD-only conversion."""
     app_settings = settings_manager.get_settings()
     exchange_rate = float(app_settings.get('exchange_rate', 4000.0))
-    print(f"DEBUG: Using exchange_rate={exchange_rate}")
+    income_frequency = app_settings.get('income_frequency', 'monthly')
+    print(f"DEBUG: Using exchange_rate={exchange_rate}, income_frequency={income_frequency}")
     
     today = datetime.now()
     start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -78,7 +182,9 @@ def get_monthly_summary():
                 "total_general_savings": total_general_savings,
                 "total_goal_savings": total_goal_savings,
                 "period_name": today.strftime('%B %Y'),
-                "exchange_rate": exchange_rate
+                "exchange_rate": exchange_rate,
+                "income_frequency": income_frequency,
+                "pay_cycle_summary": get_pay_cycle_summary()
             }
     except psycopg2.pool.PoolError:
         print("ERROR: Database is temporarily unavailable.")

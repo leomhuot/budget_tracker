@@ -20,7 +20,7 @@
 
     <div class="card shadow-sm">
         <div class="card-header">
-            <h2 class="h5 mb-0">Monthly Savings Goal</h2>
+            <h2 class="h5 mb-0">Monthly Savings Goal & Pay Schedule</h2>
         </div>
         <div class="card-body">
             <form action="{{ url_for('settings') }}" method="post">
@@ -34,6 +34,38 @@
                     <input type="number" id="exchange_rate" name="exchange_rate" class="form-control" value="{{ settings.exchange_rate }}" step="1" min="1" required>
                     <div class="form-text">The exchange rate used to convert USD to KHR.</div>
                 </div>
+                <div class="mb-3">
+                    <label for="income_frequency" class="form-label">Income / Salary Frequency:</label>
+                    <select id="income_frequency" name="income_frequency" class="form-select" onchange="togglePaySchedule(this.value)">
+                        <option value="monthly" {% if settings.income_frequency == 'monthly' %}selected{% endif %}>Monthly (Once a month)</option>
+                        <option value="semi-monthly" {% if settings.income_frequency == 'semi-monthly' %}selected{% endif %}>Semi-Monthly (Twice a month)</option>
+                    </select>
+                    <div class="form-text">Choose how often you receive your salary.</div>
+                </div>
+
+                <div id="pay-schedule-fields" class="row mb-3 {% if settings.income_frequency != 'semi-monthly' %}d-none{% endif %}">
+                    <div class="col-md-6">
+                        <label for="pay_period_1_day" class="form-label">First Payday Day of Month:</label>
+                        <input type="number" id="pay_period_1_day" name="pay_period_1_day" class="form-control" value="{{ settings.pay_period_1_day|default(1) }}" min="1" max="31">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="pay_period_2_day" class="form-label">Second Payday Day of Month:</label>
+                        <input type="number" id="pay_period_2_day" name="pay_period_2_day" class="form-control" value="{{ settings.pay_period_2_day|default(15) }}" min="1" max="31">
+                    </div>
+                    <div class="form-text mt-1">Days of the month when your salary paychecks are received (e.g. 1st and 15th).</div>
+                </div>
+
+                <script>
+                    function togglePaySchedule(val) {
+                        const fields = document.getElementById('pay-schedule-fields');
+                        if (val === 'semi-monthly') {
+                            fields.classList.remove('d-none');
+                        } else {
+                            fields.classList.add('d-none');
+                        }
+                    }
+                </script>
+
                 <button type="submit" class="btn btn-primary">Save Settings</button>
             </form>
         </div>

@@ -74,6 +74,21 @@ def get_settings():
             cur.execute("SELECT value FROM settings WHERE key = 'exchange_rate';")
             result = cur.fetchone()
             settings['exchange_rate'] = float(result[0]) if result else 4000.0
+
+            # Get income_frequency
+            cur.execute("SELECT value FROM settings WHERE key = 'income_frequency';")
+            result = cur.fetchone()
+            settings['income_frequency'] = result[0] if result else 'monthly'
+
+            # Get pay_period_1_day
+            cur.execute("SELECT value FROM settings WHERE key = 'pay_period_1_day';")
+            result = cur.fetchone()
+            settings['pay_period_1_day'] = int(result[0]) if result else 10
+
+            # Get pay_period_2_day
+            cur.execute("SELECT value FROM settings WHERE key = 'pay_period_2_day';")
+            result = cur.fetchone()
+            settings['pay_period_2_day'] = int(result[0]) if result else 25
     finally:
         db.release_db_connection(conn)
 
@@ -109,6 +124,24 @@ def save_settings(data):
                 "INSERT INTO settings (key, value) VALUES (%s, %s) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;",
                 ('exchange_rate', str(exchange_rate))
             )
+            # Save income_frequency
+            income_frequency = data.get('income_frequency', 'monthly')
+            cur.execute(
+                "INSERT INTO settings (key, value) VALUES (%s, %s) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;",
+                ('income_frequency', str(income_frequency))
+            )
+            # Save pay_period_1_day
+            pay_period_1_day = data.get('pay_period_1_day', 1)
+            cur.execute(
+                "INSERT INTO settings (key, value) VALUES (%s, %s) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;",
+                ('pay_period_1_day', str(pay_period_1_day))
+            )
+            # Save pay_period_2_day
+            pay_period_2_day = data.get('pay_period_2_day', 15)
+            cur.execute(
+                "INSERT INTO settings (key, value) VALUES (%s, %s) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;",
+                ('pay_period_2_day', str(pay_period_2_day))
+            )
             conn.commit()
     finally:
         db.release_db_connection(conn)
@@ -138,6 +171,22 @@ def initialize_default_settings():
                 cur.execute(
                     "INSERT INTO settings (key, value) VALUES (%s, %s);",
                     ('monthly_savings_goal', str(DEFAULT_MONTHLY_SAVINGS_GOAL))
+                )
+                conn.commit()
+
+            cur.execute("SELECT COUNT(*) FROM settings WHERE key = 'income_frequency';")
+            if cur.fetchone()[0] == 0:
+                cur.execute(
+                    "INSERT INTO settings (key, value) VALUES (%s, %s);",
+                    ('income_frequency', 'monthly')
+                )
+                cur.execute(
+                    "INSERT INTO settings (key, value) VALUES (%s, %s);",
+                    ('pay_period_1_day', '10')
+                )
+                cur.execute(
+                    "INSERT INTO settings (key, value) VALUES (%s, %s);",
+                    ('pay_period_2_day', '25')
                 )
                 conn.commit()
 

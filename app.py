@@ -789,9 +789,16 @@ def settings():
     if request.method == 'POST':
         monthly_savings_goal = float(request.form.get('monthly_savings_goal'))
         exchange_rate = float(request.form.get('exchange_rate', 4000.0))
+        income_frequency = request.form.get('income_frequency', 'monthly')
+        pay_period_1_day = int(request.form.get('pay_period_1_day', 1))
+        pay_period_2_day = int(request.form.get('pay_period_2_day', 15))
+
         settings_data = settings_manager.get_settings()
         settings_data['monthly_savings_goal'] = monthly_savings_goal
         settings_data['exchange_rate'] = exchange_rate
+        settings_data['income_frequency'] = income_frequency
+        settings_data['pay_period_1_day'] = pay_period_1_day
+        settings_data['pay_period_2_day'] = pay_period_2_day
         settings_manager.save_settings(settings_data)
         flash('Settings saved successfully!', 'success')
         return redirect(url_for('settings'))
