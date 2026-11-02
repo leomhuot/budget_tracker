@@ -141,30 +141,30 @@
 
     {% if monthly_summary.income_frequency == 'semi-monthly' and monthly_summary.pay_cycle_summary %}
     <!-- Pay Cycle Summary Card for Twice-a-Month Salaried Users -->
-    <div class="card shadow-sm border-0 mb-4 animate__animated animate__fadeIn" style="background: linear-gradient(135deg, #f8f9fc 0%, #eef2f7 100%); border-left: 5px solid #4e73df !important;">
+    <div class="card stat-card shadow-sm mb-4 animate__animated animate__fadeIn border-start border-primary border-4">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                 <h5 class="fw-bold mb-0 text-primary">
                     <i class="fa-solid fa-calendar-days me-2"></i>Current Pay Cycle: {{ monthly_summary.pay_cycle_summary.cycle_name }}
                 </h5>
-                <span class="badge bg-primary px-3 py-2 rounded-pill">Bi-Monthly Mode Active</span>
+                <span class="badge bg-primary px-3 py-2 rounded-pill">BI-MONTHLY MODE ACTIVE</span>
             </div>
             <div class="row g-3 text-center">
                 <div class="col-4">
-                    <div class="p-2 bg-white rounded shadow-sm">
-                        <small class="text-muted d-block uppercase fw-semibold">Cycle Income</small>
+                    <div class="p-2 rounded border">
+                        <small class="d-block uppercase fw-semibold opacity-75">Cycle Income</small>
                         <span class="fw-bold text-success fs-5 amount-value" data-value='${{ "%.2f"|format(monthly_summary.pay_cycle_summary.total_income) }}' data-target="{{ monthly_summary.pay_cycle_summary.total_income }}">${{ "%.2f"|format(monthly_summary.pay_cycle_summary.total_income) }}</span>
                     </div>
                 </div>
                 <div class="col-4">
-                    <div class="p-2 bg-white rounded shadow-sm">
-                        <small class="text-muted d-block uppercase fw-semibold">Cycle Expense</small>
+                    <div class="p-2 rounded border">
+                        <small class="d-block uppercase fw-semibold opacity-75">Cycle Expense</small>
                         <span class="fw-bold text-danger fs-5 amount-value" data-value='${{ "%.2f"|format(monthly_summary.pay_cycle_summary.total_expense) }}' data-target="{{ monthly_summary.pay_cycle_summary.total_expense }}">${{ "%.2f"|format(monthly_summary.pay_cycle_summary.total_expense) }}</span>
                     </div>
                 </div>
                 <div class="col-4">
-                    <div class="p-2 bg-white rounded shadow-sm">
-                        <small class="text-muted d-block uppercase fw-semibold">Cycle Balance</small>
+                    <div class="p-2 rounded border">
+                        <small class="d-block uppercase fw-semibold opacity-75">Cycle Balance</small>
                         <span class="fw-bold text-primary fs-5 amount-value" data-value='${{ "%.2f"|format(monthly_summary.pay_cycle_summary.balance) }}' data-target="{{ monthly_summary.pay_cycle_summary.balance }}">${{ "%.2f"|format(monthly_summary.pay_cycle_summary.balance) }}</span>
                     </div>
                 </div>
