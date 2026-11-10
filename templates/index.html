@@ -446,9 +446,22 @@
                     </div>
 
                     <!-- Mobile Card Stack View -->
-                    <div class="d-md-none p-3">
+                    <div class="d-md-none p-3 pb-0">
+                        <div class="input-group input-group-sm mb-3">
+                            <label class="input-group-text bg-light fw-bold text-muted" for="mobileSortSelect"><i class="fa-solid fa-arrow-down-wide-short me-1"></i> Sort By</label>
+                            <select class="form-select fw-bold" id="mobileSortSelect" onchange="sortMobileCards(this.value)">
+                                <option value="category">Category (A-Z)</option>
+                                <option value="planned-desc">Planned (High to Low)</option>
+                                <option value="planned-asc">Planned (Low to High)</option>
+                                <option value="actual-desc">Actual (High to Low)</option>
+                                <option value="actual-asc">Actual (Low to High)</option>
+                                <option value="variance-desc">Variance (Best to Worst)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="d-md-none px-3 pb-3" id="mobileCardsContainer">
                         {% for item in budget_comparison.comparison_items %}
-                        <div class="card mb-3 border shadow-sm rounded-3 p-3 bg-body">
+                        <div class="card mb-3 border shadow-sm rounded-3 p-3 bg-body budget-card-item" data-category="{{ item.category }}" data-planned="{{ item.planned }}" data-actual="{{ item.actual }}" data-variance="{{ item.variance }}">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="fw-bold text-dark fs-6">{{ item.category }}</span>
                                 {% if item.status == 'danger' %}
@@ -630,6 +643,36 @@
         });
 
         rows.forEach(row => tbody.appendChild(row));
+    };
+
+    // Mobile Card Sorting Function
+    window.sortMobileCards = function(criteria) {
+        const container = document.getElementById('mobileCardsContainer');
+        if (!container) return;
+        const cards = Array.from(container.querySelectorAll('.budget-card-item'));
+
+        cards.sort((a, b) => {
+            if (criteria === 'category') {
+                let catA = a.getAttribute('data-category').toLowerCase();
+                let catB = b.getAttribute('data-category').toLowerCase();
+                return catA.localeCompare(catB);
+            } else if (criteria === 'planned-desc' || criteria === 'planned-asc') {
+                let pA = parseFloat(a.getAttribute('data-planned')) || 0;
+                let pB = parseFloat(b.getAttribute('data-planned')) || 0;
+                return criteria === 'planned-desc' ? pB - pA : pA - pB;
+            } else if (criteria === 'actual-desc' || criteria === 'actual-asc') {
+                let aA = parseFloat(a.getAttribute('data-actual')) || 0;
+                let aB = parseFloat(b.getAttribute('data-actual')) || 0;
+                return criteria === 'actual-desc' ? aB - aA : aA - aB;
+            } else if (criteria === 'variance-desc') {
+                let vA = parseFloat(a.getAttribute('data-variance')) || 0;
+                let vB = parseFloat(b.getAttribute('data-variance')) || 0;
+                return vB - vA;
+            }
+            return 0;
+        });
+
+        cards.forEach(card => container.appendChild(card));
     };
 </script>
 {% endblock %}
