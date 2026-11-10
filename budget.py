@@ -15,6 +15,67 @@ def adjust_for_weekend(dt):
         return dt - timedelta(days=2)
     return dt
 
+def get_active_budget_period():
+    """Returns start_date, end_date, and period name based on income_frequency setting."""
+    app_settings = settings_manager.get_settings()
+    income_frequency = app_settings.get('income_frequency', 'monthly')
+    
+    today = datetime.now()
+    year = today.year
+    month = today.month
+
+    if income_frequency == 'semi-monthly':
+        p1_day = int(app_settings.get('pay_period_1_day', 10))
+        p2_day = int(app_settings.get('pay_period_2_day', 25))
+        
+        def get_safe_dt(y, m, d):
+            try:
+                return datetime(y, m, d)
+            except ValueError:
+                if m == 12:
+                    next_m = datetime(y + 1, 1, 1)
+                else:
+                    next_m = datetime(y, m + 1, 1)
+                return next_m - timedelta(days=1)
+
+        raw_p1 = get_safe_dt(year, month, p1_day)
+        raw_p2 = get_safe_dt(year, month, p2_day)
+        
+        adj_p1 = adjust_for_weekend(raw_p1)
+        adj_p2 = adjust_for_weekend(raw_p2)
+        
+        prev_month = month - 1 if month > 1 else 12
+        prev_year = year if month > 1 else year - 1
+        raw_prev_p2 = get_safe_dt(prev_year, prev_month, p2_day)
+        adj_prev_p2 = adjust_for_weekend(raw_prev_p2)
+
+        next_month = month + 1 if month < 12 else 1
+        next_year = year if month < 12 else year + 1
+        raw_next_p1 = get_safe_dt(next_year, next_month, p1_day)
+        adj_next_p1 = adjust_for_weekend(raw_next_p1)
+
+        if today >= adj_p2:
+            start_date = adj_p2
+            end_date = adj_next_p1
+            period_name = f"Pay Period 2 ({start_date.strftime('%b %d')} - {(end_date - timedelta(days=1)).strftime('%b %d')})"
+        elif today >= adj_p1:
+            start_date = adj_p1
+            end_date = adj_p2
+            period_name = f"Pay Period 1 ({start_date.strftime('%b %d')} - {(end_date - timedelta(days=1)).strftime('%b %d')})"
+        else:
+            start_date = adj_prev_p2
+            end_date = adj_p1
+            period_name = f"Pay Period 2 ({start_date.strftime('%b %d')} - {(end_date - timedelta(days=1)).strftime('%b %d')})"
+    else:
+        start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if today.month == 12:
+            end_date = start_date.replace(year=today.year + 1, month=1)
+        else:
+            end_date = start_date.replace(month=today.month + 1)
+        period_name = today.strftime('%B %Y')
+
+    return start_date, end_date, period_name
+
 def get_pay_cycle_summary():
     """Calculates summary data for the current pay cycle with weekend adjustment for 10th/25th paydays."""
     app_settings = settings_manager.get_settings()
@@ -24,52 +85,7 @@ def get_pay_cycle_summary():
     if income_frequency != 'semi-monthly':
         return None
 
-    p1_day = int(app_settings.get('pay_period_1_day', 10))
-    p2_day = int(app_settings.get('pay_period_2_day', 25))
-    
-    today = datetime.now()
-    year = today.year
-    month = today.month
-    
-    def get_safe_dt(y, m, d):
-        try:
-            return datetime(y, m, d)
-        except ValueError:
-            if m == 12:
-                next_m = datetime(y + 1, 1, 1)
-            else:
-                next_m = datetime(y, m + 1, 1)
-            return next_m - timedelta(days=1)
-
-    raw_p1 = get_safe_dt(year, month, p1_day)
-    raw_p2 = get_safe_dt(year, month, p2_day)
-    
-    adj_p1 = adjust_for_weekend(raw_p1)
-    adj_p2 = adjust_for_weekend(raw_p2)
-    
-    prev_month = month - 1 if month > 1 else 12
-    prev_year = year if month > 1 else year - 1
-    raw_prev_p2 = get_safe_dt(prev_year, prev_month, p2_day)
-    adj_prev_p2 = adjust_for_weekend(raw_prev_p2)
-
-    next_month = month + 1 if month < 12 else 1
-    next_year = year if month < 12 else year + 1
-    raw_next_p1 = get_safe_dt(next_year, next_month, p1_day)
-    adj_next_p1 = adjust_for_weekend(raw_next_p1)
-
-    if today >= adj_p2:
-        start_date = adj_p2
-        end_date = adj_next_p1
-        cycle_name = f"Pay Period 2 ({start_date.strftime('%b %d')} - {(end_date - timedelta(days=1)).strftime('%b %d')})"
-    elif today >= adj_p1:
-        start_date = adj_p1
-        end_date = adj_p2
-        cycle_name = f"Pay Period 1 ({start_date.strftime('%b %d')} - {(end_date - timedelta(days=1)).strftime('%b %d')})"
-    else:
-        start_date = adj_prev_p2
-        end_date = adj_p1
-        cycle_name = f"Pay Period 2 ({start_date.strftime('%b %d')} - {(end_date - timedelta(days=1)).strftime('%b %d')})"
-
+    start_date, end_date, cycle_name = get_active_budget_period()
     start_date_str = start_date.strftime('%Y-%m-%d')
     end_date_str = end_date.strftime('%Y-%m-%d')
 
@@ -111,19 +127,13 @@ def get_pay_cycle_summary():
         return None
 
 def get_monthly_summary():
-    """Calculates monthly summary data efficiently using SQL and USD-only conversion."""
+    """Calculates summary data efficiently using SQL and USD-only conversion based on active period (monthly or semi-monthly pay cycle)."""
     app_settings = settings_manager.get_settings()
     exchange_rate = float(app_settings.get('exchange_rate', 4000.0))
     income_frequency = app_settings.get('income_frequency', 'monthly')
     print(f"DEBUG: Using exchange_rate={exchange_rate}, income_frequency={income_frequency}")
     
-    today = datetime.now()
-    start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    if today.month == 12:
-        end_date = start_date.replace(year=today.year + 1, month=1)
-    else:
-        end_date = start_date.replace(month=today.month + 1)
-    
+    start_date, end_date, period_name = get_active_budget_period()
     start_date_str = start_date.strftime('%Y-%m-%d')
     end_date_str = end_date.strftime('%Y-%m-%d')
 
@@ -136,27 +146,22 @@ def get_monthly_summary():
                 total_usd = 0.0
                 for amount, currency in rows:
                     amount = float(amount)
-                    # Force string and strip
                     curr = str(currency).strip() if currency else 'USD'
-                    print(f"DEBUG: Processing amount={amount}, raw_currency='{currency}', normalized_curr='{curr}'")
                     if curr.upper() == 'USD':
-                        print(f"DEBUG: Currency is USD")
                         total_usd += amount
                     elif curr.upper() == 'KHR':
-                        print(f"DEBUG: Currency is KHR, converting {amount} to {amount / exchange_rate}")
                         total_usd += (amount / exchange_rate)
                     else:
-                        print(f"DEBUG: Unknown currency '{curr}', defaulting to USD")
                         total_usd += amount
                 return total_usd
 
-            # Get Total Income (Monthly)
+            # Get Total Income (Active Period)
             total_income = get_usd_total(
                 "SELECT COALESCE(amount, 0), currency FROM transactions WHERE type = 'income' AND date >= %s AND date < %s;",
                 (start_date_str, end_date_str)
             )
 
-            # Get Total Expense (Monthly)
+            # Get Total Expense (Active Period)
             total_expense = get_usd_total(
                 "SELECT COALESCE(amount, 0), currency FROM transactions WHERE type = 'expense' AND date >= %s AND date < %s;",
                 (start_date_str, end_date_str)
@@ -181,7 +186,7 @@ def get_monthly_summary():
                 "total_savings": total_savings,
                 "total_general_savings": total_general_savings,
                 "total_goal_savings": total_goal_savings,
-                "period_name": today.strftime('%B %Y'),
+                "period_name": period_name,
                 "exchange_rate": exchange_rate,
                 "income_frequency": income_frequency,
                 "pay_cycle_summary": get_pay_cycle_summary()
@@ -656,13 +661,7 @@ def get_category_budget_comparison():
     expense_categories = app_settings.get('expense_categories', [])
     category_planned_limits = app_settings.get('category_planned_limits', {})
     
-    today = datetime.now()
-    start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    if today.month == 12:
-        end_date = start_date.replace(year=today.year + 1, month=1)
-    else:
-        end_date = start_date.replace(month=today.month + 1)
-    
+    start_date, end_date, period_name = get_active_budget_period()
     start_date_str = start_date.strftime('%Y-%m-%d')
     end_date_str = end_date.strftime('%Y-%m-%d')
 
@@ -716,5 +715,6 @@ def get_category_budget_comparison():
         'comparison_items': comparison,
         'total_planned': total_planned,
         'total_actual': total_actual,
-        'total_variance': total_planned - total_actual
+        'total_variance': total_planned - total_actual,
+        'period_name': period_name
     }
